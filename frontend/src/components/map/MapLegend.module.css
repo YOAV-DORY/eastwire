@@ -1,0 +1,43 @@
+.legend {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elev-1);
+  font-size: var(--text-small);
+}
+
+.items {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.items li {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-1);
+  color: var(--text-muted);
+}
+
+.items li > span:last-child {
+  margin-left: var(--space-2);
+}
+
+.pin {
+  display: inline-flex;
+}
+
+.circle {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--text-muted);
+  border-radius: 50%;
+}
+
+.countryOnly {
+  color: var(--text);
+}

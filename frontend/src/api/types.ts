@@ -92,3 +92,28 @@ export interface SourceView {
   evidenceCheckedOn: string
   evidenceNote: string | null
 }
+
+export type MapWindow = '24h' | '7d' | '30d'
+
+/** A city pin: stories placed in this city (city precision only), counted once each. */
+export interface CityPin {
+  id: number
+  name: string
+  country: string
+  lat: number
+  lon: number
+  total: number
+  mentioned: number
+  event: number
+  publisher: number
+  lowConfidenceOnly: boolean
+  lastItemAt: string
+}
+
+export interface MapData {
+  window: MapWindow
+  roles: LocationRole[]
+  cities: CityPin[]
+  /** Stories that name a country but no city on the list there; never pinned to a capital. */
+  countryOnly: { country: string; count: number }[]
+}

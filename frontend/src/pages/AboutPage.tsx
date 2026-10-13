@@ -90,12 +90,15 @@ export function AboutPage() {
         <h2 className={`${styles.heading} mono muted`}>Credits and privacy</h2>
         <p>
           Discovery data: <a href="https://www.gdeltproject.org/">The GDELT Project</a>. City data:{' '}
-          <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0). Global Voices text: CC BY 3.0, credited on each
-          story.
+          <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0). Map tiles: ©{' '}
+          <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, drawn with{' '}
+          <a href="https://leafletjs.com/">Leaflet</a>. Global Voices text: CC BY 3.0, credited on each story.
         </p>
         <p className="muted">
-          EastWire sets no cookies and uses no trackers. Your theme choice is stored only in your browser. To ask for a
-          correction or removal, open an issue on <a href="https://github.com/YOAV-DORY/eastwire/issues">GitHub</a>.
+          EastWire sets no cookies and uses no trackers. Your theme and shortcut settings are stored only in your
+          browser. Map images load from the OpenStreetMap tile servers, which see your IP address like any website. To
+          ask for a correction or removal, open an issue on{' '}
+          <a href="https://github.com/YOAV-DORY/eastwire/issues">GitHub</a>.
         </p>
       </section>
     </article>

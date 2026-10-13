@@ -4,6 +4,7 @@ import { AppShell } from './components/layout/AppShell'
 import { AboutPage } from './pages/AboutPage'
 import { ComingSoon } from './pages/ComingSoon'
 import { Home } from './pages/Home'
+import { MapPage } from './pages/MapPage'
 import { NotFound } from './pages/NotFound'
 import { SearchPage } from './pages/SearchPage'
 import { StatusPage } from './pages/StatusPage'
@@ -18,16 +19,8 @@ export const routes: RouteObject[] = [
       { path: '/', element: <Home /> },
       { path: '/status', element: <StatusPage /> },
       { path: '/about', element: <AboutPage /> },
-      {
-        path: '/map',
-        element: (
-          <ComingSoon
-            title="Map"
-            milestone={6}
-            description="An interactive map of the city list, with stories pinned only where a city is known and country-level stories counted separately."
-          />
-        ),
-      },
+      { path: '/map', element: <MapPage /> },
+      { path: '/map/city/:geonamesId', element: <MapPage /> },
       { path: '/search', element: <SearchPage /> },
       {
         path: '/sectors',

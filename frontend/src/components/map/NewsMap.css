@@ -1,0 +1,144 @@
+/* Leaflet styling for EastWire. Plain CSS because Leaflet creates these elements itself. */
+
+.ew-map {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elev-1);
+  /* Keeps Leaflet's internal z-indexes (up to 1000) below the sticky top bar. */
+  isolation: isolate;
+  font-family: var(--font-sans);
+}
+
+/* OSM tiles are light; in dark theme they are inverted and toned down to match the UI. */
+[data-theme="dark"] .ew-tiles {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.3);
+}
+
+/* ---------------------------------------------------------------- pins */
+.ew-pin {
+  background: none;
+  border: 0;
+}
+
+.ew-pin svg {
+  display: block;
+  overflow: visible;
+  transition: transform var(--dur-fast) var(--ease-standard);
+  transform-origin: 50% 100%;
+}
+
+.ew-pin:hover svg,
+.ew-pin:focus-visible svg {
+  transform: translateY(-2px);
+}
+
+.ew-pin:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.ew-pin--selected svg {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 0 #fff) drop-shadow(0 0 3px #fff);
+}
+
+.ew-pin--drop svg {
+  animation: ew-pin-drop var(--dur-pin) var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 20ms);
+}
+
+@keyframes ew-pin-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ew-pin svg {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------------- clusters */
+.ew-cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #000;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 6px var(--accent-glow);
+  color: #000;
+  font-weight: 800;
+  font-size: var(--text-small);
+}
+
+/* ---------------------------------------------------------------- population layer */
+.ew-population {
+  stroke: var(--text-muted);
+  fill: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------- popups and controls */
+.ew-popup-wrap .leaflet-popup-content-wrapper,
+.ew-popup-wrap .leaflet-popup-tip {
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elev-2);
+  color: var(--text);
+  box-shadow: var(--shadow-pop);
+}
+
+.ew-popup-wrap .leaflet-popup-content-wrapper {
+  border-radius: var(--radius-lg);
+}
+
+.ew-popup {
+  display: grid;
+  gap: 4px;
+  min-width: 180px;
+  font-size: var(--text-small);
+}
+
+.ew-popup strong {
+  font-size: var(--text-body);
+}
+
+.ew-popup-counts,
+.ew-popup-note {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.ew-popup a {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.ew-map .leaflet-popup-close-button {
+  color: var(--text-muted);
+}
+
+.ew-map .leaflet-control-zoom a {
+  border-color: var(--border-strong);
+  background: var(--bg-elev-2);
+  color: var(--text);
+}
+
+.ew-map .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.ew-map .leaflet-control-attribution a {
+  color: var(--text);
+}

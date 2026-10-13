@@ -29,6 +29,17 @@
   height: 56px;
 }
 
+.mapHero {
+  position: relative;
+}
+
+.openMap {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-8);
+  z-index: 1;
+}
+
 .filters {
   display: flex;
   gap: var(--space-2);
