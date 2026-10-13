@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useSearchParams } from 'react-router'
 import { useArticleFeed, useCountries, usePlaces, useStatus } from '../api/queries'
 import { Flag } from '../components/graphics/Flag'
@@ -7,11 +7,10 @@ import { StoryCard } from '../components/news/StoryCard'
 import { ColdStart, EmptyState, ErrorState, FeedSkeleton, StaleBanner } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
 import { Chip } from '../components/ui/Chip'
+import { SearchBar } from '../components/search/SearchBar'
+import { useSlow } from '../hooks/useSlow'
 import { relativeTime } from '../lib/time'
 import styles from './Home.module.css'
-
-/** Show the cold-start note if the first load takes longer than this (free tier waking up). */
-const COLD_START_AFTER_MS = 3_000
 
 export function Home() {
   const [params, setParams] = useSearchParams()
@@ -51,6 +50,8 @@ export function Home() {
         </h1>
         <HeroMark className={styles.mark} />
       </section>
+
+      <SearchBar variant="hero" keep={{ country }} />
 
       {(status.data?.state === 'stale' || status.data?.state === 'outage') && status.data.lastSuccessAt && (
         <StaleBanner
@@ -144,18 +145,4 @@ export function Home() {
       </section>
     </div>
   )
-}
-
-/** True once a load has taken longer than COLD_START_AFTER_MS. */
-function useSlow(loading: boolean): boolean {
-  const [slow, setSlow] = useState(false)
-  useEffect(() => {
-    if (!loading) return
-    const timer = setTimeout(() => setSlow(true), COLD_START_AFTER_MS)
-    return () => {
-      clearTimeout(timer)
-      setSlow(false)
-    }
-  }, [loading])
-  return loading && slow
 }

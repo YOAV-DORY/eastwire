@@ -38,8 +38,7 @@ public class JdbcArticleRepository implements ArticleRepository {
                 FROM article a
                 JOIN source s ON s.id = a.source_id
                 LEFT JOIN story_cluster c ON c.id = a.cluster_id
-                """ + where(q, params) + """
-                ORDER BY COALESCE(a.published_at, a.discovered_at) DESC, a.id DESC
+                """ + where(q, params) + orderBy(q) + """
                 LIMIT :limit OFFSET :offset
                 """;
         params.put("limit", q.size());
@@ -54,9 +53,23 @@ public class JdbcArticleRepository implements ArticleRepository {
         return jdbc.sql("SELECT count(*) FROM article a " + where(q, params)).params(params).query(Long.class).single();
     }
 
+    /** Relevance uses ts_rank_cd (cover density), so phrases and words close together rank higher. */
+    private static String orderBy(ArticleQuery q) {
+        String newest = "COALESCE(a.published_at, a.discovered_at) DESC, a.id DESC";
+        if (q.text() != null && q.sort() == ArticleQuery.Sort.RELEVANCE) {
+            return "ORDER BY ts_rank_cd(a.search_tsv, websearch_to_tsquery('english', :q)) DESC, " + newest + "\n";
+        }
+        return "ORDER BY " + newest + "\n";
+    }
+
     private static String where(ArticleQuery q, Map<String, Object> params) {
         List<String> conditions = new ArrayList<>();
         conditions.add("a.expires_at > now()");
+        if (q.text() != null) {
+            // websearch syntax: "exact phrase", -excluded, OR. It never raises on odd input.
+            conditions.add("a.search_tsv @@ websearch_to_tsquery('english', :q)");
+            params.put("q", q.text());
+        }
         if (q.country() != null) {
             conditions.add("EXISTS (SELECT 1 FROM article_location l WHERE l.article_id = a.id "
                     + "AND l.country_iso2 = :country AND l.role IN " + ABOUT_ROLES + ")");

@@ -6,13 +6,14 @@ placed on a map, with every source shown. Asia-wide expansion comes later.
 It shows what its listed sources published. It does not claim to measure what any audience
 has or hasn't seen.
 
-**Status:** milestone 4 of 9: read API and homepage.
+**Status:** milestone 5 of 9: search.
 - The hourly job collects GDELT-discovered headlines from reviewed publishers and Global Voices articles ([`docs/ingestion.md`](docs/ingestion.md)).
 - The read-only API serves them with a display-policy check on every read.
 - The homepage shows them with country and city filters, freshness and honest empty states.
+- Full-text search (`/search?q=…`) supports quoted phrases, `-exclusions` and `OR`, with every filter kept in a shareable URL. Press `/` to search; single-key shortcuts can be turned off.
 
 Deployment steps (Neon, Render, Cloudflare Pages, all free) are in [`docs/deploy.md`](docs/deploy.md).
-Map, search and sectors come in milestones 5–7.
+The map and sectors come in milestones 6–7.
 The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Ground rules

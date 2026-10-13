@@ -1158,6 +1158,16 @@ frontend/src/
 - **Verified locally against real ingested data:** live API, browser at 390 and 1280 px, no console errors, 1 `main`/1 `h1`.
 - **Tests:** api 28 (+4 Postgres in CI), frontend 67.
 
+**CI fix (PR #2):** the Testcontainers database is now a Spring bean. Per-class `@Container` fields were stopped while Spring reused a cached context pointing at them, so every later test class failed. PRs #2 and #3 are green, including the API Docker image smoke test.
+
+**Milestone 5 (search):** built on branch `m5-search`, stacked on milestone 4.
+- **API:** `/api/v1/search` uses Postgres `websearch_to_tsquery` (phrases, `-exclusions`, `OR`) with `ts_rank_cd` relevance or date order, and the same filters and read-time policy as the feed. `QueryValidator` is shared by feed and search.
+- **Frontend:**
+  - Hero search bar on Home; `/search` page with country, city, from/to and order filters, all in the URL.
+  - Real-link pagination, a syntax hint with examples, honest empty results.
+  - `/` focuses search and `?` opens a shortcuts dialog where single-key shortcuts can be turned off (WCAG 2.1.4).
+- **Verified:** real-data queries (`semiconductor`, `rupee OR inflation`, `"South Korea"`, `Tata -steel`); browser at 1280 and 390 px; api 35 tests (+5 Postgres in CI), frontend 75.
+
 **Owner actions to go live:**
 1. Create the Neon project.
 2. Run `backend/db/local-init.sql` with strong passwords.
@@ -1167,4 +1177,4 @@ All in `docs/database.md`.
 
 **Next:**
 1. The owner deploys (docs/deploy.md).
-2. Milestone 5: search.
+2. Milestone 6: the map.

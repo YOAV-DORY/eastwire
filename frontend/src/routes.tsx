@@ -5,6 +5,7 @@ import { AboutPage } from './pages/AboutPage'
 import { ComingSoon } from './pages/ComingSoon'
 import { Home } from './pages/Home'
 import { NotFound } from './pages/NotFound'
+import { SearchPage } from './pages/SearchPage'
 import { StatusPage } from './pages/StatusPage'
 
 // The component gallery exists only in development builds; production drops it entirely.
@@ -27,16 +28,7 @@ export const routes: RouteObject[] = [
           />
         ),
       },
-      {
-        path: '/search',
-        element: (
-          <ComingSoon
-            title="Search"
-            milestone={5}
-            description="Keyword search with country, city, sector and date filters, and links you can share."
-          />
-        ),
-      },
+      { path: '/search', element: <SearchPage /> },
       {
         path: '/sectors',
         element: (

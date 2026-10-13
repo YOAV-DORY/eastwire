@@ -1,10 +1,13 @@
 import clsx from 'clsx'
-import { Compass, Info, LayoutList, Map, Search, Shapes } from 'lucide-react'
-import type { ReactNode } from 'react'
-import { Link, NavLink, Outlet, useSearchParams } from 'react-router'
+import { Compass, Info, Keyboard, LayoutList, Map, Search, Shapes } from 'lucide-react'
+import { useMemo, useState, type ReactNode } from 'react'
+import { Link, NavLink, Outlet, useNavigate, useSearchParams } from 'react-router'
 import { useCountries, useStatus } from '../../api/queries'
 import { Flag } from '../graphics/Flag'
 import { Wordmark } from '../graphics/Wordmark'
+import { SEARCH_INPUT_ATTR } from '../search/SearchBar'
+import { ShortcutsDialog } from '../search/ShortcutsDialog'
+import { useHotkeys, useShortcutsSetting } from '../../hooks/useShortcuts'
 import { FreshnessIndicator } from '../status/FreshnessIndicator'
 import { ThemeToggle } from '../ui/ThemeToggle'
 import styles from './AppShell.module.css'
@@ -22,6 +25,23 @@ const NAV = [
  */
 export function AppShell() {
   const status = useStatus()
+  const navigate = useNavigate()
+  const shortcuts = useShortcutsSetting()
+  const [helpOpen, setHelpOpen] = useState(false)
+  const bindings = useMemo(
+    () => ({
+      // "/" focuses the search field on the page, or opens the search page.
+      '/': () => {
+        const input = document.querySelector<HTMLInputElement>(`[${SEARCH_INPUT_ATTR}]`)
+        if (input) input.focus()
+        else navigate('/search')
+      },
+      '?': () => setHelpOpen(true),
+    }),
+    [navigate],
+  )
+  useHotkeys(shortcuts.enabled, bindings)
+
   return (
     <div className={styles.shell}>
       <a className="skip-link" href="#main">
@@ -43,7 +63,7 @@ export function AppShell() {
           <ThemeToggle />
         </div>
       </header>
-      <Sidebar />
+      <Sidebar onShowShortcuts={() => setHelpOpen(true)} />
       <main id="main" className={styles.main}>
         <Outlet />
       </main>
@@ -55,11 +75,17 @@ export function AppShell() {
           </NavLink>
         ))}
       </nav>
+      <ShortcutsDialog
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        enabled={shortcuts.enabled}
+        onToggle={shortcuts.setEnabled}
+      />
     </div>
   )
 }
 
-function Sidebar() {
+function Sidebar({ onShowShortcuts }: { onShowShortcuts: () => void }) {
   const countries = useCountries()
   const [params] = useSearchParams()
   const active = params.get('country')
@@ -100,6 +126,10 @@ function Sidebar() {
           <Compass size={16} strokeWidth={1.75} aria-hidden="true" />
           Status
         </NavLink>
+        <button type="button" className={clsx(styles.sideLink, styles.sideButton)} onClick={onShowShortcuts}>
+          <Keyboard size={16} strokeWidth={1.75} aria-hidden="true" />
+          Keyboard shortcuts
+        </button>
       </SidebarGroup>
     </aside>
   )

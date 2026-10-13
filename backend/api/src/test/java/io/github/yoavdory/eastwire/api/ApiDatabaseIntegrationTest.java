@@ -100,6 +100,22 @@ class ApiDatabaseIntegrationTest {
     }
 
     @Test
+    void searchMatchesHeadlinesAndExcerptsWithEnglishStemming() throws Exception {
+        mvc.perform(get("/api/v1/search").param("q", "tokyo"))
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items[0].title").value("Tokyo story"));
+        // "excerpts" stems to the same lexeme as "excerpt" in the stored text.
+        mvc.perform(get("/api/v1/search").param("q", "excerpts"))
+                .andExpect(jsonPath("$.items[0].title").value("India story"));
+        mvc.perform(get("/api/v1/search").param("q", "story -tokyo"))
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items[0].title").value("India story"));
+        // Expired articles are never found, and filters still apply.
+        mvc.perform(get("/api/v1/search").param("q", "expired")).andExpect(jsonPath("$.total").value(0));
+        mvc.perform(get("/api/v1/search").param("q", "story").param("country", "JP")).andExpect(jsonPath("$.total").value(1));
+    }
+
+    @Test
     void countriesCountOnlyLiveArticles() throws Exception {
         mvc.perform(get("/api/v1/countries"))
                 .andExpect(jsonPath("$[?(@.iso2 == 'IN')].total").value(1))

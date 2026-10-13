@@ -1,0 +1,94 @@
+.page {
+  display: grid;
+  gap: var(--space-5);
+  max-width: var(--feed-max);
+}
+
+.title {
+  font-size: var(--text-h1);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--track-h1);
+  font-weight: var(--weight-h1);
+  overflow-wrap: anywhere;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.filters label {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.filters select,
+.filters input {
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-elev-1);
+  color: var(--text);
+  font-size: var(--text-small);
+  color-scheme: inherit;
+}
+
+.examples ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-2) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.examples a {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.examples a:hover {
+  border-color: var(--border-strong);
+}
+
+.results {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.count {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-2);
+}
+
+.pagination a {
+  color: var(--accent-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pagination a:hover {
+  text-decoration: underline;
+}
