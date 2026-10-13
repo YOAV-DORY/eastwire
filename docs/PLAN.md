@@ -1143,6 +1143,21 @@ frontend/src/
 - **Measured volume:** 25,799 GDELT rows over 6 h gave 2 allowed articles. Global Voices gave 18 articles within the 90-day window.
 - **Hourly workflow:** `.github/workflows/ingest.yml`, off until `INGEST_ENABLED=true`.
 
+**Milestone 3, second domain batch:** domains were chosen by GKG volume. Business Standard is now allowed (6 allowed in total); Times of India, ANI, Moneycontrol and others are denied. The same 6-hour window now gives 78 GDELT items instead of 2.
+
+**Milestone 4 (read API + homepage):** built on branch `m4-read-api`, stacked on milestone 3.
+- **API:**
+  - Endpoints: `/articles` (country/city/date filters, pagination, `DisplayPolicy` re-checked on every read), `/status` (oldest last success, fresh/stale/outage/unknown), `/countries` (24 h counts) and `/places`.
+  - The database answers 503 with a friendly message when unreachable.
+- **Frontend:**
+  - AppShell: top bar, sidebar with country counts, bottom nav.
+  - Home: hero, country chips with flags, city picker, StoryCard feed with Load more.
+  - FreshnessIndicator, stale/empty/error/cold-start states.
+  - Pages: /status, /about (sources, gaps, places, credits), honest "coming in milestone N" pages.
+- **Deployment:** API Dockerfile with a CI build and smoke test, `render.yaml`, Pages `_redirects`/`_headers`, `docs/deploy.md`.
+- **Verified locally against real ingested data:** live API, browser at 390 and 1280 px, no console errors, 1 `main`/1 `h1`.
+- **Tests:** api 28 (+4 Postgres in CI), frontend 67.
+
 **Owner actions to go live:**
 1. Create the Neon project.
 2. Run `backend/db/local-init.sql` with strong passwords.
@@ -1151,5 +1166,5 @@ frontend/src/
 All in `docs/database.md`.
 
 **Next:**
-1. Review the pending publisher domains (the main lever for coverage).
-2. Milestone 4: read API, homepage and first deploy.
+1. The owner deploys (docs/deploy.md).
+2. Milestone 5: search.

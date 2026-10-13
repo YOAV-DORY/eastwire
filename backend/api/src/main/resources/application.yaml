@@ -3,6 +3,19 @@ spring:
     name: eastwire-api
   main:
     banner-mode: "off"
+  datasource:
+    # Neon in production with the read-only role api_reader. Local defaults match compose.yaml.
+    url: ${EASTWIRE_DB_URL:jdbc:postgresql://localhost:5432/eastwire}
+    username: ${EASTWIRE_DB_USER:api_reader}
+    password: ${EASTWIRE_DB_PASSWORD:api_reader_local}
+    hikari:
+      maximum-pool-size: 3
+      # Neon scales to zero; the first connection after a pause can take a few seconds.
+      connection-timeout: 15000
+      read-only: true
+  flyway:
+    # Only the ingest job migrates; the API's role cannot.
+    enabled: false
 
 server:
   # Render injects PORT.
@@ -15,5 +28,5 @@ eastwire:
   # Path to the repo-level config/ directory. Gradle's bootRun and tests set it automatically.
   config-dir: ${EASTWIRE_CONFIG_DIR:config}
   cors:
-    # Comma-separated. Add the Cloudflare Pages origin when deploying (milestone 4).
+    # Comma-separated. Add the Cloudflare Pages origin when deploying.
     allowed-origins: ${EASTWIRE_CORS_ORIGINS:http://localhost:5174}

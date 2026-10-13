@@ -3,6 +3,7 @@ package io.github.yoavdory.eastwire.api;
 import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import io.github.yoavdory.eastwire.core.policy.DisplayPolicy;
 import java.nio.file.Path;
+import java.time.Clock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -24,5 +25,10 @@ public class ApiApplication {
     @Bean
     DisplayPolicy displayPolicy(ComplianceConfig config) {
         return new DisplayPolicy(config);
+    }
+
+    @Bean
+    Clock clock() {
+        return Clock.systemUTC();
     }
 }

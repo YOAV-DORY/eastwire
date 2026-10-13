@@ -63,3 +63,22 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+
+  api-image:
+    name: API Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build the image Render deploys
+        run: docker build -f backend/api/Dockerfile -t eastwire-api:ci .
+      # The API starts without a database (connections are opened on first query), so the
+      # endpoints that read only config/ must answer from the container.
+      - name: Smoke test
+        run: |
+          docker run -d --name api -p 8080:8080 eastwire-api:ci
+          for i in $(seq 1 60); do curl -fsS http://localhost:8080/api/v1/health && break; sleep 2; done
+          curl -fsS http://localhost:8080/api/v1/sources | grep -q '"slug":"gdelt-gkg"'
+          docker logs api | tail -20
+

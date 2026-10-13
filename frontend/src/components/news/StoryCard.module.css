@@ -1,0 +1,117 @@
+.card {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elev-1);
+  transition:
+    transform var(--dur-base) var(--ease-standard),
+    border-color var(--dur-base) var(--ease-standard),
+    box-shadow var(--dur-base) var(--ease-standard);
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-hover);
+}
+
+.card:focus-within {
+  border-color: var(--border-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover {
+    transform: none;
+  }
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.place {
+  color: var(--text);
+}
+
+.headline {
+  font-size: var(--text-body);
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.headline a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.headline a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.arrow {
+  display: inline;
+  margin-left: var(--space-1);
+  vertical-align: -2px;
+  color: var(--text-muted);
+}
+
+.excerpt {
+  color: var(--text-muted);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.publisher {
+  color: var(--text);
+}
+
+.badge {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+.locations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.location {
+  padding: 1px var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  line-height: var(--lh-small);
+}
+
+/* Low confidence is shown, not hidden: dashed outline plus a text note for screen readers. */
+.low {
+  border-style: dashed;
+}
+
+.attribution {
+  font-size: var(--text-small);
+  line-height: var(--lh-small);
+}
+
+.attribution a {
+  color: inherit;
+}

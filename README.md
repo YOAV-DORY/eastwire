@@ -6,10 +6,13 @@ placed on a map, with every source shown. Asia-wide expansion comes later.
 It shows what its listed sources published. It does not claim to measure what any audience
 has or hasn't seen.
 
-**Status:** milestone 3 of 9: ingestion. The hourly job collects GDELT-discovered headlines from
-reviewed publishers and Global Voices articles, with run tracking, retries and a circuit breaker
-([`docs/ingestion.md`](docs/ingestion.md)). It goes live once the Neon database is set up
-([`docs/database.md`](docs/database.md)). No public pages show news yet (milestone 4).
+**Status:** milestone 4 of 9: read API and homepage.
+- The hourly job collects GDELT-discovered headlines from reviewed publishers and Global Voices articles ([`docs/ingestion.md`](docs/ingestion.md)).
+- The read-only API serves them with a display-policy check on every read.
+- The homepage shows them with country and city filters, freshness and honest empty states.
+
+Deployment steps (Neon, Render, Cloudflare Pages, all free) are in [`docs/deploy.md`](docs/deploy.md).
+Map, search and sectors come in milestones 5–7.
 The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Ground rules
@@ -40,6 +43,8 @@ The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PL
 | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Config validation, backend build with integration tests, frontend lint/test/build |
 | [`.github/workflows/ingest.yml`](.github/workflows/ingest.yml) | Hourly ingestion (minute 17), off until `INGEST_ENABLED=true` |
 | [`docs/ingestion.md`](docs/ingestion.md) | How a run works, connectors, failure handling, measured volumes |
+| [`docs/deploy.md`](docs/deploy.md) | Going live on Neon + Render + Cloudflare Pages ($0) |
+| [`render.yaml`](render.yaml), [`backend/api/Dockerfile`](backend/api/Dockerfile) | API deployment (Render Blueprint, Docker image) |
 
 ## Run it locally
 
