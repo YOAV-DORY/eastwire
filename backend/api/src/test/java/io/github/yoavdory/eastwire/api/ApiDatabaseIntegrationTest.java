@@ -9,11 +9,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -24,12 +26,20 @@ import org.testcontainers.utility.DockerImageName;
  */
 @SpringBootTest(properties = {"spring.flyway.enabled=true", "spring.datasource.hikari.read-only=false"})
 @AutoConfigureMockMvc
+@Import(ApiDatabaseIntegrationTest.Containers.class)
 @Testcontainers(disabledWithoutDocker = true)
 class ApiDatabaseIntegrationTest {
 
-    @Container
-    @ServiceConnection
-    static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer(DockerImageName.parse("postgres:17-alpine"));
+    /** A Spring bean, so the database lives as long as the cached context (see ingest's PostgresTestBase). */
+    @TestConfiguration(proxyBeanMethods = false)
+    static class Containers {
+
+        @Bean
+        @ServiceConnection
+        PostgreSQLContainer postgres() {
+            return new PostgreSQLContainer(DockerImageName.parse("postgres:17-alpine"));
+        }
+    }
 
     @Autowired
     MockMvc mvc;
