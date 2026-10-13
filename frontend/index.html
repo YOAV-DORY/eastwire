@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Asian news on a map, with every source shown. China, India, South Korea, Japan." />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>EastWire</title>
+    <script>
+      // Apply the saved theme before first paint (key shared with src/hooks/useTheme.ts).
+      ;(function () {
+        var theme = 'dark'
+        try {
+          var saved = localStorage.getItem('eastwire.theme')
+          if (saved === 'light' || saved === 'dark') theme = saved
+        } catch (e) {}
+        document.documentElement.setAttribute('data-theme', theme)
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

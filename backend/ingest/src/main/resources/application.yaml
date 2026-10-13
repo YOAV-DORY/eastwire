@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: eastwire-ingest
+  main:
+    web-application-type: none
+    banner-mode: "off"
+  datasource:
+    # Neon in production (role: ingest_writer). Local defaults match compose.yaml.
+    url: ${EASTWIRE_DB_URL:jdbc:postgresql://localhost:5432/eastwire}
+    username: ${EASTWIRE_DB_USER:ingest_writer}
+    password: ${EASTWIRE_DB_PASSWORD:ingest_writer_local}
+  flyway:
+    locations: classpath:db/migration
+
+eastwire:
+  # Path to the repo-level config/ directory. Gradle's bootRun and tests set it automatically.
+  config-dir: ${EASTWIRE_CONFIG_DIR:config}
+  ingest:
+    run-on-startup: true

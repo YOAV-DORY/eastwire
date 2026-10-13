@@ -1,0 +1,139 @@
+/*
+ * EastWire design tokens (docs/PLAN.md, section 17.2).
+ * Linear's calm dark surface + Gumroad's pink, rationed to five roles:
+ * primary buttons, active filters, map pins, "New" badges, search focus ring.
+ * Contrast ratios are checked by src/styles/tokens.test.ts.
+ */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  /* surfaces */
+  --bg: #08090a;
+  --bg-elev-1: #111214;
+  --bg-elev-2: #17181b;
+  --bg-hover: #1d1e22;
+  --bg-social: #0e0f11;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  /* text */
+  --text: #f7f8f8;
+  --text-muted: #8a8f98;
+  --text-disabled: #62666d; /* disabled or decorative only */
+  --text-on-accent: #000000;
+  /* accents */
+  --accent: #ff90e8;
+  --accent-hover: #ffa6ee;
+  --accent-press: #f07adb;
+  --accent-text: #ff90e8;
+  --accent-glow: rgba(255, 144, 232, 0.22);
+  --accent-2: #ffe27a; /* stale / attention markers only */
+  --danger: #ff5c5c;
+  --ok: #3dd68c;
+  /* sectors: dots and chips only, always next to a text label */
+  --sector-economy: #2fb7c4;
+  --sector-geopolitics: #f2994a;
+  --sector-technology: #5b8def;
+  --sector-business: #a78bfa;
+  --sector-society: #ff6b6b;
+  --sector-environment: #3dd68c;
+  /* elevation: borders first; shadows only for hover and popovers */
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --shadow-chunky: 2px 2px 0 0 #000;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #fbfbfc;
+  --bg-elev-1: #ffffff;
+  --bg-elev-2: #f4f5f7;
+  --bg-hover: #eeeff2;
+  --bg-social: #f6f6f8;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --text: #0b0b0d;
+  --text-muted: #5c6068;
+  --text-disabled: #9a9ea6;
+  /* Pink fails as text on white (about 2:1), so links and rings use a deeper pink. */
+  --accent-text: #b5179e;
+  --accent-glow: rgba(181, 23, 158, 0.18);
+  --danger: #c62828;
+  --ok: #1e8a55;
+  --sector-economy: #0e7c86;
+  --sector-geopolitics: #b3541e;
+  --sector-technology: #2f5fd0;
+  --sector-business: #6d4acf;
+  --sector-society: #c7363b;
+  --sector-environment: #1e8a55;
+  --shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.08);
+  --shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.14);
+}
+
+:root {
+  /* type */
+  --font-sans: "Inter Variable", "Inter Fallback", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --text-display: clamp(2.5rem, 1.5rem + 4.6vw, 5.5rem); /* home hero only */
+  --lh-display: 1;
+  --track-display: -0.045em;
+  --weight-display: 800;
+  --text-h1: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+  --lh-h1: 1.05;
+  --track-h1: -0.03em;
+  --weight-h1: 700;
+  --text-body: 0.9375rem; /* 15px; 16px from 768px */
+  --lh-body: 1.6;
+  --text-small: 0.8125rem; /* 13px: secondary text, mono metadata, chips */
+  --lh-small: 1.45;
+  /* spacing: 4px base */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  /* radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+  /* motion */
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+  --dur-pin: 320ms;
+  --dur-pulse: 2000ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* layout */
+  --topbar-h: 56px;
+  --bottomnav-h: 64px;
+  --sidebar-w: 240px;
+  --content-max: 1200px;
+  --feed-max: 720px;
+  --rail-w: 320px;
+  --measure: 68ch;
+  --z-map: 0;
+  --z-sticky: 1100; /* above Leaflet's internal z-indexes */
+  --z-dialog: 1200;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --text-body: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0.01ms;
+    --dur-base: 0.01ms;
+    --dur-pin: 0.01ms;
+  }
+}

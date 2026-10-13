@@ -6,7 +6,8 @@ placed on a map, with every source shown. Asia-wide expansion comes later.
 It shows what its listed sources published. It does not claim to measure what any audience
 has or hasn't seen.
 
-**Status:** milestone 1 of 9 (compliance groundwork). No application code yet.
+**Status:** milestone 2 of 9: the skeleton. The compliance groundwork, backend modules, database
+schema, display-policy engine, design system and CI are in place. No news is ingested yet.
 The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Ground rules
@@ -32,13 +33,28 @@ The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PL
 | [`config/cities.csv`](config/cities.csv) | Generated city list (GeoNames, CC BY 4.0) |
 | [`config/city_curation.yaml`](config/city_curation.yaml) | Hand-curated city aliases and exclusions |
 | [`scripts/`](scripts/) | City list builder and config validator |
+| [`backend/`](backend/) | Java 21 / Spring Boot 4: `core` (config, `DisplayPolicy`, Flyway schema), `ingest`, `api` |
+| [`frontend/`](frontend/) | React + TypeScript: design tokens, UI primitives, placeholder home page |
+| [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Config validation, backend build with integration tests, frontend lint/test/build |
 
-## Check the config
+## Run it locally
+
+You need Java (any recent JDK; Gradle downloads Java 21 itself), Node 24 and Python 3.
 
 ```bash
+# Compliance config
 python3 -m venv .venv && .venv/bin/pip install -r scripts/requirements.txt
 .venv/bin/python -I scripts/validate_config.py
+
+# Backend: core (config + display policy), ingest (hourly job), api (read-only REST)
+cd backend && ./gradlew build          # Testcontainers tests need Docker; skipped without it
+./gradlew :api:bootRun                 # http://localhost:8080/api/v1/sources
+
+# Frontend (dark by default; dev-only component gallery at /dev/gallery)
+cd frontend && npm install && npm run dev   # http://localhost:5174
 ```
+
+Database setup (local and Neon) is in [`docs/database.md`](docs/database.md).
 
 ## Attribution
 
