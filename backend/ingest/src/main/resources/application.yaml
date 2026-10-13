@@ -9,6 +9,8 @@ spring:
     url: ${EASTWIRE_DB_URL:jdbc:postgresql://localhost:5432/eastwire}
     username: ${EASTWIRE_DB_USER:ingest_writer}
     password: ${EASTWIRE_DB_PASSWORD:ingest_writer_local}
+    hikari:
+      maximum-pool-size: 4
   flyway:
     locations: classpath:db/migration
 
@@ -17,3 +19,20 @@ eastwire:
   config-dir: ${EASTWIRE_CONFIG_DIR:config}
   ingest:
     run-on-startup: true
+    # pg_try_advisory_lock keeps two runs (cron + manual) from overlapping.
+    advisory-lock: true
+  http:
+    user-agent: "EastWireBot/0.1 (+https://github.com/YOAV-DORY/eastwire)"
+    # Slow sites (Global Voices took 20 s to answer on 2026-10-13) need more than a few seconds.
+    connect-timeout: 20s
+    request-timeout: 60s
+    max-attempts: 3
+    base-delay: 2s
+    # A source asking us to wait longer than this fails the run; the circuit breaker takes over.
+    max-retry-after: 120s
+  gdelt:
+    base-url: https://data.gdeltproject.org/gdeltv2
+    # Never process files older than this (a missed day is reported as a gap, not backfilled).
+    max-lookback: 6h
+    # First run ever: start this far back.
+    bootstrap: 1h

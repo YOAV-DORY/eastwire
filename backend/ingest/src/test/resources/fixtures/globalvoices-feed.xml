@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic test feed shaped like a Global Voices RSS feed. All text is invented. -->
+<rss version="2.0"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Test feed</title>
+    <link>https://globalvoices.org/</link>
+    <description>Synthetic</description>
+    <item>
+      <title><![CDATA[Neighbourhood libraries in Busan stay open late]]></title>
+      <link>https://globalvoices.org/2026/10/01/test-libraries-busan/</link>
+      <dc:creator><![CDATA[Test Author]]></dc:creator>
+      <pubDate>Thu, 01 Oct 2026 08:00:00 +0000</pubDate>
+      <category><![CDATA[East Asia]]></category>
+      <category><![CDATA[South Korea]]></category>
+      <category><![CDATA[Education]]></category>
+      <description><![CDATA[SEOUL — Volunteers say late opening hours help students. A second sentence adds detail about the program. A third sentence is here only to make the text long enough to need shortening when it is cut to an excerpt for display on a card.]]></description>
+      <content:encoded><![CDATA[<p>Body text.</p><p>Originally published on <a href="https://globalvoices.org/2026/10/01/test-libraries-busan/">Global Voices</a></p>]]></content:encoded>
+    </item>
+    <item>
+      <title><![CDATA[Farmers&#8217; cooperatives test new seed bank]]></title>
+      <link>https://globalvoices.org/2026/10/02/test-seed-bank/</link>
+      <dc:creator><![CDATA[Another Author]]></dc:creator>
+      <pubDate>Fri, 02 Oct 2026 08:00:00 +0000</pubDate>
+      <category><![CDATA[South Asia]]></category>
+      <category><![CDATA[India]]></category>
+      <description><![CDATA[A cooperative near Pune is trying a shared seed bank.]]></description>
+      <content:encoded><![CDATA[<p>Body.</p><p><em>This story was originally published by <a href="https://partner-outlet.example/story">Partner Outlet</a> and is republished as part of a content-sharing agreement.</em></p>]]></content:encoded>
+    </item>
+    <item>
+      <title><![CDATA[A story only about another region]]></title>
+      <link>https://globalvoices.org/2026/10/03/test-other-region/</link>
+      <dc:creator><![CDATA[Third Author]]></dc:creator>
+      <pubDate>Sat, 03 Oct 2026 08:00:00 +0000</pubDate>
+      <category><![CDATA[Latin America]]></category>
+      <category><![CDATA[Brazil]]></category>
+      <description><![CDATA[Not about a covered country.]]></description>
+    </item>
+  </channel>
+</rss>

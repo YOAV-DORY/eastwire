@@ -2,6 +2,7 @@
 // and the Flyway migrations. No Spring here, so it is fast to test.
 plugins {
     `java-library`
+    `java-test-fixtures`   // RepoConfig, shared with the ingest and api tests
 }
 
 dependencies {

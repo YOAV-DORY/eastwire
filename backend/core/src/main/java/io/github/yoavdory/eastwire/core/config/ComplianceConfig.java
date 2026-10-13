@@ -30,7 +30,8 @@ public record ComplianceConfig(
         List<SourceConfig> sources,
         List<DomainPolicy> domains,
         List<Country> countries,
-        List<City> cities) {
+        List<City> cities,
+        Set<String> requiresCountryContext) {
 
     /** System property / Spring property naming the config directory. */
     public static final String CONFIG_DIR_PROPERTY = "eastwire.config-dir";
@@ -50,7 +51,12 @@ public record ComplianceConfig(
         domains = List.copyOf(domains);
         countries = List.copyOf(countries);
         cities = List.copyOf(cities);
+        requiresCountryContext = Set.copyOf(requiresCountryContext);
         checkHardRules(sources, domains);
+    }
+
+    public ComplianceConfig(List<SourceConfig> sources, List<DomainPolicy> domains, List<Country> countries, List<City> cities) {
+        this(sources, domains, countries, cities, Set.of());
     }
 
     public static ComplianceConfig load(Path dir) {
@@ -58,11 +64,22 @@ public record ComplianceConfig(
                 readYaml(dir.resolve("sources.yaml"), SourcesFile.class).sources(),
                 readYaml(dir.resolve("domains.yaml"), DomainsFile.class).domains(),
                 readYaml(dir.resolve("countries.yaml"), CountriesFile.class).countries(),
-                readCities(dir.resolve("cities.csv")));
+                readCities(dir.resolve("cities.csv")),
+                readYaml(dir.resolve("city_curation.yaml"), CurationFile.class).requiresCountryContext());
     }
 
     public Optional<SourceConfig> source(String slug) {
         return sources.stream().filter(s -> s.slug().equals(slug)).findFirst();
+    }
+
+    /** Maps a GDELT FIPS 10-4 country code (e.g. "KS") to EastWire's ISO code ("KR"), if covered. */
+    public Optional<Country> countryForFips(String fips) {
+        return countries.stream().filter(c -> c.fips().equals(fips)).findFirst();
+    }
+
+    /** Countries in the current phase (the MVP's four). */
+    public List<Country> activeCountries() {
+        return countries.stream().filter(c -> c.phase() == 1).toList();
     }
 
     /** The most specific domain entry covering {@code host} (sub.example.com beats example.com). */
@@ -77,7 +94,7 @@ public record ComplianceConfig(
         List<SourceConfig> updated = sources.stream()
                 .map(s -> s.slug().equals(replacement.slug()) ? replacement : s)
                 .toList();
-        return new ComplianceConfig(updated, domains, countries, cities);
+        return new ComplianceConfig(updated, domains, countries, cities, requiresCountryContext);
     }
 
     private static void checkHardRules(List<SourceConfig> sources, List<DomainPolicy> domains) {
@@ -129,5 +146,12 @@ public record ComplianceConfig(
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record CountriesFile(List<Country> countries) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record CurationFile(Set<String> requiresCountryContext) {
+        CurationFile {
+            requiresCountryContext = requiresCountryContext == null ? Set.of() : requiresCountryContext;
+        }
     }
 }

@@ -6,8 +6,10 @@ placed on a map, with every source shown. Asia-wide expansion comes later.
 It shows what its listed sources published. It does not claim to measure what any audience
 has or hasn't seen.
 
-**Status:** milestone 2 of 9: the skeleton. The compliance groundwork, backend modules, database
-schema, display-policy engine, design system and CI are in place. No news is ingested yet.
+**Status:** milestone 3 of 9: ingestion. The hourly job collects GDELT-discovered headlines from
+reviewed publishers and Global Voices articles, with run tracking, retries and a circuit breaker
+([`docs/ingestion.md`](docs/ingestion.md)). It goes live once the Neon database is set up
+([`docs/database.md`](docs/database.md)). No public pages show news yet (milestone 4).
 The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Ground rules
@@ -36,6 +38,8 @@ The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PL
 | [`backend/`](backend/) | Java 21 / Spring Boot 4: `core` (config, `DisplayPolicy`, Flyway schema), `ingest`, `api` |
 | [`frontend/`](frontend/) | React + TypeScript: design tokens, UI primitives, placeholder home page |
 | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Config validation, backend build with integration tests, frontend lint/test/build |
+| [`.github/workflows/ingest.yml`](.github/workflows/ingest.yml) | Hourly ingestion (minute 17), off until `INGEST_ENABLED=true` |
+| [`docs/ingestion.md`](docs/ingestion.md) | How a run works, connectors, failure handling, measured volumes |
 
 ## Run it locally
 
