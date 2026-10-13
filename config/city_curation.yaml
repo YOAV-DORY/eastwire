@@ -1,0 +1,42 @@
+# Hand-curated corrections applied by scripts/build_cities.py on top of GeoNames.
+# Every entry needs a reason. Keep this list short and reviewable.
+
+# Older or English names that appear in English-language headlines.
+# Keyed by country, then by the city's GeoNames ASCII name (as it appears in cities.csv).
+# Used by the gazetteer matcher in addition to the city's own name.
+aliases:
+  IN:
+    Mumbai: [Bombay]
+    Bengaluru: [Bangalore]
+    Kolkata: [Calcutta]
+    Chennai: [Madras]
+    Pune: [Poona]
+    Thiruvananthapuram: [Trivandrum]
+    Puducherry: [Pondicherry]
+    Panjim: [Panaji]
+  CN:
+    Beijing: [Peking]
+    Guangzhou: [Canton]
+    Nanjing: [Nanking]
+    Chongqing: [Chungking]
+    Tianjin: [Tientsin]
+    Xiamen: [Amoy]
+    Xi'an: [Xian]
+    UEruemqi: [Urumqi, Urumchi]
+    Hohhot: [Huhehot]
+  KR:
+    Busan: [Pusan]
+    Incheon: [Inchon]
+    Daegu: [Taegu]
+    Daejeon: [Taejon]
+    Gwangju: [Kwangju]
+    Jeju City: [Jeju]
+  JP: {}
+
+# GeoNames records left out of the city list on purpose.
+exclude:
+  - geonames_id: 1790842
+    name: Wuzhong (Ningxia)
+    reason: >-
+      GeoNames gives a population of 7,202,654, which looks implausible for this prefecture.
+      Left out until the figure has been checked by hand against another source.

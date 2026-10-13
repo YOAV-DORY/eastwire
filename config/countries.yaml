@@ -1,0 +1,26 @@
+# Countries EastWire covers, and the phase each one is in.
+#
+# iso2  = ISO 3166-1 alpha-2, the code used everywhere inside EastWire.
+# fips  = FIPS 10-4 code. GDELT GKG/Events use FIPS, NOT ISO, so ingestion maps fips -> iso2.
+#         Watch the traps: China is CH (not CN), Japan is JA, South Korea is KS,
+#         Vietnam is VM, Philippines is RP, Singapore is SN, Bangladesh is BG.
+# phase = 1 for the MVP. Phase 2 countries stay disabled until their domains have been
+#         reviewed (config/domains.yaml) and their city list has been generated.
+
+countries:
+  - { iso2: CN, fips: CH, name: China, phase: 1 }
+  - { iso2: IN, fips: IN, name: India, phase: 1 }
+  - { iso2: KR, fips: KS, name: South Korea, phase: 1 }
+  - { iso2: JP, fips: JA, name: Japan, phase: 1 }
+
+  # Phase 2: expansion across Asia (disabled)
+  - { iso2: TW, fips: TW, name: Taiwan, phase: 2 }
+  - { iso2: HK, fips: HK, name: Hong Kong, phase: 2 }
+  - { iso2: ID, fips: ID, name: Indonesia, phase: 2 }
+  - { iso2: VN, fips: VM, name: Vietnam, phase: 2 }
+  - { iso2: PH, fips: RP, name: Philippines, phase: 2 }
+  - { iso2: TH, fips: TH, name: Thailand, phase: 2 }
+  - { iso2: MY, fips: MY, name: Malaysia, phase: 2 }
+  - { iso2: SG, fips: SN, name: Singapore, phase: 2 }
+  - { iso2: PK, fips: PK, name: Pakistan, phase: 2 }
+  - { iso2: BD, fips: BG, name: Bangladesh, phase: 2 }

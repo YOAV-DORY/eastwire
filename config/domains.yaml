@@ -1,0 +1,330 @@
+# Publisher domain policy for items DISCOVERED via GDELT.
+#
+# What an `allow` permits: headline as link text + publisher name + time + link to the original.
+# Never an excerpt, never an image, and EastWire never fetches the publisher's site itself
+# (title and URL come from GDELT GKG). Rules and reasoning: docs/domain-review.md.
+#
+# decision: allow | deny | pending   (anything not listed is treated as pending = hidden)
+# rule:     the rule from docs/domain-review.md that produced the decision
+# Matching: a domain entry also covers its subdomains (frontline.thehindu.com -> thehindu.com).
+#           If url_prefixes is set, only URLs whose path starts with one of them are allowed.
+# This is a review record, not legal advice.
+
+review_rules_version: 1
+
+domains:
+  # ---------------------------------------------------------------- allow
+  - domain: mainichi.jp
+    publisher: The Mainichi (English edition)
+    country: JP
+    decision: allow
+    rule: A1
+    url_prefixes: [/english/]
+    conditions: [non_commercial]
+    evidence_url: https://mainichi.jp/english/info/copyright_en.html
+    checked_on: 2026-10-13
+    notes: >-
+      Using material without permission is prohibited only for purposes other than personal
+      or non-commercial use. No linking, headline or automation clause found.
+
+  - domain: asahi.com
+    publisher: The Asahi Shimbun (Asia & Japan Watch)
+    country: JP
+    decision: allow
+    rule: A2
+    url_prefixes: [/ajw/]
+    conditions: [non_commercial, no_frames, label_as_asahi, notify_by_email_after_launch]
+    evidence_url: https://www.asahi.com/ajw/help/policy.html
+    checked_on: 2026-10-13
+    notes: >-
+      Site policy says links are free in principle if they are not for profit and not framed.
+      It explicitly covers linking from a story headline, provided the link says it goes to
+      The Asahi Shimbun Digital. It asks linkers to notify it by email. Owner action: send that
+      notice after launch (see docs/domain-review.md, action items).
+
+  - domain: scroll.in
+    publisher: Scroll.in
+    country: IN
+    decision: allow
+    rule: A1
+    conditions: [non_commercial]
+    evidence_url: https://scroll.in/terms
+    checked_on: 2026-10-13
+    notes: >-
+      Terms (last updated April 2022) limit use of the site to personal, non-commercial use and
+      say nothing about linking, headlines, metadata or third-party sourcing. Residual risk R1.
+
+  - domain: sixthtone.com
+    publisher: Sixth Tone
+    country: CN
+    decision: allow
+    rule: A2
+    conditions: [credit_by_name]
+    evidence_url: https://www.sixthtone.com/terms-use
+    checked_on: 2026-10-13
+    ownership_note: pending  # only label ownership with a cited source
+    notes: >-
+      Terms say anyone may link to its articles with no permission required, and individuals
+      may cite articles if Sixth Tone is credited by name. Other reproduction needs consent.
+
+  - domain: caixinglobal.com
+    publisher: Caixin Global
+    country: CN
+    decision: allow
+    rule: A1
+    conditions: [non_commercial]
+    evidence_url: https://www.caixinglobal.com/terms/
+    checked_on: 2026-10-13
+    notes: >-
+      Terms bar copying, publishing or reposting content for commercial use. Nothing on linking
+      or automation. Many articles are paywalled; EastWire links out and never bypasses it.
+
+  # ---------------------------------------------------------------- deny
+  - domain: kyodonews.net
+    publisher: Kyodo News
+    country: JP
+    decision: deny
+    rule: D1
+    evidence_url: https://english.kyodonews.net/list/info/copyright
+    checked_on: 2026-10-13
+    notes: >-
+      Direct links to specific articles ("deep links") are not allowed without consulting
+      Kyodo first. Also bars frame links and robot-based data mining.
+
+  - domain: koreaherald.com
+    publisher: The Korea Herald (Herald Corporation)
+    country: KR
+    decision: deny
+    rule: D2
+    evidence_url: https://members.heraldcorp.com/html/custom/copyright.php?&lang=en
+    checked_on: 2026-10-13
+    notes: >-
+      Materials may not be reproduced, displayed or published without prior written
+      permission. Same wording standard as the excluded Korea Times.
+
+  - domain: koreajoongangdaily.joins.com
+    publisher: Korea JoongAng Daily
+    country: KR
+    decision: deny
+    rule: D2
+    evidence_url: https://www.koreajoongangdaily.com/copyright
+    checked_on: 2026-10-13
+    notes: >-
+      Bars directly or indirectly displaying or using content in any media, including
+      databases and information services, and bars commercial or non-commercial information
+      services, without prior written consent. Terms effective 8 June 2026.
+
+  - domain: koreajoongangdaily.com
+    publisher: Korea JoongAng Daily
+    country: KR
+    decision: deny
+    rule: D2
+    evidence_url: https://www.koreajoongangdaily.com/copyright
+    checked_on: 2026-10-13
+    notes: Same publisher and terms as koreajoongangdaily.joins.com.
+
+  - domain: yna.co.kr
+    publisher: Yonhap News Agency
+    country: KR
+    decision: deny
+    rule: D2
+    evidence_url: https://en.yna.co.kr/aboutus/copyright
+    checked_on: 2026-10-13
+    notes: >-
+      Information may not be displayed directly or indirectly through any medium without
+      prior permission. Non-profit information services also need prior written permission.
+
+  - domain: hindustantimes.com
+    publisher: Hindustan Times (HT Digital Streams)
+    country: IN
+    decision: deny
+    rule: D2
+    evidence_url: https://www.hindustantimes.com/termsofuse
+    checked_on: 2026-10-13
+    notes: >-
+      Prohibited uses include publicly displaying content. Bars scraping and AI use of content
+      or metadata. The same terms cover livemint.com, livehindustan.com and healthshots.com.
+
+  - domain: livemint.com
+    publisher: Mint (HT Digital Streams)
+    country: IN
+    decision: deny
+    rule: D2
+    evidence_url: https://www.livemint.com/terms-of-use
+    checked_on: 2026-10-13
+    notes: Same terms as hindustantimes.com.
+
+  - domain: livehindustan.com
+    publisher: Live Hindustan (HT Digital Streams)
+    country: IN
+    decision: deny
+    rule: D2
+    evidence_url: https://www.livemint.com/terms-of-use
+    checked_on: 2026-10-13
+    notes: Named in the HT Digital Streams terms. Hindi-language, so not in the English stream anyway.
+
+  - domain: indianexpress.com
+    publisher: The Indian Express
+    country: IN
+    decision: deny
+    rule: D2
+    evidence_url: https://indianexpress.com/terms-and-conditions/
+    checked_on: 2026-10-13
+    notes: >-
+      Content is for personal use only and may not be displayed for other purposes without
+      consent. Also bars embedding or displaying content on other platforms and indexing a
+      significant portion of the site.
+
+  - domain: thewire.in
+    publisher: The Wire
+    country: IN
+    decision: deny
+    rule: D2
+    evidence_url: https://thewire.in/terms
+    checked_on: 2026-10-13
+    notes: >-
+      Bars directly or indirectly publishing or disseminating any content, entering it into a
+      database, or including it in any electronic retrieval service without written permission.
+
+  - domain: channelnewsasia.com
+    publisher: CNA (Mediacorp)
+    country: SG
+    decision: deny
+    rule: D1
+    evidence_url: https://www.mediacorp.sg/terms-conditions
+    checked_on: 2026-10-13
+    notes: Mediacorp terms bar deeplinking to or framing any part of its sites from other websites.
+
+  # Excluded publishers from the source matrix (docs/source-matrix.md), applied on every path.
+  - domain: scmp.com
+    publisher: South China Morning Post
+    country: HK
+    decision: deny
+    rule: D3
+    evidence_url: https://www.scmp.com/terms-conditions
+    checked_on: 2026-10-13
+    notes: >-
+      Terms (updated 15 Sep 2026) bar automated access, extraction and indexing including
+      metadata, whether direct or via third-party sources, and bar unauthorised links.
+
+  - domain: thehindu.com
+    publisher: The Hindu (THG Publishing), incl. frontline.thehindu.com and sportstar.thehindu.com
+    country: IN
+    decision: deny
+    rule: D4
+    evidence_url: https://www.thehindu.com/termsofuse/
+    checked_on: 2026-10-13
+    notes: >-
+      Terms (effective 18 Jan 2023) require prior written consent for automated collection and
+      bar display for public purposes. Excluded until written consent.
+
+  - domain: thehindubusinessline.com
+    publisher: BusinessLine (THG Publishing)
+    country: IN
+    decision: deny
+    rule: D4
+    evidence_url: https://www.thehindu.com/termsofuse/
+    checked_on: 2026-10-13
+    notes: THG Publishing group site; follows The Hindu decision.
+
+  - domain: koreatimes.co.kr
+    publisher: The Korea Times
+    country: KR
+    decision: deny
+    rule: D4
+    evidence_url: https://www.koreatimes.co.kr/copyright
+    checked_on: 2026-10-13
+    notes: Redistribution or publication needs prior written permission. Excluded until granted.
+
+  # Aggregator sites seen in the GKG sample of 2026-10-13. They appear to republish other
+  # outlets' copy rather than report. Denied on quality grounds; terms not reviewed.
+  - domain: heraldglobe.com
+    publisher: Herald Globe
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+  - domain: parisguardian.com
+    publisher: Paris Guardian
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+  - domain: pakistantelegraph.com
+    publisher: Pakistan Telegraph
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+  - domain: myanmarnews.net
+    publisher: Myanmar News
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+
+  # ---------------------------------------------------------------- pending
+  - domain: nhk.or.jp
+    publisher: NHK WORLD-JAPAN
+    country: JP
+    decision: pending
+    rule: P2
+    url_prefixes: [/nhkworld/en/]
+    evidence_url: https://www3.nhk.or.jp/nhkworld/en/terms/
+    checked_on: 2026-10-13
+    next_action: Email NHK to ask whether EastWire's automatically generated headline links are acceptable.
+    notes: >-
+      Article 11 permits links in general, but excludes links "intentionally generated in large
+      numbers through automated means such as bots". EastWire's links are generated
+      automatically from GDELT data, so this needs NHK's answer.
+
+  - domain: japantimes.co.jp
+    publisher: The Japan Times
+    country: JP
+    decision: pending
+    rule: P1
+    next_action: Owner reads the link policy and robots.txt in a normal browser (docs/evidence/README.md).
+    notes: Cloudflare blocked automated reads of the link policy on 2026-10-13. Tied to the RSS connector decision.
+
+  - domain: hani.co.kr
+    publisher: The Hankyoreh (English edition)
+    country: KR
+    decision: pending
+    rule: P1
+    next_action: Find and review the English-edition copyright terms (only member terms were found).
+  - domain: nippon.com
+    publisher: nippon.com
+    country: JP
+    decision: pending
+    rule: P1
+    next_action: Terms page not found from the homepage; find and review.
+  - domain: news.cn
+    publisher: Xinhua (English)
+    country: CN
+    decision: pending
+    rule: P1
+    next_action: Review copyright terms. If allowed, label as state media with a citation.
+  - domain: xinhuanet.com
+    publisher: Xinhua
+    country: CN
+    decision: pending
+    rule: P1
+    next_action: Same as news.cn.
+  - domain: chinadaily.com.cn
+    publisher: China Daily
+    country: CN
+    decision: pending
+    rule: P1
+    next_action: Review copyright terms. If allowed, label as state media with a citation.
+  - domain: newindianexpress.com
+    publisher: The New Indian Express
+    country: IN
+    decision: pending
+    rule: P1
+    next_action: Review terms (frequent in the GKG sample).
+  - domain: nikkei.com
+    publisher: Nikkei Asia
+    country: JP
+    decision: pending
+    rule: P1
+    next_action: Review carefully; Nikkei has a history of restrictive linking policies.

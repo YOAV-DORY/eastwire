@@ -1,0 +1,320 @@
+# EastWire source registry: the machine-readable form of docs/source-matrix.md.
+# Ingestion reads this file; a source runs only if `enabled: true`.
+#
+# status:       verified | conditional | excluded
+#               (excluded and conditional sources must stay enabled: false;
+#                scripts/validate_config.py enforces this)
+# display_mode: headline_excerpt | headline_only | embed | none
+# All evidence was checked on the date given in `evidence.checked_on`.
+
+sources:
+  # --------------------------------------------------------------- news and discovery
+  - slug: gdelt-gkg
+    name: GDELT GKG 2.x raw files (English stream)
+    kind: discovery
+    connector: gdelt_gkg
+    endpoint: https://data.gdeltproject.org/gdeltv2/lastupdate.txt
+    coverage: Global; filtered to phase-1 countries by FIPS code
+    auth: none
+    quota: No published quota; about 5 MB zipped per 15-minute file
+    status: verified
+    enabled: true
+    display_mode: headline_only     # and only for domains with decision=allow in domains.yaml
+    max_excerpt_chars: 0
+    images: false
+    attribution: "Data: The GDELT Project (gdeltproject.org)"
+    retention_days: 30
+    evidence:
+      url: https://gdeltproject.org/about.html
+      checked_on: 2026-10-13
+      note: >-
+        Open use with a required citation and link; says nothing about the copyright of the
+        underlying articles. Live test: lastupdate.txt is current; the newest listed file can
+        return 404 for several minutes after being listed.
+
+  - slug: gdelt-doc
+    name: GDELT DOC 2.0 API
+    kind: discovery
+    connector: gdelt_doc
+    endpoint: https://api.gdeltproject.org/api/v2/doc/doc
+    auth: none
+    quota: One request every 5 seconds; 429s observed even after a 5-minute pause
+    status: conditional
+    enabled: false
+    display_mode: headline_only
+    max_excerpt_chars: 0
+    images: false
+    attribution: "Data: The GDELT Project (gdeltproject.org)"
+    retention_days: 30
+    evidence:
+      url: https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/
+      checked_on: 2026-10-13
+      note: Returned empty {} results, then a plain-text rate-limit message with HTTP 200, then 429.
+
+  - slug: gdelt-geo
+    name: GDELT GEO 2.0 API
+    kind: discovery
+    connector: none
+    endpoint: https://api.gdeltproject.org/api/v2/geo/geo
+    status: excluded
+    enabled: false
+    display_mode: none
+    evidence:
+      url: https://blog.gdeltproject.org/gdelt-geo-2-0-api-debuts/
+      checked_on: 2026-10-13
+      note: HTTP 404 on all four parameter variants tested.
+
+  - slug: global-voices
+    name: Global Voices
+    kind: news_feed
+    connector: rss
+    endpoints:
+      - https://globalvoices.org/-/world/east-asia/china/feed/
+      - https://globalvoices.org/-/world/east-asia/japan/feed/
+      - https://globalvoices.org/-/world/east-asia/south-korea/feed/
+      - https://globalvoices.org/-/world/south-asia/india/feed/
+    topic_endpoints:
+      - https://globalvoices.org/-/topics/economics-business/feed/
+      - https://globalvoices.org/-/topics/politics/feed/
+      - https://globalvoices.org/-/topics/technology/feed/
+      - https://globalvoices.org/-/topics/environment/feed/
+    publisher_country: null   # international network; publisher location not shown
+    auth: none
+    quota: none stated
+    status: verified
+    enabled: true
+    display_mode: headline_excerpt
+    max_excerpt_chars: 300     # from the feed <description>, cut at a sentence boundary
+    images: false              # media can be licensed differently from the text
+    license:
+      name: CC BY 3.0
+      url: https://creativecommons.org/licenses/by/3.0/
+    attribution: "By {author}, Global Voices · CC BY 3.0 · excerpt, shortened"
+    partner_reprints: link_only   # posts republished from other outlets show headline + link only
+    retention_days: 90
+    evidence:
+      url: https://globalvoices.org/about/global-voices-attribution-policy/
+      checked_on: 2026-10-13
+      note: Policy "Updated 9 April 2025"; text under CC BY; media may be licensed differently.
+
+  - slug: japan-times
+    name: The Japan Times
+    kind: news_feed
+    connector: rss
+    endpoint: https://www.japantimes.co.jp/feed/   # trailing slash; /feed returns a Cloudflare challenge
+    publisher_country: JP
+    publisher_city_geonames_id: 1850147            # Tokyo
+    auth: none
+    status: conditional
+    enabled: false
+    display_mode: headline_excerpt
+    max_excerpt_chars: 200     # RSS dek only; well under the policy's 20% cap
+    wire_credit_mode: headline_only   # AFP, Jiji, Kyodo, Reuters, Bloomberg, AP credits
+    images: false
+    attribution: "The Japan Times"   # must sit next to the excerpt, with the original link
+    retention_days: 30
+    enable_when:
+      - Owner reads the link policy and robots.txt in a normal browser and saves PDFs to docs/evidence/
+      - The feed is reachable from GitHub Actions runners
+      - Optional but preferred - written confirmation that automated RSS use is acceptable
+    evidence:
+      url: https://www.japantimes.co.jp/about-us/link-policy/
+      checked_on: 2026-10-13
+      note: Policy page and robots.txt sit behind a Cloudflare bot challenge; not bypassed.
+
+  - slug: the-hindu
+    name: The Hindu
+    kind: news_feed
+    connector: none
+    endpoint: https://www.thehindu.com/news/national/feeder/default.rss
+    status: excluded
+    enabled: false
+    display_mode: none
+    evidence:
+      url: https://www.thehindu.com/termsofuse/
+      checked_on: 2026-10-13
+      note: Effective 18 Jan 2023. Automated collection needs prior written consent; no public display.
+
+  - slug: korea-times
+    name: The Korea Times
+    kind: news_feed
+    connector: none
+    endpoint: https://feed.koreatimes.co.kr/k/allnews.xml
+    status: excluded
+    enabled: false
+    display_mode: none
+    evidence:
+      url: https://www.koreatimes.co.kr/copyright
+      checked_on: 2026-10-13
+      note: Redistribution or publication needs prior written permission (ToS effective 2 May 2025).
+
+  - slug: scmp
+    name: South China Morning Post
+    kind: news_feed
+    connector: none
+    endpoint: null
+    status: excluded
+    enabled: false
+    display_mode: none
+    evidence:
+      url: https://www.scmp.com/terms-conditions
+      checked_on: 2026-10-13
+      note: Updated 15 Sep 2026. Clause 3.2.1 bars automated extraction incl. metadata, also via third parties.
+
+  # --------------------------------------------------------------- social
+  - slug: bluesky-curated
+    name: Bluesky (curated accounts)
+    kind: social
+    connector: bluesky_author_feed
+    endpoint: https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed
+    revalidate_endpoint: https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts
+    embed: https://embed.bsky.app/oembed
+    auth: none
+    quota: Docs call public limits "generous"; no numeric guarantee
+    status: verified
+    enabled: false              # turned on in milestone 8, once social_accounts.yaml has entries
+    display_mode: embed
+    label: "Social post · not verified reporting"
+    retention_days: 30          # revalidated every run; deleted when missing or labeled
+    evidence:
+      url: https://bsky.network/docs/advanced-guides/rate-limits
+      checked_on: 2026-10-13
+      note: getAuthorFeed and oEmbed returned 200 without a token.
+
+  - slug: bluesky-search
+    name: Bluesky search
+    kind: social
+    connector: none
+    endpoint: https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts
+    status: conditional
+    enabled: false
+    display_mode: none
+    evidence:
+      url: https://bsky.network/docs/advanced-guides/rate-limits
+      checked_on: 2026-10-13
+      note: HTTP 403 from the CDN on public.api.bsky.app.
+
+  - slug: youtube-curated
+    name: YouTube (curated channels)
+    kind: social
+    connector: youtube_uploads
+    endpoint: https://www.googleapis.com/youtube/v3/playlistItems
+    details_endpoint: https://www.googleapis.com/youtube/v3/videos
+    auth: api_key            # secret YOUTUBE_API_KEY, server side only
+    quota: 10,000 units/day; search.list separately 100/day and not used
+    status: verified
+    enabled: false           # milestone 8
+    display_mode: embed      # youtube-nocookie.com, click to load, player never modified
+    label: "Video · not verified reporting"
+    retention_days: 30       # refresh or delete within 30 days (Developer Policies III.E.4.c)
+    evidence:
+      url: https://developers.google.com/youtube/terms/developer-policies
+      checked_on: 2026-10-13
+      note: Quota page updated 2026-10-08; Developer Policies updated 2026-09-14.
+
+  - slug: telegram-curated
+    name: Telegram (manually curated public posts)
+    kind: social
+    connector: manual_embed
+    endpoint: https://core.telegram.org/widgets/post
+    status: conditional
+    enabled: false
+    display_mode: embed
+    label: "Social post · not verified reporting"
+    evidence:
+      url: https://core.telegram.org/widgets/post
+      checked_on: 2026-10-13
+      note: Embeds of public channel posts are supported; no automated discovery is permitted by this.
+
+  - slug: mastodon
+    name: Mastodon
+    kind: social
+    connector: none
+    status: conditional
+    enabled: false
+    display_mode: none
+    evidence:
+      url: https://docs.joinmastodon.org/methods/timelines/
+      checked_on: 2026-10-13
+      note: Public timeline access depends on each instance's settings; review instance by instance.
+
+  - slug: reddit
+    name: Reddit
+    kind: social
+    connector: none
+    status: excluded
+    enabled: false
+    display_mode: none
+    evidence:
+      url: https://support.reddithelp.com/hc/en-us/articles/42728983564564-Responsible-Builder-Policy
+      checked_on: 2026-10-13
+      note: Explicit approval is required before any data access.
+
+  - slug: weibo
+    name: Weibo
+    kind: social
+    connector: none
+    status: excluded
+    enabled: false
+    display_mode: none
+    evidence:
+      url: https://open.weibo.com/wiki/Statuses/search/en
+      checked_on: 2026-10-13
+      note: Legacy documentation dated 24 Jan 2011; current access and display terms unknown.
+
+  - slug: naver-news
+    name: Naver News Search
+    kind: discovery
+    connector: none
+    endpoint: https://openapi.naver.com/v1/search/news.json
+    status: conditional
+    enabled: false
+    display_mode: none
+    evidence:
+      url: https://developers.naver.com/docs/serviceapi/search/news/news.md
+      checked_on: 2026-10-13
+      note: Not readable by our tools; 25,000 calls/day per the project brief. Results are Korean and translation is not allowed.
+
+  - slug: line
+    name: LINE Messaging API
+    kind: social
+    connector: none
+    status: excluded
+    enabled: false
+    display_mode: none
+    evidence:
+      url: https://developers.line.biz/en/docs/messaging-api/receiving-messages/
+      checked_on: 2026-10-13
+      note: Bot-scoped chat webhooks; not a public-news source. Never collect chats.
+
+  - slug: x
+    name: X
+    kind: social
+    connector: none
+    status: excluded
+    enabled: false
+    display_mode: none
+    evidence:
+      url: https://docs.x.com/x-api/getting-started/pricing
+      checked_on: 2026-10-13
+      note: Pay-per-use at $0.005 per post read; excluded under the $0 budget. No scraping.
+
+# Map and gazetteer providers (attribution is mandatory wherever they appear).
+map_providers:
+  - slug: osm-tiles
+    url_template: https://tile.openstreetmap.org/{z}/{x}/{y}.png
+    status: verified
+    attribution: "© OpenStreetMap contributors"
+    rules: [valid Referer, no bulk download or prefetch, respect caching, no SLA]
+    evidence: { url: https://operations.osmfoundation.org/policies/tiles/, checked_on: 2026-10-13 }
+  - slug: carto-dark
+    url_template: https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key={key}
+    status: conditional
+    attribution: "© OpenStreetMap contributors © CARTO"
+    rules: [free API key, non-commercial up to 5M tile requests/month, read basemap terms first]
+    evidence: { url: https://github.com/CartoDB/basemap-styles, checked_on: 2026-10-13 }
+  - slug: geonames
+    url_template: https://download.geonames.org/export/dump/cities15000.zip
+    status: verified
+    attribution: "GeoNames (geonames.org), CC BY 4.0"
+    evidence: { url: https://download.geonames.org/export/dump/readme.txt, checked_on: 2026-10-13 }

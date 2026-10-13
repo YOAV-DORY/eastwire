@@ -1,0 +1,15 @@
+# Python tooling
+.venv/
+__pycache__/
+
+# Downloaded third-party data (regenerate with the commands in docs/cities.md)
+data/raw/
+
+# Local secrets
+.env
+.env.*
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
