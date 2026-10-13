@@ -79,6 +79,20 @@ domains:
       Terms bar copying, publishing or reposting content for commercial use. Nothing on linking
       or automation. Many articles are paywalled; EastWire links out and never bypasses it.
 
+
+  - domain: business-standard.com
+    publisher: Business Standard
+    country: IN
+    decision: allow
+    rule: A1
+    conditions: [non_commercial]
+    evidence_url: https://www.business-standard.com/terms-conditions
+    checked_on: 2026-10-13
+    notes: >-
+      Terms restrict scraping and data mining of its own services (EastWire never visits the
+      site) and govern user posts; no clause on linking, headline display, metadata or
+      third-party sourcing found. Residual risk R1. Many articles are paywalled; link-out only.
+
   # ---------------------------------------------------------------- deny
   - domain: kyodonews.net
     publisher: Kyodo News
@@ -263,6 +277,141 @@ domains:
     checked_on: 2026-10-13
     notes: Aggregator; verify by hand before ever changing.
 
+  # Second review batch (2026-10-13), chosen by volume in a 13-file GKG sample.
+  - domain: indiatimes.com
+    publisher: Times Internet (Times of India, Economic Times)
+    country: IN
+    decision: deny
+    rule: D2
+    evidence_url: https://www.indiatimes.com/termsandcondition
+    checked_on: 2026-10-13
+    notes: >-
+      Users are prohibited from aggregating, scraping, recreating or redistributing content,
+      and from automated summarization or aggregation without written approval. Covers the
+      timesofindia and economictimes subdomains.
+
+  - domain: moneycontrol.com
+    publisher: Moneycontrol (Network18)
+    country: IN
+    decision: deny
+    rule: D2
+    evidence_url: https://www.moneycontrol.com/cdata/termsofuse.php
+    checked_on: 2026-10-13
+    notes: Bars directly or indirectly redistributing content and publicly displaying material without written authorization.
+
+  - domain: rediff.com
+    publisher: Rediff.com
+    country: IN
+    decision: deny
+    rule: D2
+    evidence_url: https://www.rediff.com/terms.html
+    checked_on: 2026-10-13
+    notes: Content is for personal non-commercial use; users may not reproduce, distribute or display it.
+
+  - domain: aninews.in
+    publisher: ANI (Asian News International)
+    country: IN
+    decision: deny
+    rule: D2
+    evidence_url: https://www.aninews.in/term-condition/
+    checked_on: 2026-10-13
+    notes: Bars displaying, publishing or framing any content obtained from the website. ANI is also a wire service.
+
+  - domain: livelaw.in
+    publisher: LiveLaw
+    country: IN
+    decision: deny
+    rule: D2
+    evidence_url: https://www.livelaw.in/terms-and-conditions
+    checked_on: 2026-10-13
+    notes: Bars displaying content, explicitly including framing and inline linking, or communicating it to the public.
+
+  - domain: asiaone.com
+    publisher: AsiaOne
+    country: SG
+    decision: deny
+    rule: D1
+    evidence_url: https://www.asiaone.com/terms-and-conditions
+    checked_on: 2026-10-13
+    notes: Bars using linking (among other means) to provide access to its content without prior written consent.
+
+  - domain: chinadaily.com.cn
+    publisher: China Daily
+    country: CN
+    decision: deny
+    rule: D2
+    evidence_url: https://www.chinadaily.com.cn/
+    checked_on: 2026-10-13
+    notes: >-
+      Site-wide footer: content shall not be republished or used in any form without written
+      authorization from China Daily Information Co. (The copyright page itself returned "not found".)
+
+  - domain: manilatimes.net
+    publisher: The Manila Times
+    country: PH
+    decision: deny
+    rule: D2
+    evidence_url: https://www.manilatimes.net/terms-of-service
+    checked_on: 2026-10-13
+    notes: Content is for personal non-commercial use; users may not distribute, display or communicate it to the public.
+
+  # Appear to belong to the same aggregator network as heraldglobe.com (naming pattern and the
+  # same wire stories across sites in the GKG sample). Denied on quality grounds; terms not reviewed.
+  - domain: bignewsnetwork.com
+    publisher: bignewsnetwork.com
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+  - domain: indiagazette.com
+    publisher: indiagazette.com
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+  - domain: bruneinews.net
+    publisher: bruneinews.net
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+  - domain: shanghaisun.com
+    publisher: shanghaisun.com
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+  - domain: cambodiantimes.com
+    publisher: cambodiantimes.com
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+  - domain: asiabulletin.com
+    publisher: asiabulletin.com
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+  - domain: beijingbulletin.com
+    publisher: beijingbulletin.com
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+  - domain: vietnamtribune.com
+    publisher: vietnamtribune.com
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+  - domain: srilankasource.com
+    publisher: srilankasource.com
+    decision: deny
+    rule: Q1
+    checked_on: 2026-10-13
+    notes: Aggregator; verify by hand before ever changing.
+
   # ---------------------------------------------------------------- pending
   - domain: nhk.or.jp
     publisher: NHK WORLD-JAPAN
@@ -310,21 +459,40 @@ domains:
     decision: pending
     rule: P1
     next_action: Same as news.cn.
-  - domain: chinadaily.com.cn
-    publisher: China Daily
-    country: CN
-    decision: pending
-    rule: P1
-    next_action: Review copyright terms. If allowed, label as state media with a citation.
-  - domain: newindianexpress.com
-    publisher: The New Indian Express
-    country: IN
-    decision: pending
-    rule: P1
-    next_action: Review terms (frequent in the GKG sample).
   - domain: nikkei.com
     publisher: Nikkei Asia
     country: JP
     decision: pending
     rule: P1
     next_action: Review carefully; Nikkei has a history of restrictive linking policies.
+
+  - domain: newindianexpress.com
+    publisher: The New Indian Express
+    country: IN
+    decision: pending
+    rule: P1
+    next_action: The /terms-of-use page found only covers data collection; find the reader terms.
+  - domain: tribuneindia.com
+    publisher: The Tribune
+    country: IN
+    decision: pending
+    rule: P1
+    next_action: Terms page renders with JavaScript; read it in a browser.
+  - domain: freepressjournal.in
+    publisher: Free Press Journal
+    country: IN
+    decision: pending
+    rule: P1
+    next_action: Reader terms not found (/legal is not the terms page).
+  - domain: outlookindia.com
+    publisher: Outlook India
+    country: IN
+    decision: pending
+    rule: P1
+    next_action: /terms-and-conditions covers advertisers only; find the reader terms.
+  - domain: deccanchronicle.com
+    publisher: Deccan Chronicle
+    country: IN
+    decision: pending
+    rule: P1
+    next_action: Terms page not found.

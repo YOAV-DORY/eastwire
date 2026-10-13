@@ -43,6 +43,8 @@ subprojects {
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
         systemProperty("eastwire.config-dir", complianceConfigDir)
+        // Tests read config/ at runtime: a changed source or domain decision must re-run them.
+        inputs.dir(complianceConfigDir).withPathSensitivity(PathSensitivity.RELATIVE)
         testLogging {
             events("failed", "skipped")
             exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
