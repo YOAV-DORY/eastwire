@@ -85,7 +85,7 @@
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
   /* type scale: serif for headlines, sans for reading and interface; nothing below 12px */
-  --text-lead: clamp(1.875rem, 1.3rem + 1.9vw, 2.875rem); /* the lead story, 30–46px */
+  --text-lead: clamp(1.625rem, 1.1rem + 2.2vw, 2.875rem); /* the lead story, 26–46px */
   --lh-lead: 1.08;
   --text-h1: clamp(2rem, 1.45rem + 1.7vw, 3rem); /* page titles, 32–48px */
   --lh-h1: 1.05;

@@ -53,7 +53,8 @@
   line-height: var(--lh-small);
 }
 
-.item + .item::before {
+/* The dot ends an item rather than starting the next, so a wrapped line never opens with one. */
+.item:has(+ .item)::after {
   content: "·";
   margin: 0 0.5em;
   color: var(--text-faint);
