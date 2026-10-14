@@ -159,7 +159,9 @@ class ApiDatabaseIntegrationTest {
                 .andExpect(jsonPath("$.items[0].publisher").value("The Mainichi (English edition)"))
                 .andExpect(jsonPath("$.items[0].viaDiscovery").value(true))
                 .andExpect(jsonPath("$.items[0].isNew").value(true))
-                .andExpect(jsonPath("$.items[0].locations", hasSize(2)))
+                // Tokyo (main subject), the publisher's base and a passing mention of South Korea.
+                .andExpect(jsonPath("$.items[0].locations", hasSize(3)))
+                .andExpect(jsonPath("$.items[0].locations[0].primary").value(true))
                 .andExpect(jsonPath("$.items[1].excerpt").value("An excerpt."));
     }
 
