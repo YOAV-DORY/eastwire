@@ -26,7 +26,7 @@ class ArticleServiceTest {
                 excerpt == null ? "Data: The GDELT Project (gdeltproject.org)" : "By A. Writer, Global Voices · CC BY 3.0 · excerpt, shortened",
                 excerpt == null ? null : "CC BY 3.0", excerpt == null ? null : "https://creativecommons.org/licenses/by/3.0/",
                 null, discovered, clusterSize,
-                List.of(new LocationRow("mentioned", "city", "medium", "gazetteer", "JP", 1850147L, "Tokyo", "Mentions Tokyo")),
+                List.of(new LocationRow("mentioned", "city", "medium", "gazetteer", "JP", 1850147L, "Tokyo", "Mentions Tokyo", true)),
                 List.of());
     }
 

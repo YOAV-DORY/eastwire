@@ -36,6 +36,9 @@ class ArticleWriterIntegrationTest extends PostgresTestBase {
     @Autowired
     SectorTagger tagger;
 
+    @Autowired
+    StoryHygiene hygiene;
+
     private static Location seoulEvent() {
         return new Location(1835848L, "KR", Role.EVENT, Precision.CITY, Confidence.HIGH, Method.DATELINE, "Dateline: Seoul");
     }
@@ -105,6 +108,31 @@ class ArticleWriterIntegrationTest extends PostgresTestBase {
     private List<String> sectors(long articleId) {
         return jdbc.sql("SELECT sector FROM article_sector WHERE article_id = :id ORDER BY score DESC")
                 .param("id", articleId).query(String.class).list();
+    }
+
+    @Test
+    void pressReleasesAreNotStoredAndOldOnesAreRemoved() {
+        ArticleSink.WriteResult pr = writer.write(gdelt(
+                "https://www.business-standard.com/content/press-releases-ani/brand-launches-thing-1", "Brand launches a thing"));
+        assertThat(pr.kind()).isEqualTo(Kind.NOT_NEWS);
+
+        long kept = writer.write(gdelt("https://mainichi.jp/english/articles/20261013/kept", "Osaka port expansion approved"))
+                .articleId();
+        // A row stored before the rules existed: a press release and an unjudged place.
+        jdbc.sql("""
+                INSERT INTO article (source_id, canonical_url, url_hash, domain, title, display_mode, expires_at)
+                SELECT id, 'https://www.business-standard.com/content/press-releases-ani/old', sha256('old'),
+                       'business-standard.com', 'Old release', 'headline_only', now() + interval '1 day'
+                FROM source WHERE slug = 'gdelt-gkg'
+                """).update();
+        jdbc.sql("UPDATE article_location SET is_primary = NULL WHERE article_id = :id").param("id", kept).update();
+
+        StoryHygiene.Result result = hygiene.run();
+
+        assertThat(result.notNewsRemoved()).isEqualTo(1);
+        assertThat(result.articlesJudged()).isEqualTo(1);
+        assertThat(count("SELECT count(*) FROM article")).isEqualTo(1);
+        assertThat(count("SELECT count(*) FROM article_location WHERE is_primary IS NULL")).isZero();
     }
 
     @Test

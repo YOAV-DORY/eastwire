@@ -3,6 +3,7 @@ package io.github.yoavdory.eastwire.ingest.pipeline;
 import io.github.yoavdory.eastwire.core.article.Location;
 import io.github.yoavdory.eastwire.core.article.UrlCanonicalizer;
 import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
+import io.github.yoavdory.eastwire.core.config.QualityRules;
 import io.github.yoavdory.eastwire.core.config.SourceConfig;
 import io.github.yoavdory.eastwire.core.policy.DisplayDecision;
 import io.github.yoavdory.eastwire.core.policy.DisplayPolicy;
@@ -23,7 +24,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Stores candidates as articles. For each one, in a single transaction:
- * display policy → URL dedupe → takedown check → excerpt cut to the permitted length →
+ * display policy → not-news filter → URL dedupe → takedown check → excerpt cut to the permitted length →
  * insert → locations → sectors → cluster with near-identical headlines from the last 48 hours.
  */
 @Component
@@ -38,16 +39,18 @@ public class ArticleWriter implements ArticleSink {
     private final ComplianceConfig config;
     private final DisplayPolicy policy;
     private final SectorTagger sectors;
+    private final QualityRules quality;
     private final Clock clock;
     private final Map<String, Short> sourceIds = new ConcurrentHashMap<>();
 
     public ArticleWriter(JdbcClient jdbc, TransactionTemplate tx, ComplianceConfig config, DisplayPolicy policy,
-            SectorTagger sectors, Clock clock) {
+            SectorTagger sectors, QualityRules quality, Clock clock) {
         this.jdbc = jdbc;
         this.tx = tx;
         this.config = config;
         this.policy = policy;
         this.sectors = sectors;
+        this.quality = quality;
         this.clock = clock;
     }
 
@@ -60,6 +63,10 @@ public class ArticleWriter implements ArticleSink {
         }
         if (c.title() == null || c.title().isBlank()) {
             return WriteResult.of(Kind.INVALID, "empty title");
+        }
+        String notNews = quality.notNewsReason(c.url(), c.title());
+        if (notNews != null) {
+            return WriteResult.of(Kind.NOT_NEWS, notNews);
         }
         SourceConfig source = config.source(c.sourceSlug()).orElseThrow();
         Instant now = clock.instant();
@@ -136,8 +143,9 @@ public class ArticleWriter implements ArticleSink {
     private void insertLocation(long articleId, Location l) {
         jdbc.sql("""
                         INSERT INTO article_location (article_id, place_id, country_iso2, role, precision, confidence,
-                                                      method, evidence_snippet)
-                        VALUES (:articleId, :placeId, :country, :role, :precision, :confidence, :method, :evidence)
+                                                      method, evidence_snippet, is_primary)
+                        VALUES (:articleId, :placeId, :country, :role, :precision, :confidence, :method, :evidence,
+                                :primary)
                         ON CONFLICT DO NOTHING
                         """)
                 .param("articleId", articleId)
@@ -148,6 +156,7 @@ public class ArticleWriter implements ArticleSink {
                 .param("confidence", Location.db(l.confidence()))
                 .param("method", Location.db(l.method()))
                 .param("evidence", l.evidence())
+                .param("primary", l.primary())
                 .update();
     }
 

@@ -49,9 +49,11 @@ final class GkgLocationMapper {
         this.citiesByCountry = config.cities().stream().collect(Collectors.groupingBy(City::countryIso2));
     }
 
+    /** Covered places in the order the text first mentions them (the first is the story's lead place). */
     List<Location> map(List<GkgLocation> mentions) {
         Map<String, Location> unique = new LinkedHashMap<>();
-        for (GkgLocation g : mentions) {
+        List<GkgLocation> inTextOrder = mentions.stream().sorted(Comparator.comparingInt(GkgLocation::offset)).toList();
+        for (GkgLocation g : inTextOrder) {
             Country country = byFips.get(g.fipsCountry());
             if (country == null) {
                 continue;

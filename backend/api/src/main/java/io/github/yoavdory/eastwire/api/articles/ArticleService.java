@@ -43,12 +43,27 @@ public class ArticleService {
     }
 
     public ArticleView.Page page(ArticleQuery query) {
-        List<ArticleRow> rows = repository.find(query);
         long total = repository.count(query);
+        List<ArticleRow> rows = balanced(query) ? balancedPage(query) : repository.find(query);
         Instant now = clock.instant();
         List<ArticleView> items = rows.stream().map(r -> toView(r, now)).filter(Objects::nonNull).toList();
         boolean hasMore = (long) query.offset() + rows.size() < total && query.page() < ArticleQuery.MAX_PAGE;
         return new ArticleView.Page(items, query.page(), query.size(), total, hasMore);
+    }
+
+    /** The plain feed (no place filter, no search) is balanced across countries; filtered views stay newest first. */
+    static boolean balanced(ArticleQuery q) {
+        return q.text() == null && q.country() == null && q.cityId() == null;
+    }
+
+    /** One page of the balanced order, built from every story that could appear on any page. */
+    private List<ArticleRow> balancedPage(ArticleQuery q) {
+        int window = ArticleQuery.MAX_PAGE * q.size();
+        List<ArticleRow> candidates = repository.find(new ArticleQuery(null, null, q.from(), q.to(), 1, window, null,
+                ArticleQuery.Sort.DATE, q.sector()));
+        List<ArticleRow> ordered = FeedBalancer.balance(candidates, clock.instant());
+        int from = Math.min(q.offset(), ordered.size());
+        return ordered.subList(from, Math.min(ordered.size(), from + q.size()));
     }
 
     ArticleView toView(ArticleRow r, Instant now) {
@@ -62,13 +77,15 @@ public class ArticleService {
         String attribution = excerpt == null && r.excerpt() != null ? d.attributionLine(false) : r.attribution();
         ArticleView.License license = r.licenseName() == null ? null : new ArticleView.License(r.licenseName(), r.licenseUrl());
         Instant discovered = r.discoveredAt();
+        // "New" follows the story's own publication time, so a week-old post found today is not new.
+        Instant reference = r.publishedAt() != null ? r.publishedAt() : discovered;
         return new ArticleView(r.id(), r.title(), r.url(), d.publisherName(), r.domain(),
                 new ArticleView.Source(r.sourceSlug(), config.source(r.sourceSlug()).map(s -> s.name()).orElse(r.sourceSlug())),
                 discovery, r.publishedAt(), discovered,
-                discovered != null && discovered.isAfter(now.minus(NEW_FOR)),
+                reference != null && reference.isAfter(now.minus(NEW_FOR)),
                 excerpt, attribution, license,
                 r.locations().stream().map(l -> new ArticleView.LocationView(l.role(), l.precision(), l.confidence(),
-                        l.method(), l.countryIso2(), l.placeId(), l.placeName(), l.evidence())).toList(),
+                        l.method(), l.countryIso2(), l.placeId(), l.placeName(), l.evidence(), l.primary())).toList(),
                 r.sectors().stream().map(this::sectorTag).toList(), Math.max(0, r.clusterSize() - 1));
     }
 

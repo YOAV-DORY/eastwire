@@ -31,7 +31,8 @@ public record ArticleRow(
             String countryIso2,
             Long placeId,
             String placeName,
-            String evidence) {
+            String evidence,
+            boolean primary) {
     }
 
     /** A stored sector tag; {@code rulesJson} is the matched_rules array as written by ingestion. */

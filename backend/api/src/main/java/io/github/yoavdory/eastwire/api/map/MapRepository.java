@@ -8,7 +8,10 @@ import java.util.Map;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
-/** Raw location rows for the map; aggregation and the display policy happen in {@link MapService}. */
+/**
+ * Raw location rows for the map; aggregation and the display policy happen in {@link MapService}.
+ * Mentioned and dateline places count only when they are the story's main subject.
+ */
 @Repository
 public class MapRepository {
 
@@ -53,6 +56,7 @@ public class MapRepository {
                         JOIN source s ON s.id = a.source_id
                         JOIN article_location l ON l.article_id = a.id
                         WHERE a.expires_at > now() AND COALESCE(a.published_at, a.discovered_at) > :since
+                          AND (l.role = 'publisher' OR l.is_primary)
                         """ + filters)
                 .params(params)
                 .query((rs, n) -> new LocationRow(rs.getLong("id"), rs.getString("slug"), rs.getString("canonical_url"),

@@ -9,6 +9,7 @@ import java.util.Locale;
  *
  * @param placeId  GeoNames id of a city on the city list; null unless precision is CITY
  * @param evidence short text showing why (e.g. the matched name); at most 80 characters
+ * @param primary  the place is what the story is about, not a passing mention ({@code PrimaryPlaces})
  */
 public record Location(
         Long placeId,
@@ -17,7 +18,14 @@ public record Location(
         Precision precision,
         Confidence confidence,
         Method method,
-        String evidence) {
+        String evidence,
+        boolean primary) {
+
+    /** A location not yet judged main subject or passing mention. */
+    public Location(Long placeId, String countryIso2, Role role, Precision precision, Confidence confidence, Method method,
+            String evidence) {
+        this(placeId, countryIso2, role, precision, confidence, method, evidence, false);
+    }
 
     public Location {
         if ((precision == Precision.CITY) != (placeId != null)) {
@@ -26,6 +34,10 @@ public record Location(
         if (evidence != null && evidence.length() > 80) {
             evidence = evidence.substring(0, 79) + "…";
         }
+    }
+
+    public Location withPrimary(boolean value) {
+        return new Location(placeId, countryIso2, role, precision, confidence, method, evidence, value);
     }
 
     public enum Role { MENTIONED, EVENT, PUBLISHER }

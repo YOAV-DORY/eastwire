@@ -70,11 +70,13 @@ class ApiDatabaseIntegrationTest {
                         'headline_only', now() - interval '40 days', NULL, now() - interval '1 day')
                 """).update();
         jdbc.sql("""
-                INSERT INTO article_location (article_id, place_id, country_iso2, role, precision, confidence, method, evidence_snippet)
-                VALUES (1, 1850147, 'JP', 'mentioned', 'city', 'medium', 'gdelt_gkg', 'Mentions Tokyo'),
-                       (1, NULL, 'JP', 'publisher', 'country', 'high', 'source_registry', 'Publisher: The Mainichi'),
-                       (2, NULL, 'IN', 'mentioned', 'country', 'high', 'feed_category', 'Filed under India by Global Voices'),
-                       (3, NULL, 'IN', 'mentioned', 'country', 'medium', 'gdelt_gkg', 'Mentions India')
+                INSERT INTO article_location (article_id, place_id, country_iso2, role, precision, confidence, method,
+                                              evidence_snippet, is_primary)
+                VALUES (1, 1850147, 'JP', 'mentioned', 'city', 'medium', 'gdelt_gkg', 'Mentions Tokyo', true),
+                       (1, NULL, 'JP', 'publisher', 'country', 'high', 'source_registry', 'Publisher: The Mainichi', false),
+                       (1, NULL, 'KR', 'mentioned', 'country', 'medium', 'gdelt_gkg', 'Mentions South Korea', false),
+                       (2, NULL, 'IN', 'mentioned', 'country', 'high', 'feed_category', 'Filed under India by Global Voices', true),
+                       (3, NULL, 'IN', 'mentioned', 'country', 'medium', 'gdelt_gkg', 'Mentions India', true)
                 """).update();
         jdbc.sql("""
                 INSERT INTO article_sector (article_id, sector, score, matched_rules)
@@ -119,6 +121,16 @@ class ApiDatabaseIntegrationTest {
     }
 
     @Test
+    void searchSuggestionsOnlyOfferQueriesWithResults() throws Exception {
+        jdbc.sql("UPDATE article SET title = 'Tokyo story about a court ruling' WHERE id = 1").update();
+        mvc.perform(get("/api/v1/search/suggestions"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].q").value("Tokyo"))
+                .andExpect(jsonPath("$[0].count").value(1))
+                .andExpect(jsonPath("$[?(@.q == 'Seoul')]").isEmpty());
+    }
+
+    @Test
     void sectorFilterAndExplanations() throws Exception {
         mvc.perform(get("/api/v1/articles").param("sector", "economy"))
                 .andExpect(jsonPath("$.total").value(1))
@@ -157,6 +169,7 @@ class ApiDatabaseIntegrationTest {
         mvc.perform(get("/api/v1/articles").param("city", "1850147"))
                 .andExpect(jsonPath("$.items[0].locations[0].placeName").value("Tokyo"));
         mvc.perform(get("/api/v1/articles").param("country", "IN")).andExpect(jsonPath("$.total").value(1));
+        // Article 1 mentions South Korea only in passing, so it is not on the South Korea page.
         mvc.perform(get("/api/v1/articles").param("country", "KR")).andExpect(jsonPath("$.total").value(0));
     }
 

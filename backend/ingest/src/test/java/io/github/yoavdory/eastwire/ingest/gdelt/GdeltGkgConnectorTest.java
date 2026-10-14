@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.github.yoavdory.eastwire.core.article.Location.Role;
 import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import io.github.yoavdory.eastwire.core.config.RepoConfig;
+import io.github.yoavdory.eastwire.core.geo.Gazetteer;
 import io.github.yoavdory.eastwire.core.policy.DisplayPolicy;
 import io.github.yoavdory.eastwire.ingest.Connector;
 import io.github.yoavdory.eastwire.ingest.http.HttpFetcher;
@@ -38,7 +39,9 @@ class GdeltGkgConnectorTest {
                 written.add(c);
                 return WriteResult.created(written.size());
             },
-            CONFIG, new DisplayPolicy(CONFIG), gdelt.uri("/gdeltv2").toString(), Duration.ofHours(6), Duration.ofHours(1));
+            CONFIG, new DisplayPolicy(CONFIG),
+            new Gazetteer(CONFIG.cities(), CONFIG.activeCountries(), CONFIG.requiresCountryContext()),
+            gdelt.uri("/gdeltv2").toString(), Duration.ofHours(6), Duration.ofHours(1));
 
     GdeltGkgConnectorTest() throws IOException {
     }

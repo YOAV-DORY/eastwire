@@ -74,4 +74,10 @@ class GkgLocationMapperTest {
         assertThat(map(UNITED_STATES + ";" + TEXAS_CITY)).isEmpty();
         assertThat(map(INDIA + ";" + INDIA + ";" + NEW_DELHI)).hasSize(2);
     }
+
+    @Test
+    void keepsPlacesInTheOrderTheTextMentionsThem() {
+        // Seoul is listed first but mentioned at character 40; India at character 16.
+        assertThat(map(SEOUL + ";" + INDIA)).extracting(Location::countryIso2).containsExactly("IN", "KR");
+    }
 }

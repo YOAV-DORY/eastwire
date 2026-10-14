@@ -8,6 +8,8 @@ import io.github.yoavdory.eastwire.core.article.Location.Role;
 import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import io.github.yoavdory.eastwire.core.config.DomainPolicy;
 import io.github.yoavdory.eastwire.core.policy.DisplayPolicy;
+import io.github.yoavdory.eastwire.core.geo.Gazetteer;
+import io.github.yoavdory.eastwire.core.geo.PrimaryPlaces;
 import io.github.yoavdory.eastwire.core.policy.DisplayRequest;
 import io.github.yoavdory.eastwire.core.sector.SectorSignals;
 import io.github.yoavdory.eastwire.ingest.Connector;
@@ -60,11 +62,13 @@ public class GdeltGkgConnector implements Connector {
     private final ComplianceConfig config;
     private final DisplayPolicy policy;
     private final GkgLocationMapper locations;
+    private final Gazetteer gazetteer;
     private final String baseUrl;
     private final Duration maxLookback;
     private final Duration bootstrap;
 
     public GdeltGkgConnector(HttpFetcher http, ArticleSink sink, ComplianceConfig config, DisplayPolicy policy,
+            Gazetteer gazetteer,
             @Value("${eastwire.gdelt.base-url}") String baseUrl,
             @Value("${eastwire.gdelt.max-lookback}") Duration maxLookback,
             @Value("${eastwire.gdelt.bootstrap}") Duration bootstrap) {
@@ -73,6 +77,7 @@ public class GdeltGkgConnector implements Connector {
         this.config = config;
         this.policy = policy;
         this.locations = new GkgLocationMapper(config);
+        this.gazetteer = gazetteer;
         this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         this.maxLookback = maxLookback;
         this.bootstrap = bootstrap;
@@ -175,6 +180,7 @@ public class GdeltGkgConnector implements Connector {
         }
         List<Location> all = new ArrayList<>(mentioned);
         publisherLocation(r.url()).ifPresent(all::add);
+        all = PrimaryPlaces.mark(Text.title(r.title()), all, gazetteer, true);
         return Optional.of(new ArticleCandidate(SLUG, r.url(), Text.title(r.title()), null, null, null, false,
                 ArticleCandidate.ExcerptKind.NONE, r.publishedAt(), r.date(), "en", all, SectorSignals.themes(r.themes())));
     }

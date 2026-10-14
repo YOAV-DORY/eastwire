@@ -57,6 +57,15 @@ final class GkgParser {
                 parseThemes(cols[V1_THEMES])));
     }
 
+    /** The mention's character offset; entries without one sort last. */
+    private static int offset(String[] p) {
+        try {
+            return p.length > 8 && !p[8].isBlank() ? Integer.parseInt(p[8].strip()) : Integer.MAX_VALUE;
+        } catch (NumberFormatException e) {
+            return Integer.MAX_VALUE;
+        }
+    }
+
     /** V1THEMES: theme codes separated by ';'. */
     static Set<String> parseThemes(String field) {
         Set<String> themes = new TreeSet<>();
@@ -81,7 +90,7 @@ final class GkgParser {
             }
             try {
                 out.add(new GkgLocation(GkgRecord.Type.of(Integer.parseInt(p[0])), p[1], p[2], p[3],
-                        Double.parseDouble(p[5]), Double.parseDouble(p[6]), p[7]));
+                        Double.parseDouble(p[5]), Double.parseDouble(p[6]), p[7], offset(p)));
             } catch (IllegalArgumentException e) {
                 // One odd location entry should not cost us the whole article.
             }
