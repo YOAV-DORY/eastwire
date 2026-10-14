@@ -8,7 +8,8 @@ export interface MapState {
   country?: string
   sector?: string
   population: boolean
-  view: 'map' | 'list'
+  /** map and list together (phones show one at a time), or the accessible city table. */
+  view: 'map' | 'list' | 'table'
 }
 
 const WINDOWS: MapWindow[] = ['24h', '7d', '30d']
@@ -26,7 +27,7 @@ export function readMapState(params: URLSearchParams): MapState {
     country: params.get('country') ?? undefined,
     sector: isSectorId(params.get('sector')) ? (params.get('sector') ?? undefined) : undefined,
     population: params.get('pop') === '1',
-    view: params.get('view') === 'list' ? 'list' : 'map',
+    view: params.get('view') === 'list' ? 'list' : params.get('view') === 'table' ? 'table' : 'map',
   }
 }
 
@@ -39,7 +40,7 @@ export function writeMapState(state: MapState): URLSearchParams {
   if (state.country) p.set('country', state.country)
   if (state.sector) p.set('sector', state.sector)
   if (state.population) p.set('pop', '1')
-  if (state.view === 'list') p.set('view', 'list')
+  if (state.view !== 'map') p.set('view', state.view)
   return p
 }
 

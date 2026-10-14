@@ -29,6 +29,8 @@ export interface FeedFilters {
   country?: string
   city?: string
   sector?: string
+  /** Earliest publication date, YYYY-MM-DD. */
+  from?: string
 }
 
 export function useArticleFeed(filters: FeedFilters) {
@@ -37,7 +39,7 @@ export function useArticleFeed(filters: FeedFilters) {
     queryFn: ({ pageParam, signal }) =>
       apiGet<ArticlePage>(
         '/api/v1/articles',
-        { country: filters.country, city: filters.city, sector: filters.sector, page: pageParam },
+        { country: filters.country, city: filters.city, sector: filters.sector, from: filters.from, page: pageParam },
         signal,
       ),
     initialPageParam: 1,

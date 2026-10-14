@@ -22,6 +22,12 @@
   filter: grayscale(0.85) contrast(0.88) brightness(1.04) sepia(0.08);
 }
 
+/* Tiles overlap by half a pixel, so the filtered tiles show no hairline seams between them. */
+.ew-map .leaflet-tile-container img.leaflet-tile {
+  width: 256.5px !important;
+  height: 256.5px !important;
+}
+
 /* ---------------------------------------------------------------- English city labels */
 .ew-map .ew-label {
   padding: 1px 6px;

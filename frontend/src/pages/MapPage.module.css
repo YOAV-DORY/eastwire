@@ -1,35 +1,51 @@
 .page {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .intro {
   display: grid;
-  gap: var(--space-3);
-  max-width: var(--measure);
+  gap: var(--space-2);
 }
 
 .title {
   font-size: var(--text-h1);
   line-height: var(--lh-h1);
-  letter-spacing: var(--track-h1);
-  font-weight: var(--weight-h1);
 }
 
-.controls {
+.lede {
+  max-width: var(--measure);
+  color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------------ filters */
+
+.toolbar {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: var(--space-3);
+}
+
+.inlineFilters {
+  display: none;
+}
+
+.phoneBar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-4);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
 }
 
-.select {
-  display: grid;
-  gap: var(--space-1);
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--text-small);
 }
 
-.select select {
-  min-height: 40px;
+.field select {
+  min-height: var(--tap);
   padding: 0 var(--space-3);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
@@ -38,65 +54,296 @@
   font-size: var(--text-small);
 }
 
-.group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+/* A segmented control: the chosen segment is pink, the rest quiet. */
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elev-1);
 }
 
-.roles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
+.segmented button {
+  min-height: 38px;
+  padding: 0 var(--space-4);
   border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
   font-size: var(--text-small);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
 }
 
-.roles legend {
-  float: left;
-  margin-right: var(--space-1);
+.segmented button:hover {
+  color: var(--text);
 }
 
-.roles label,
-.toggle {
+.segmented button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.filtersButton {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: 32px;
+  min-height: var(--tap);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elev-1);
+  color: var(--text);
+  font-size: var(--text-small);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.options {
   font-size: var(--text-small);
 }
 
+.options summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.options[open] {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.roles {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.roles legend {
+  margin-bottom: var(--space-1);
+  color: var(--text-muted);
+}
+
+.roles label,
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+}
+
 .roles input,
-.toggle input {
-  width: 16px;
-  height: 16px;
+.check input {
+  width: 18px;
+  height: 18px;
   accent-color: var(--accent);
 }
 
+.tableLink {
+  color: var(--accent-text);
+}
+
+/* ------------------------------------------------------------------ map and list */
+
 .body {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-6);
 }
 
 .mapColumn,
-.panelColumn {
+.listColumn {
   display: grid;
   align-content: start;
   gap: var(--space-4);
   min-width: 0;
 }
 
-@media (min-width: 1024px) {
-  .withPanel {
-    grid-template-columns: minmax(0, 1fr) 380px;
+.mapFrame {
+  position: relative;
+  /* Phones: the map keeps most of the screen between the masthead, the switch and the bottom bar. */
+  height: calc(100dvh - var(--header-h) - var(--bottomnav-h) - 190px);
+  min-height: 300px;
+}
+
+.cityCard {
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: var(--space-3);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elev-2);
+  box-shadow: var(--shadow-pop);
+  animation: rise var(--dur-enter) var(--ease-out);
+}
+
+.cityCard > div {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.cityCard > div > strong {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.cityCard > div > span {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.cityCardClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.note {
+  color: var(--text-muted);
+}
+
+/* Phones: one at a time, by the Map/List switch; the legend below the map explains it. */
+@media (max-width: 1023px) {
+  .lede {
+    display: none;
   }
 
-  .panelColumn {
-    position: sticky;
-    top: calc(var(--topbar-h) + var(--space-4));
-    max-height: calc(100dvh - var(--topbar-h) - var(--space-8));
-    overflow-y: auto;
+  .page[data-view='list'] .mapColumn,
+  .page:not([data-view='list']) .listColumn {
+    display: none;
   }
+}
+
+/* Wide screens: filters inline, the map pinned beside a story list that scrolls with the page. */
+@media (min-width: 1024px) {
+  .inlineFilters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+  }
+
+  .options {
+    position: relative;
+  }
+
+  .options[open] {
+    position: absolute;
+    z-index: 600;
+    min-width: 280px;
+    margin-top: var(--space-1);
+    padding: var(--space-4);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elev-2);
+    box-shadow: var(--shadow-pop);
+  }
+
+  .phoneBar {
+    display: none;
+  }
+
+  .body {
+    grid-template-columns: minmax(0, 1fr) 420px;
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  .mapColumn {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-4));
+  }
+
+  .mapFrame {
+    height: calc(100dvh - var(--header-h) - 150px);
+    min-height: 420px;
+  }
+
+  .cityCard {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ phone filters sheet */
+
+.sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  width: 100%;
+  max-width: none;
+  max-height: 85dvh;
+  margin: 0;
+  padding: var(--space-4) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom));
+  border: 0;
+  border-top: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: var(--bg-elev-1);
+  color: var(--text);
+  box-shadow: var(--shadow-pop);
+}
+
+.sheet[open] {
+  display: grid;
+  gap: var(--space-4);
+  animation: rise var(--dur-enter) var(--ease-out);
+}
+
+.sheet::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.sheetHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sheetClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.sheetBody {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.sheetBody .field {
+  display: grid;
+  gap: var(--space-1);
 }
