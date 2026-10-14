@@ -176,7 +176,7 @@ sources:
     auth: none
     quota: Docs call public limits "generous"; no numeric guarantee
     status: verified
-    enabled: false              # turned on in milestone 8, once social_accounts.yaml has entries
+    enabled: true               # accounts: config/social_accounts.yaml
     display_mode: embed
     label: "Social post · not verified reporting"
     retention_days: 30          # revalidated every run; deleted when missing or labeled
@@ -207,7 +207,7 @@ sources:
     auth: api_key            # secret YOUTUBE_API_KEY, server side only
     quota: 10,000 units/day; search.list separately 100/day and not used
     status: verified
-    enabled: false           # milestone 8
+    enabled: false           # owner step: set the YOUTUBE_API_KEY secret, then true (docs/social.md)
     display_mode: embed      # youtube-nocookie.com, click to load, player never modified
     label: "Video · not verified reporting"
     retention_days: 30       # refresh or delete within 30 days (Developer Policies III.E.4.c)

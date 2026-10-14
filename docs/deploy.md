@@ -16,6 +16,7 @@ Follow [`database.md`](database.md), "Production". At the end:
 - the `EASTWIRE_DB_*` secrets are set;
 - `INGEST_ENABLED=true` is set;
 - one manual "Ingest" run has created the schema and the first stories.
+- optional: the `YOUTUBE_API_KEY` secret, to turn on videos ([`social.md`](social.md)).
 
 ## 2. API (Render)
 

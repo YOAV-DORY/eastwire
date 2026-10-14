@@ -9,6 +9,7 @@ import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import io.github.yoavdory.eastwire.core.config.DomainPolicy;
 import io.github.yoavdory.eastwire.core.policy.DisplayPolicy;
 import io.github.yoavdory.eastwire.core.policy.DisplayRequest;
+import io.github.yoavdory.eastwire.core.sector.SectorSignals;
 import io.github.yoavdory.eastwire.ingest.Connector;
 import io.github.yoavdory.eastwire.ingest.http.HttpFetcher;
 import io.github.yoavdory.eastwire.ingest.pipeline.ArticleCandidate;
@@ -175,7 +176,7 @@ public class GdeltGkgConnector implements Connector {
         List<Location> all = new ArrayList<>(mentioned);
         publisherLocation(r.url()).ifPresent(all::add);
         return Optional.of(new ArticleCandidate(SLUG, r.url(), Text.title(r.title()), null, null, null, false,
-                ArticleCandidate.ExcerptKind.NONE, r.publishedAt(), r.date(), "en", all));
+                ArticleCandidate.ExcerptKind.NONE, r.publishedAt(), r.date(), "en", all, SectorSignals.themes(r.themes())));
     }
 
     /** Where the publisher is based, from the reviewed domain entry (never from the article). */

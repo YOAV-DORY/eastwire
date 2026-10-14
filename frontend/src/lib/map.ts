@@ -1,10 +1,12 @@
 import type { CityPin, LocationRole, MapWindow } from '../api/types'
+import { isSectorId } from '../sectors'
 
 /** Map view state, kept in the URL so a map view can be shared. */
 export interface MapState {
   window: MapWindow
   roles: LocationRole[]
   country?: string
+  sector?: string
   population: boolean
   view: 'map' | 'list'
 }
@@ -22,6 +24,7 @@ export function readMapState(params: URLSearchParams): MapState {
     window,
     roles: roles.length > 0 ? roles : DEFAULT_ROLES,
     country: params.get('country') ?? undefined,
+    sector: isSectorId(params.get('sector')) ? (params.get('sector') ?? undefined) : undefined,
     population: params.get('pop') === '1',
     view: params.get('view') === 'list' ? 'list' : 'map',
   }
@@ -34,6 +37,7 @@ export function writeMapState(state: MapState): URLSearchParams {
   const rolesKey = [...state.roles].sort().join(',')
   if (rolesKey !== [...DEFAULT_ROLES].sort().join(',')) p.set('roles', state.roles.join(','))
   if (state.country) p.set('country', state.country)
+  if (state.sector) p.set('sector', state.sector)
   if (state.population) p.set('pop', '1')
   if (state.view === 'list') p.set('view', 'list')
   return p

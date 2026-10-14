@@ -41,4 +41,6 @@ jobs:
           EASTWIRE_DB_USER: ${{ secrets.EASTWIRE_DB_USER }}
           EASTWIRE_DB_PASSWORD: ${{ secrets.EASTWIRE_DB_PASSWORD }}
           EASTWIRE_CONFIG_DIR: ${{ github.workspace }}/config
+          # Optional; YouTube stays off in sources.yaml until it is set (docs/social.md).
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: java -jar backend/ingest/build/libs/eastwire-ingest.jar

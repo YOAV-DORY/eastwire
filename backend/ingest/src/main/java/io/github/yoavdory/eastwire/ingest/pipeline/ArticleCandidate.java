@@ -1,6 +1,7 @@
 package io.github.yoavdory.eastwire.ingest.pipeline;
 
 import io.github.yoavdory.eastwire.core.article.Location;
+import io.github.yoavdory.eastwire.core.sector.SectorSignals;
 import java.time.Instant;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * @param excerptKind  the permission basis of an excerpt from {@code summary}
  * @param publishedAt  publication time if the source states it, else null
  * @param discoveredAt when the source made it visible to us (e.g. GDELT's processing time)
+ * @param signals      topic hints from the source (GDELT themes, feed categories) for sector tagging
  */
 public record ArticleCandidate(
         String sourceSlug,
@@ -25,10 +27,12 @@ public record ArticleCandidate(
         Instant publishedAt,
         Instant discoveredAt,
         String language,
-        List<Location> locations) {
+        List<Location> locations,
+        SectorSignals signals) {
 
     public ArticleCandidate {
         locations = List.copyOf(locations);
+        signals = signals == null ? SectorSignals.NONE : signals;
     }
 
     /** The time the article's age is measured from. */

@@ -17,14 +17,17 @@ export function CityPanel({
   place,
   pin,
   countryNames,
+  sector,
   onClose,
 }: {
   place: PlaceView
   pin?: CityPin
   countryNames: Record<string, string>
+  /** The map's sector filter, applied to the stories listed too. */
+  sector?: string
   onClose: () => void
 }) {
-  const feed = useArticleFeed({ country: place.country, city: String(place.id) })
+  const feed = useArticleFeed({ country: place.country, city: String(place.id), sector })
   const items = feed.data?.pages[0]?.items ?? []
   const ref = useRef<HTMLElement>(null)
   const opened = useRef(false)
@@ -99,7 +102,9 @@ export function CityPanel({
           ))}
         </ol>
       )}
-      <ButtonLink href={`/?country=${place.country}&city=${place.id}`}>All stories for {place.name}</ButtonLink>
+      <ButtonLink href={`/?country=${place.country}&city=${place.id}${sector ? `&sector=${sector}` : ''}`}>
+        All stories for {place.name}
+      </ButtonLink>
     </section>
   )
 }

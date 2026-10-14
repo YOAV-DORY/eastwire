@@ -2,11 +2,13 @@ import { lazy, Suspense } from 'react'
 import type { RouteObject } from 'react-router'
 import { AppShell } from './components/layout/AppShell'
 import { AboutPage } from './pages/AboutPage'
-import { ComingSoon } from './pages/ComingSoon'
 import { Home } from './pages/Home'
 import { MapPage } from './pages/MapPage'
 import { NotFound } from './pages/NotFound'
 import { SearchPage } from './pages/SearchPage'
+import { SectorPage } from './pages/SectorPage'
+import { SectorsPage } from './pages/SectorsPage'
+import { SocialPage } from './pages/SocialPage'
 import { StatusPage } from './pages/StatusPage'
 
 // The component gallery exists only in development builds; production drops it entirely.
@@ -22,16 +24,9 @@ export const routes: RouteObject[] = [
       { path: '/map', element: <MapPage /> },
       { path: '/map/city/:geonamesId', element: <MapPage /> },
       { path: '/search', element: <SearchPage /> },
-      {
-        path: '/sectors',
-        element: (
-          <ComingSoon
-            title="Sectors"
-            milestone={7}
-            description="Economy, geopolitics, technology, business, society and environment, each with the rules used to tag stories."
-          />
-        ),
-      },
+      { path: '/sectors', element: <SectorsPage /> },
+      { path: '/sector/:slug', element: <SectorPage /> },
+      { path: '/social', element: <SocialPage /> },
       { path: '*', element: <NotFound /> },
     ],
   },

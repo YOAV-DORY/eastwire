@@ -49,7 +49,8 @@ class ApiDatabaseIntegrationTest {
 
     @BeforeEach
     void seed() {
-        jdbc.sql("TRUNCATE article, article_location, story_cluster, source_status, source, place, country RESTART IDENTITY CASCADE").update();
+        jdbc.sql("TRUNCATE article, article_location, story_cluster, source_status, source, place, country, social_item, "
+                + "social_account RESTART IDENTITY CASCADE").update();
         jdbc.sql("INSERT INTO country VALUES ('JP','JA','Japan',1), ('IN','IN','India',1), ('KR','KS','South Korea',1), ('CN','CH','China',1)").update();
         jdbc.sql("INSERT INTO place (geonames_id, name, ascii_name, country_iso2, lat, lon) VALUES (1850147,'Tokyo','Tokyo','JP',35.69,139.69)").update();
         jdbc.sql("""
@@ -74,6 +75,65 @@ class ApiDatabaseIntegrationTest {
                        (2, NULL, 'IN', 'mentioned', 'country', 'high', 'feed_category', 'Filed under India by Global Voices'),
                        (3, NULL, 'IN', 'mentioned', 'country', 'medium', 'gdelt_gkg', 'Mentions India')
                 """).update();
+        jdbc.sql("""
+                INSERT INTO article_sector (article_id, sector, score, matched_rules)
+                VALUES (1, 'economy', 4, '[{"kind": "keyword", "value": "inflation", "field": "headline", "weight": 3.0},
+                                          {"kind": "gdelt_theme", "value": "ECON_INFLATION", "weight": 1.0}]'),
+                       (3, 'economy', 3, '[]')
+                """).update();
+    }
+
+    @Test
+    void socialPostsComeWithTheirAccountLabelAndRelatedStories() throws Exception {
+        jdbc.sql("""
+                INSERT INTO source (slug, name, kind, status, display_mode, enabled)
+                VALUES ('bluesky-curated', 'Bluesky', 'social', 'verified', 'embed', true)
+                """).update();
+        jdbc.sql("""
+                INSERT INTO social_account (platform, external_id, handle, display_name, kind, reason, evidence_url, scope, domain)
+                VALUES ('bluesky', 'did:plc:desk', 'scroll.in', 'Scroll', 'newsroom', 'Indian digital newsroom',
+                        'https://bsky.app/profile/scroll.in', 'all', 'scroll.in')
+                """).update();
+        jdbc.sql("""
+                INSERT INTO social_item (platform, external_id, url, account_id, created_at, index_text, cid, expires_at, countries)
+                VALUES ('bluesky', 'at://did:plc:desk/app.bsky.feed.post/a', 'https://bsky.app/profile/scroll.in/post/a', 1,
+                        now() - interval '1 hour', 'Tokyo story, read more', 'bafya', now() + interval '29 days', '{JP}'),
+                       ('bluesky', 'at://did:plc:desk/app.bsky.feed.post/b', 'https://bsky.app/profile/scroll.in/post/b', 1,
+                        now() - interval '2 hours', 'Another post', 'bafyb', now() + interval '29 days', '{IN}')
+                """).update();
+        jdbc.sql("INSERT INTO story_cluster (first_seen_at, representative_article_id, size) VALUES (now(), 1, 1)").update();
+        jdbc.sql("UPDATE article SET cluster_id = 1 WHERE id = 1").update();
+        jdbc.sql("INSERT INTO social_link (social_item_id, cluster_id, link_type, score) VALUES (1, 1, 'text_overlap', 0.9)").update();
+
+        mvc.perform(get("/api/v1/social"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(2))
+                .andExpect(jsonPath("$.items[0].platform").value("bluesky"))
+                .andExpect(jsonPath("$.items[0].cid").value("bafya"))
+                .andExpect(jsonPath("$.items[0].account.reason").value("Indian digital newsroom"))
+                .andExpect(jsonPath("$.items[0].related[0].title").value("Tokyo story"))
+                .andExpect(jsonPath("$.items[0].label").value("Social post · not verified reporting"));
+        mvc.perform(get("/api/v1/social").param("country", "IN")).andExpect(jsonPath("$.total").value(1));
+        mvc.perform(get("/api/v1/social").param("platform", "telegram")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void sectorFilterAndExplanations() throws Exception {
+        mvc.perform(get("/api/v1/articles").param("sector", "economy"))
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items[0].sectors[0].slug").value("economy"))
+                .andExpect(jsonPath("$.items[0].sectors[0].label").value("Economy"))
+                .andExpect(jsonPath("$.items[0].sectors[0].rules[0].value").value("inflation"))
+                .andExpect(jsonPath("$.items[0].sectors[0].rules[1].kind").value("gdelt_theme"));
+        mvc.perform(get("/api/v1/articles").param("sector", "society")).andExpect(jsonPath("$.total").value(0));
+        mvc.perform(get("/api/v1/map/cities").param("sector", "economy"))
+                .andExpect(jsonPath("$.cities[0].name").value("Tokyo"));
+        mvc.perform(get("/api/v1/map/cities").param("sector", "society")).andExpect(jsonPath("$.cities", hasSize(0)));
+        mvc.perform(get("/api/v1/sectors"))
+                .andExpect(jsonPath("$.sectors", hasSize(6)))
+                .andExpect(jsonPath("$.sectors[0].slug").value("economy"))
+                .andExpect(jsonPath("$.sectors[0].last7d").value(1))   // the expired article does not count
+                .andExpect(jsonPath("$.untagged7d").value(1));
     }
 
     @Test

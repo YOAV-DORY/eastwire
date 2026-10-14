@@ -45,6 +45,9 @@ subprojects {
         systemProperty("eastwire.config-dir", complianceConfigDir)
         // Tests read config/ at runtime: a changed source or domain decision must re-run them.
         inputs.dir(complianceConfigDir).withPathSensitivity(PathSensitivity.RELATIVE)
+        // Optional: -PsectorSample=<csv> scores the sector rules on hand-labelled real headlines
+        // that stay out of the repo (docs/sectors.md).
+        (findProperty("sectorSample") as String?)?.let { systemProperty("eastwire.sector-sample", it) }
         testLogging {
             events("failed", "skipped")
             exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL

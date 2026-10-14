@@ -1,6 +1,18 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { ApiError, apiGet } from './client'
-import type { ArticlePage, CountryView, LocationRole, MapData, MapWindow, PlaceView, SourceView, Status } from './types'
+import type {
+  ArticlePage,
+  CountryView,
+  LocationRole,
+  MapData,
+  MapWindow,
+  PlaceView,
+  SectorsView,
+  SocialPage,
+  SocialPlatform,
+  SourceView,
+  Status,
+} from './types'
 
 /**
  * Retry patiently: the free-tier API sleeps after 15 minutes and takes about a minute to
@@ -16,13 +28,18 @@ export const retryPolicy = {
 export interface FeedFilters {
   country?: string
   city?: string
+  sector?: string
 }
 
 export function useArticleFeed(filters: FeedFilters) {
   return useInfiniteQuery({
     queryKey: ['articles', filters],
     queryFn: ({ pageParam, signal }) =>
-      apiGet<ArticlePage>('/api/v1/articles', { country: filters.country, city: filters.city, page: pageParam }, signal),
+      apiGet<ArticlePage>(
+        '/api/v1/articles',
+        { country: filters.country, city: filters.city, sector: filters.sector, page: pageParam },
+        signal,
+      ),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
     ...retryPolicy,
@@ -69,6 +86,7 @@ export interface SearchFilters {
   q: string
   country?: string
   city?: string
+  sector?: string
   from?: string
   to?: string
   sort?: 'relevance' | 'date'
@@ -90,6 +108,7 @@ export interface MapFilters {
   window: MapWindow
   roles: LocationRole[]
   country?: string
+  sector?: string
 }
 
 export function useMapCities(filters: MapFilters) {
@@ -98,7 +117,7 @@ export function useMapCities(filters: MapFilters) {
     queryFn: ({ signal }) =>
       apiGet<MapData>(
         '/api/v1/map/cities',
-        { window: filters.window, roles: filters.roles.join(','), country: filters.country },
+        { window: filters.window, roles: filters.roles.join(','), country: filters.country, sector: filters.sector },
         signal,
       ),
     placeholderData: keepPreviousData,
@@ -113,6 +132,38 @@ export function useAllPlaces(enabled: boolean) {
     queryFn: ({ signal }) => apiGet<PlaceView[]>('/api/v1/places', {}, signal),
     enabled,
     staleTime: 24 * 60 * 60_000,
+    ...retryPolicy,
+  })
+}
+
+/** The sector rules (config/sectors.yaml) and how many recent stories carry each tag. */
+export function useSectors() {
+  return useQuery({
+    queryKey: ['sectors'],
+    queryFn: ({ signal }) => apiGet<SectorsView>('/api/v1/sectors', {}, signal),
+    staleTime: 5 * 60_000,
+    ...retryPolicy,
+  })
+}
+
+export interface SocialFilters {
+  platform?: SocialPlatform
+  country?: string
+  size?: number
+}
+
+/** Curated social posts and videos, newest first. */
+export function useSocial(filters: SocialFilters) {
+  return useInfiniteQuery({
+    queryKey: ['social', filters],
+    queryFn: ({ pageParam, signal }) =>
+      apiGet<SocialPage>(
+        '/api/v1/social',
+        { platform: filters.platform, country: filters.country, size: filters.size, page: pageParam },
+        signal,
+      ),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
     ...retryPolicy,
   })
 }

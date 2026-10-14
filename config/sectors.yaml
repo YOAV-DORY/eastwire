@@ -1,0 +1,982 @@
+# Sector tagging rules. Rule-based on purpose: every tag can be explained to the reader by
+# the exact rules that matched. No machine learning, no AI.
+#
+# How an article is scored (docs/sectors.md has worked examples):
+#   - keyword in the headline:            its weight
+#   - keyword only in the shown excerpt:  its weight x excerpt_factor
+#   - Global Voices topic tag:            its weight
+#   - GDELT theme code:                   its weight, at most theme_cap per sector in total,
+#                                         because GDELT themes come from text we never show
+#   - negative phrase in headline/excerpt: minus its weight
+# A sector is tagged when its score >= threshold. At most max_sectors per article, highest
+# score first; ties keep the order below. Anything else is "Unclassified".
+#
+# Matching: case-insensitive, on whole words after punctuation is turned into spaces
+# ("AI-powered" -> "ai powered"). A trailing * matches word endings ("tariff*" matches
+# "tariffs"); a GDELT theme ending in * matches every code with that prefix.
+#
+# Editing this file re-tags every stored article on the next hourly run.
+
+threshold: 3
+max_sectors: 2
+excerpt_factor: 0.5
+theme_cap: 2
+
+sectors:
+  - slug: economy
+    label: Economy
+    definition: >-
+      The economy as a whole: growth, prices, jobs, trade, budgets, taxes, currencies and
+      central banks. News about a particular company is Business.
+    keywords:
+      economy: 3
+      economic: 2
+      economies: 3
+      inflation: 3
+      deflation: 3
+      gdp: 3
+      recession: 3
+      economic growth: 3
+      growth forecast: 3
+      interest rate*: 3
+      repo rate: 3
+      rate cut*: 3
+      rate hike*: 3
+      central bank: 3
+      rbi: 3
+      reserve bank: 3
+      bank of japan: 3
+      boj: 3
+      pboc: 3
+      people's bank of china: 3
+      bank of korea: 3
+      monetary policy: 3
+      fiscal: 3
+      budget: 2
+      deficit: 3
+      trade surplus: 3
+      current account: 3
+      consumer prices: 3
+      cpi: 3
+      wpi: 3
+      tariff*: 3
+      trade war: 3
+      trade deal: 3
+      trade talks: 3
+      free trade: 3
+      exports: 2
+      imports: 2
+      export: 2
+      import duty: 3
+      forex: 3
+      foreign exchange: 3
+      rupee: 3
+      yen: 3
+      yuan: 3
+      renminbi: 3
+      korean won: 3
+      unemployment: 3
+      jobless: 3
+      labour market: 3
+      labor market: 3
+      minimum wage: 3
+      wages: 2
+      stimulus: 3
+      tax cut*: 3
+      gst: 3
+      income tax: 3
+      public debt: 3
+      sovereign debt: 3
+      local government debt: 3
+      bond yield*: 3
+      fdi: 3
+      foreign direct investment: 3
+      foreign investment: 2
+      imf: 3
+      world bank: 3
+      pmi: 3
+      industrial output: 3
+      factory output: 3
+      factory activity: 3
+      property market: 3
+      property sector: 3
+      housing market: 3
+      home prices: 3
+      cost of living: 3
+      household spending: 3
+      consumer spending: 3
+      consumption: 2
+      retail sales: 3
+      fuel prices: 2
+      oil prices: 2
+      food prices: 3
+      subsidy: 2
+      subsidies: 2
+      economist*: 2
+      tax: 2
+      taxes: 2
+      taxation: 3
+      fuel tax: 3
+      government spending: 3
+      public spending: 3
+      consumer demand: 3
+      demand: 1
+      growth: 1
+      slowdown: 2
+      slump: 2
+      downturn: 2
+      debt: 2
+      bailout: 2
+      infrastructure: 1
+      investment: 1
+      manufacturing: 2
+      make in india: 3
+      trade: 2
+      supply chain*: 2
+      commodit*: 2
+      crude: 2
+      finance minister: 3
+      finance ministry: 3
+      treasury: 2
+      employment: 2
+      jobs: 1
+      income: 1
+      farm*: 1
+      agricultur*: 2
+      harvest: 1
+      msp: 3
+      loan waiver: 3
+      farm loan*: 3
+      remittance*: 3
+      outflows: 2
+      inflows: 2
+      credit rating: 2
+      sovereign rating: 3
+      prices: 1
+    negative:
+      economy class: 3
+    gdelt_themes:
+      ECON_INFLATION: 1
+      WB_442_INFLATION: 1
+      ECON_INTEREST_RATES: 1
+      ECON_CENTRALBANK: 1
+      EPU_CATS_MONETARY_POLICY: 1
+      ECON_DEBT: 1
+      ECON_TAXATION: 1
+      EPU_CATS_TAXES: 1
+      ECON_CURRENCY_EXCHANGE_RATE: 1
+      ECON_CURRENCY_RESERVES: 1
+      UNEMPLOYMENT: 1
+      ECON_TRADE_DISPUTE: 1
+      ECON_FREETRADE: 1
+      ECON_BUDGET_DEFICIT: 1
+      ECON_SUBSIDIES: 1
+      ECON_COST_OF_LIVING: 1
+      ECON_PRICECONTROL: 1
+      ECON_HOUSING_PRICES: 1
+      ECON_FOREIGNINVEST: 1
+      WB_445_FISCAL_POLICY: 1
+      WB_471_ECONOMIC_GROWTH: 1
+    feed_categories:
+      Economics & Business: 1
+      Development: 1
+
+  - slug: geopolitics
+    label: Geopolitics
+    definition: >-
+      Diplomacy, defence, security, sanctions, borders and the politics of governments,
+      including elections.
+    keywords:
+      geopolitic*: 3
+      military: 3
+      army: 2
+      navy: 2
+      air force: 2
+      troops: 3
+      soldier*: 3
+      missile*: 3
+      nuclear weapon*: 3
+      nuclear test*: 3
+      warship*: 3
+      frigate*: 3
+      submarine*: 3
+      aircraft carrier*: 3
+      defence budget: 3
+      defense budget: 3
+      military spending: 3
+      export controls: 3
+      fighter jet*: 3
+      defence: 3
+      defense: 3
+      defence minister: 3
+      defense minister: 3
+      military drill*: 3
+      joint exercise*: 2
+      border: 2
+      border clash*: 3
+      line of actual control: 3
+      south china sea: 3
+      east china sea: 3
+      taiwan strait: 3
+      taiwan: 2
+      senkaku*: 3
+      dokdo: 3
+      kashmir: 2
+      pakistan: 2
+      north korea*: 3
+      pyongyang: 3
+      kim jong un: 3
+      diplomat*: 3
+      diplomacy: 3
+      foreign minister: 3
+      foreign ministry: 3
+      foreign policy: 3
+      external affairs: 3
+      ambassador*: 3
+      embassy: 2
+      summit: 2
+      bilateral: 2
+      treaty: 3
+      sanctions: 3
+      g7: 2
+      g20: 2
+      brics: 3
+      quad: 2
+      asean: 3
+      un security council: 3
+      united nations: 2
+      nato: 3
+      alliance: 2
+      war: 2
+      ceasefire: 3
+      election*: 3
+      polls: 2
+      by election*: 3
+      prime minister: 2
+      president: 1
+      parliament: 2
+      lok sabha: 3
+      rajya sabha: 3
+      national assembly: 2
+      ldp: 2
+      bjp: 3
+      congress: 2
+      chief minister: 2
+      cabinet: 2
+      minister: 1
+      pm: 1
+      opposition: 1
+      impeach*: 3
+      xi jinping: 3
+      communist party: 3
+      ccp: 3
+      espionage: 3
+      spy: 2
+      terror*: 3
+      insurgen*: 3
+      maoist*: 3
+      naxal*: 3
+      coast guard: 2
+      territorial: 2
+      sovereignty: 3
+      talks: 1
+      leaders: 1
+      disputed: 2
+      dispute: 1
+      shoal: 2
+      vessel*: 1
+      strait: 2
+      maritime: 2
+      parliamentary: 2
+      majority: 1
+      ruling party: 3
+      party: 1
+      coalition: 2
+      governor*: 2
+      lawmaker*: 2
+      mps: 1
+      legislat*: 2
+      vote: 1
+      voter*: 2
+      voting: 2
+      ballot*: 2
+      campaign: 1
+      security law: 3
+      national security: 3
+      wartime: 2
+      colonial: 1
+      condemn*: 1
+      fighter: 2
+      hypersonic: 3
+      nuclear: 1
+      weapon*: 2
+      arms: 2
+      drills: 2
+      envoy*: 3
+      foreign secretary: 3
+      state visit: 3
+      relations: 1
+      ties: 1
+      tensions: 2
+      indo pacific: 3
+    negative:
+      price war: 3
+      border gavaskar: 3
+      star wars: 3
+      war of words: 2
+    gdelt_themes:
+      ARMEDCONFLICT: 1
+      MILITARY: 1
+      MILITARY_COOPERATION: 1
+      SANCTIONS: 1
+      TERROR: 1
+      NEGOTIATIONS: 1
+      ALLIANCE: 1
+      SOVEREIGNTY: 1
+      MARITIME_INCIDENT: 1
+      ELECTION: 1
+      CEASEFIRE: 1
+      PEACEKEEPING: 1
+      WMD: 1
+      EPU_CATS_NATIONAL_SECURITY: 1
+      WB_2462_POLITICAL_VIOLENCE_AND_WAR: 1
+      SOC_DIPLOMRECOG: 1
+    feed_categories:
+      International Relations: 3
+      War & Conflict: 3
+      Elections: 3
+      Politics: 1
+      Governance: 1
+      Law: 0.5
+
+  - slug: technology
+    label: Technology
+    definition: >-
+      Computing, AI, chips, telecoms, space and science, including cyber security.
+    keywords:
+      technology: 3
+      tech: 3
+      ai: 3
+      artificial intelligence: 3
+      generative ai: 3
+      chatbot*: 3
+      semiconductor*: 3
+      chip*: 3
+      chipmaker*: 3
+      data centre*: 3
+      data center*: 3
+      cloud computing: 3
+      smartphone*: 3
+      5g: 3
+      6g: 3
+      telecom*: 2
+      broadband: 2
+      satellite*: 2
+      rocket*: 2
+      orbit*: 2
+      space station: 3
+      space agency: 3
+      isro: 3
+      jaxa: 3
+      lunar: 2
+      moon mission: 3
+      spacecraft: 3
+      robot*: 3
+      quantum: 3
+      cyber*: 3
+      hacker*: 2
+      hacked: 2
+      data breach: 3
+      data security: 3
+      data protection: 3
+      privacy: 1
+      ransomware: 3
+      software: 3
+      apps: 1
+      electric vehicle*: 2
+      ev: 1
+      evs: 1
+      battery: 2
+      batteries: 2
+      digital: 1
+      internet: 2
+      deepseek: 3
+      openai: 3
+      nvidia: 3
+      tsmc: 3
+      sk hynix: 3
+      huawei: 2
+      scientist*: 2
+      science: 2
+      research: 1
+      innovation: 1
+      drone*: 2
+      biotech*: 2
+      supercomputer*: 3
+      upi: 2
+      digital payment*: 3
+      fintech: 2
+      language model*: 3
+      llm: 3
+      llms: 3
+      algorithm*: 2
+      facial recognition: 3
+      surveillance: 1
+      crypto*: 3
+      bitcoin: 3
+      blockchain: 3
+      researchers: 2
+      study: 1
+      rover: 3
+      moon: 2
+      mars: 2
+      space: 1
+      nasa: 3
+      launch vehicle: 3
+      computing: 2
+      computer*: 2
+      laptop*: 2
+      gadget*: 2
+      device*: 1
+      electric: 1
+      charging: 1
+      engine*: 1
+      aerospace: 2
+      patent*: 2
+      genome: 3
+      genetic*: 2
+      telescope: 3
+      astronaut*: 3
+      nuclear fusion: 3
+      online: 1
+      website*: 1
+      platform*: 1
+      e commerce: 1
+    negative:
+      blue chip*: 3
+      chip in: 3
+      chipped in: 3
+    gdelt_themes:
+      SOC_EMERGINGTECH: 1
+      TECH_*: 1
+      CYBER_ATTACK: 1
+      WB_670_ICT_SECURITY: 1
+      WB_667_ICT_INFRASTRUCTURE: 1
+      WB_286_TELECOMMUNICATIONS_AND_BROADBAND_ACCESS: 1
+      SURVEILLANCE: 1
+      DRONES: 1
+      SCIENCE: 1
+    feed_categories:
+      Technology: 3
+      Science: 3
+      Digital Activism: 1
+
+  - slug: business
+    label: Business
+    definition: >-
+      Companies and markets: results, deals, listings, start-ups, executives and stock
+      indexes. The economy as a whole is Economy.
+    keywords:
+      business: 2
+      shares: 3
+      stocks: 3
+      stock: 3
+      share price*: 3
+      rallies: 1
+      nbfc*: 3
+      cr: 1
+      pharma: 2
+      hotel*: 1
+      airport*: 1
+      invest: 1
+      logistics: 1
+      stock market: 3
+      sensex: 3
+      nifty: 3
+      nikkei 225: 3
+      nikkei average: 3
+      nikkei index: 3
+      kospi: 3
+      hang seng: 3
+      shanghai composite: 3
+      ipo: 3
+      buyback*: 3
+      lists at: 3
+      initial public offering: 3
+      listing: 2
+      merger*: 3
+      acquisition*: 3
+      acquire*: 3
+      takeover: 3
+      stake: 2
+      profit*: 3
+      revenue*: 3
+      loss: 2
+      losses: 2
+      net loss: 3
+      margins: 2
+      price war: 3
+      earnings: 3
+      quarterly results: 3
+      q1: 2
+      q2: 2
+      q3: 2
+      q4: 2
+      sales: 2
+      bookings: 2
+      orders: 1
+      deal: 1
+      store: 1
+      stores: 1
+      plant: 1
+      production: 1
+      maker: 2
+      makers: 2
+      parent company: 3
+      start up*: 3
+      startup*: 3
+      unicorn*: 3
+      venture capital: 3
+      funding: 2
+      raises: 1
+      ceo: 2
+      chief executive: 2
+      layoff*: 3
+      lay off*: 3
+      job cuts: 3
+      bankrupt*: 3
+      insolvency: 3
+      market share: 3
+      retailer*: 2
+      conglomerate*: 2
+      chaebol*: 3
+      dividend*: 3
+      shareholder*: 3
+      investor*: 2
+      carmaker*: 3
+      automaker*: 3
+      airline*: 2
+      lender*: 2
+      e commerce: 2
+      company: 1
+      companies: 1
+      firm: 1
+      firms: 1
+      ltd: 2
+      tata: 2
+      reliance: 2
+      adani: 2
+      infosys: 2
+      wipro: 2
+      mahindra: 2
+      hdfc: 2
+      icici: 2
+      paytm: 2
+      zomato: 2
+      flipkart: 2
+      samsung: 2
+      hyundai: 2
+      lg: 2
+      toyota: 2
+      honda: 2
+      nissan: 2
+      sony: 2
+      softbank: 2
+      alibaba: 2
+      tencent: 2
+      byd: 2
+      xiaomi: 2
+      tsmc: 2
+      sk hynix: 2
+      chairman: 2
+      chairwoman: 2
+      founder*: 2
+      managing director: 2
+      executive*: 1
+      restructuring: 2
+      turnaround: 3
+      spin off: 3
+      subsidiar*: 3
+      unit: 1
+      buys: 1
+      sells: 1
+      brand*: 2
+      shipments: 2
+      rival*: 1
+      competitor*: 2
+      quarterly: 2
+      crore: 1
+      suv: 2
+      suvs: 2
+      cars: 1
+      vehicle*: 1
+      automotive: 2
+      bank: 1
+      banks: 1
+      banking: 2
+      insurer*: 2
+      insurance: 2
+      financial services: 3
+      fintech: 2
+      industry: 1
+      industries: 1
+      manufacturer*: 2
+      supplier*: 2
+      factory: 1
+      factories: 1
+      brewer*: 2
+      jobs: 1
+    gdelt_themes:
+      ECON_STOCKMARKET: 1
+      ECON_IPO: 1
+      ECON_ENTREPRENEURSHIP: 1
+      ECON_EARNINGSREPORT: 1
+      ECON_BANKRUPTCY: 1
+      ECON_MONOPOLY: 1
+      WB_332_CAPITAL_MARKETS: 1
+      TAX_FNCACT_CEO: 1
+      TAX_FNCACT_CHIEF_EXECUTIVE: 1
+    feed_categories:
+      Economics & Business: 1
+
+  - slug: society
+    label: Society
+    definition: >-
+      How people live: health, education, rights, gender, crime and justice, religion,
+      migration, labour, culture and sport.
+    keywords:
+      society: 2
+      social: 1
+      health: 2
+      healthcare: 3
+      hospital*: 2
+      disease*: 2
+      outbreak: 3
+      public health: 3
+      doctor*: 2
+      patient*: 2
+      cancer: 2
+      dengue: 3
+      covid: 3
+      vaccin*: 3
+      mental health: 3
+      suicide*: 3
+      education: 3
+      school*: 3
+      student*: 2
+      universit*: 2
+      exam: 2
+      exams: 2
+      examination*: 2
+      neet: 3
+      gaokao: 3
+      suneung: 3
+      teacher*: 2
+      women: 2
+      woman: 2
+      gender: 3
+      sexual harassment: 3
+      rape: 3
+      dowry: 3
+      lgbt*: 3
+      same sex: 3
+      human rights: 3
+      rights: 1
+      protest*: 3
+      activist*: 3
+      crime: 2
+      police: 2
+      arrest*: 2
+      murder*: 3
+      supreme court: 2
+      high court: 2
+      court: 1
+      verdict: 2
+      death penalty: 3
+      caste: 3
+      dalit*: 3
+      religio*: 2
+      mosque: 2
+      temple: 1
+      muslim*: 2
+      hindu: 2
+      christian*: 2
+      minorit*: 2
+      migrant*: 3
+      migration: 3
+      refugee*: 3
+      birth rate: 3
+      fertility rate: 3
+      ageing: 3
+      aging: 3
+      elderly: 3
+      poverty: 3
+      welfare: 2
+      pension*: 2
+      retirement: 2
+      workers: 1
+      strike: 2
+      culture: 2
+      cultural: 2
+      festival*: 2
+      film*: 2
+      cinema: 2
+      drama*: 2
+      streaming: 1
+      bollywood: 3
+      k pop: 3
+      kpop: 3
+      anime: 3
+      manga: 3
+      artist*: 2
+      museum*: 2
+      heritage: 2
+      cricket: 2
+      olympic*: 2
+      football: 2
+      champion*: 1
+      athlete*: 2
+      medal*: 2
+      tournament: 2
+      trophy: 2
+      border gavaskar: 3
+      censorship: 3
+      free speech: 3
+      freedom of expression: 3
+      press freedom: 3
+      journalist*: 2
+      social media: 2
+      youth: 2
+      children: 2
+      child: 2
+      marriage: 2
+      divorce: 2
+      accident*: 2
+      stampede: 3
+      schools: 3
+      births: 2
+      childcare: 3
+      parents: 2
+      couples: 2
+      baby: 2
+      babies: 2
+      family: 1
+      families: 1
+      acid attack: 3
+      survivor*: 1
+      ruling: 1
+      lawsuit: 2
+      compensation: 1
+      victim*: 2
+      harassment: 3
+      commuters: 1
+      public transport: 1
+      coach: 1
+      player*: 2
+      captain: 1
+      league: 2
+      ipl: 3
+      world cup: 3
+      sport*: 2
+      squad: 2
+      animat*: 2
+      award*: 1
+      film festival: 3
+      music: 2
+      singer*: 2
+      concert*: 2
+      books: 1
+      arts: 2
+      theatre: 2
+      fashion: 2
+      measles: 3
+      labourers: 2
+      laborers: 2
+      forced labour: 3
+      forced labor: 3
+      sentenced: 2
+      jail*: 2
+      prison*: 2
+      convicted: 2
+      custody: 2
+    gdelt_themes:
+      GENERAL_HEALTH: 1
+      MEDICAL: 1
+      EDUCATION: 1
+      PROTEST: 1
+      HUMAN_RIGHTS*: 1
+      DISCRIMINATION: 1
+      GENDER_VIOLENCE: 1
+      WB_2443_RAPE_AND_SEXUAL_VIOLENCE: 1
+      FREESPEECH: 1
+      MEDIA_CENSORSHIP: 1
+      INTERNET_CENSORSHIP: 1
+      REFUGEES: 1
+      IMMIGRATION: 1
+      SOC_GENERALCRIME: 1
+      WB_2167_PANDEMICS: 1
+      SOC_AGINGPOPULATION: 1
+      SOC_SUICIDE: 1
+      LGBT: 1
+      WB_695_POVERTY: 1
+      UNGP_HEALTHCARE: 1
+      STRIKE: 1
+    feed_categories:
+      Human Rights: 3
+      Women & Gender: 3
+      Protest: 3
+      Freedom of Speech: 3
+      Censorship: 3
+      Ethnicity & Race: 3
+      LGBTQ+: 3
+      Indigenous: 3
+      Education: 3
+      Health: 3
+      Migration & Immigration: 3
+      Refugees: 3
+      Arts & Culture: 3
+      Religion: 3
+      Labor: 2
+      Youth: 2
+      Media & Journalism: 2
+      Digital Activism: 2
+      Sport: 2
+      History: 1
+
+  - slug: environment
+    label: Environment
+    definition: >-
+      Climate, pollution, energy transition, wildlife, natural disasters and extreme weather.
+    keywords:
+      environment*: 3
+      climate: 3
+      climate change: 3
+      global warming: 3
+      emission*: 3
+      carbon: 2
+      net zero: 3
+      decarboni*: 3
+      pollution: 3
+      polluted: 3
+      air quality: 3
+      smog: 3
+      aqi: 3
+      stubble burning: 3
+      flood*: 3
+      cyclone*: 3
+      typhoon*: 3
+      monsoon: 3
+      heatwave*: 3
+      heat wave*: 3
+      drought*: 3
+      earthquake*: 3
+      quake: 3
+      tsunami: 3
+      landslide*: 3
+      wildfire*: 3
+      forest fire*: 3
+      deforestation: 3
+      forest*: 2
+      trees: 2
+      desert*: 2
+      wildlife: 3
+      biodiversity: 3
+      tiger*: 2
+      elephant*: 2
+      species: 2
+      endangered: 3
+      renewable*: 3
+      solar: 2
+      solar power: 3
+      wind power: 3
+      wind farm*: 3
+      clean energy: 3
+      green energy: 3
+      green hydrogen: 3
+      coal: 2
+      coal power: 3
+      fossil fuel*: 3
+      nuclear power: 2
+      treated water: 2
+      fukushima: 2
+      plastic*: 2
+      waste: 2
+      recycl*: 3
+      glacier*: 3
+      sea level*: 3
+      water crisis: 3
+      water shortage: 3
+      disaster*: 2
+      natural disaster*: 3
+      ecolog*: 2
+      conservation: 2
+      rainfall: 2
+      weather: 1
+      toxic: 2
+      river*: 1
+      lake*: 1
+      reactor*: 2
+      nuclear plant*: 2
+      leopard*: 2
+      snow leopard*: 3
+      panda*: 1
+      bird*: 1
+      rising seas: 3
+      coastal erosion: 3
+      seas: 1
+      ocean*: 1
+      marine: 1
+      coral: 3
+      mangrove*: 3
+      wetland*: 3
+      storm: 2
+      storms: 2
+      temperature*: 2
+      hottest: 2
+      cold wave: 3
+      snowfall: 2
+      rain: 1
+      rains: 2
+      lightning: 2
+      volcan*: 3
+      eruption: 2
+      energy transition: 3
+      electricity: 1
+      hydropower: 3
+      dam: 1
+      dams: 1
+      poaching: 3
+      poacher*: 3
+      national park*: 3
+      zoo: 1
+    negative:
+      flood of: 3
+      flooded with: 3
+      business climate: 3
+      investment climate: 3
+      political climate: 3
+      climate of fear: 3
+      tsunami of: 3
+      carbon copy: 3
+      storm of: 3
+      political storm: 3
+      eruption of: 3
+    gdelt_themes:
+      ENV_CLIMATECHANGE: 1
+      WB_567_CLIMATE_CHANGE: 1
+      NATURAL_DISASTER*: 1
+      ENV_GREEN: 1
+      WB_525_RENEWABLE_ENERGY: 1
+      ENV_SOLAR: 1
+      ENV_WINDPOWER: 1
+      ENV_HYDRO: 1
+      ENV_FORESTRY: 1
+      ENV_DEFORESTATION: 1
+      ENV_FISHERY: 1
+      ENV_WATERWAYS: 1
+      ENV_POACHING: 1
+      WATER_SECURITY: 1
+      WB_1949_CLIMATE_SMART_AGRICULTURE: 1
+    feed_categories:
+      Environment: 3
+      Disaster: 3

@@ -1,6 +1,7 @@
 package io.github.yoavdory.eastwire.api.articles;
 
 import io.github.yoavdory.eastwire.api.articles.ArticleRow.LocationRow;
+import io.github.yoavdory.eastwire.api.articles.ArticleRow.SectorRow;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -80,6 +81,10 @@ public class JdbcArticleRepository implements ArticleRepository {
                     + "AND l.place_id = :city AND l.role IN " + ABOUT_ROLES + ")");
             params.put("city", q.cityId());
         }
+        if (q.sector() != null) {
+            conditions.add("EXISTS (SELECT 1 FROM article_sector t WHERE t.article_id = a.id AND t.sector = :sector)");
+            params.put("sector", q.sector());
+        }
         if (q.from() != null) {
             conditions.add("COALESCE(a.published_at, a.discovered_at) >= :from");
             params.put("from", Timestamp.from(q.from()));
@@ -113,11 +118,15 @@ public class JdbcArticleRepository implements ArticleRepository {
                     return null;
                 })
                 .list();
-        Map<Long, List<String>> sectors = new LinkedHashMap<>();
-        jdbc.sql("SELECT article_id, sector FROM article_sector WHERE article_id IN (:ids) ORDER BY score DESC")
+        Map<Long, List<SectorRow>> sectors = new LinkedHashMap<>();
+        jdbc.sql("""
+                        SELECT article_id, sector, score, matched_rules::text AS rules
+                        FROM article_sector WHERE article_id IN (:ids) ORDER BY score DESC, sector
+                        """)
                 .param("ids", ids)
                 .query((rs, n) -> {
-                    sectors.computeIfAbsent(rs.getLong("article_id"), k -> new ArrayList<>()).add(rs.getString("sector"));
+                    sectors.computeIfAbsent(rs.getLong("article_id"), k -> new ArrayList<>())
+                            .add(new SectorRow(rs.getString("sector"), rs.getDouble("score"), rs.getString("rules")));
                     return null;
                 })
                 .list();

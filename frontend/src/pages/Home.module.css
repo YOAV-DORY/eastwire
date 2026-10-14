@@ -65,30 +65,6 @@
   font-size: var(--text-small);
 }
 
-.feed {
-  display: grid;
-  gap: var(--space-4);
-  justify-items: stretch;
-}
-
-.feed > button {
-  justify-self: start;
-}
-
-.feedTitle {
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 500;
-}
-
-.list {
-  display: grid;
-  gap: var(--space-4);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 @media (min-width: 768px) {
   .hero {
     flex-direction: row;

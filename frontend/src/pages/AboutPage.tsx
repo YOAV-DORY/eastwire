@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { useSources } from '../api/queries'
 import { FeedSkeleton } from '../components/status/Feedback'
 import { formatDate } from '../lib/time'
@@ -87,12 +88,29 @@ export function AboutPage() {
       </section>
 
       <section className={styles.section}>
+        <h2 className={`${styles.heading} mono muted`}>Sectors</h2>
+        <p>
+          Stories are tagged with up to two of six sectors by published keyword rules, the publisher&apos;s own topic
+          tags and GDELT themes. No AI. Press a sector on any story to see the rules that matched, or read{' '}
+          <Link to="/sectors">every rule and how accurate they are</Link>.
+        </p>
+      </section>
+
+      <section className={styles.section}>
         <h2 className={`${styles.heading} mono muted`}>Credits and privacy</h2>
         <p>
           Discovery data: <a href="https://www.gdeltproject.org/">The GDELT Project</a>. City data:{' '}
           <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0). Map tiles: ©{' '}
           <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, drawn with{' '}
           <a href="https://leafletjs.com/">Leaflet</a>. Global Voices text: CC BY 3.0, credited on each story.
+        </p>
+        <p className="muted">
+          The social section shows posts and videos only through Bluesky&apos;s and YouTube&apos;s official embeds, and
+          only after you press load; until then nothing is requested from them. Loading a post or video lets that
+          platform see your visit and, for YouTube, set cookies. Video data comes from the YouTube API Services, under
+          the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a> and the{' '}
+          <a href="https://policies.google.com/privacy">Google Privacy Policy</a>. EastWire stores post and video data
+          for at most 30 days and deletes it when the platform removes it.
         </p>
         <p className="muted">
           EastWire sets no cookies and uses no trackers. Your theme and shortcut settings are stored only in your

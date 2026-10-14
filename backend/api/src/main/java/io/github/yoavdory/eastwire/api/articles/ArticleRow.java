@@ -20,7 +20,7 @@ public record ArticleRow(
         Instant discoveredAt,
         int clusterSize,
         List<LocationRow> locations,
-        List<String> sectors) {
+        List<SectorRow> sectors) {
 
     /** A stored location, with the city name joined in for city-precision rows. */
     public record LocationRow(
@@ -34,7 +34,11 @@ public record ArticleRow(
             String evidence) {
     }
 
-    public ArticleRow withDetails(List<LocationRow> newLocations, List<String> newSectors) {
+    /** A stored sector tag; {@code rulesJson} is the matched_rules array as written by ingestion. */
+    public record SectorRow(String sector, double score, String rulesJson) {
+    }
+
+    public ArticleRow withDetails(List<LocationRow> newLocations, List<SectorRow> newSectors) {
         return new ArticleRow(id, sourceSlug, title, url, domain, excerpt, author, creditLine, attribution, licenseName,
                 licenseUrl, publishedAt, discoveredAt, clusterSize, newLocations, newSectors);
     }

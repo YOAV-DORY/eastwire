@@ -2,6 +2,7 @@ package io.github.yoavdory.eastwire.api;
 
 import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import io.github.yoavdory.eastwire.core.policy.DisplayPolicy;
+import io.github.yoavdory.eastwire.core.sector.SectorRules;
 import java.nio.file.Path;
 import java.time.Clock;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,11 @@ public class ApiApplication {
     @Bean
     DisplayPolicy displayPolicy(ComplianceConfig config) {
         return new DisplayPolicy(config);
+    }
+
+    @Bean
+    SectorRules sectorRules(@Value("${eastwire.config-dir}") Path configDir) {
+        return SectorRules.load(configDir);
     }
 
     @Bean

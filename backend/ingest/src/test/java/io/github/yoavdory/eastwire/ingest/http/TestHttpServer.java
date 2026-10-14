@@ -38,8 +38,8 @@ public final class TestHttpServer implements AutoCloseable {
         }
     }
 
-    /** What the server received, for assertions. */
-    public record Request(String path, Map<String, List<String>> headers) {
+    /** What the server received, for assertions. {@code query} is the raw query string, or "". */
+    public record Request(String path, String query, Map<String, List<String>> headers) {
 
         public String header(String name) {
             return headers.entrySet().stream()
@@ -81,7 +81,9 @@ public final class TestHttpServer implements AutoCloseable {
     }
 
     private void handle(HttpExchange exchange) throws IOException {
-        Request request = new Request(exchange.getRequestURI().getPath(), Map.copyOf(exchange.getRequestHeaders()));
+        String query = exchange.getRequestURI().getRawQuery();
+        Request request = new Request(exchange.getRequestURI().getPath(), query == null ? "" : query,
+                Map.copyOf(exchange.getRequestHeaders()));
         requests.add(request);
         Reply reply = routes.getOrDefault(request.path(), r -> Reply.status(404)).apply(request);
         reply.headers().forEach((k, v) -> exchange.getResponseHeaders().add(k, v));

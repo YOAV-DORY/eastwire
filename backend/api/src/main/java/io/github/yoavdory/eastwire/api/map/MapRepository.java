@@ -33,13 +33,17 @@ public class MapRepository {
         this.jdbc = jdbc;
     }
 
-    public List<LocationRow> locations(Instant since, String country) {
+    public List<LocationRow> locations(Instant since, String country, String sector) {
         Map<String, Object> params = new LinkedHashMap<>();
         params.put("since", Timestamp.from(since));
-        String countryFilter = "";
+        String filters = "";
         if (country != null) {
-            countryFilter = "AND l.country_iso2 = :country";
+            filters += "AND l.country_iso2 = :country\n";
             params.put("country", country);
+        }
+        if (sector != null) {
+            filters += "AND EXISTS (SELECT 1 FROM article_sector t WHERE t.article_id = a.id AND t.sector = :sector)\n";
+            params.put("sector", sector);
         }
         return jdbc.sql("""
                         SELECT a.id, s.slug, a.canonical_url, a.author, a.credit_line,
@@ -49,7 +53,7 @@ public class MapRepository {
                         JOIN source s ON s.id = a.source_id
                         JOIN article_location l ON l.article_id = a.id
                         WHERE a.expires_at > now() AND COALESCE(a.published_at, a.discovered_at) > :since
-                        """ + countryFilter)
+                        """ + filters)
                 .params(params)
                 .query((rs, n) -> new LocationRow(rs.getLong("id"), rs.getString("slug"), rs.getString("canonical_url"),
                         rs.getString("author"), rs.getString("credit_line"), rs.getTimestamp("t").toInstant(),

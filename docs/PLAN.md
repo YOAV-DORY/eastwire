@@ -1181,6 +1181,64 @@ frontend/src/
 - **Not done yet:** the bottom-sheet city panel on phones (the panel sits under the map instead), and a role-tabbed panel. Main JS is 126 KB gzipped; the map chunk adds 54 KB on demand.
 - **Known data quirk:** GeoNames lists Delhi and New Delhi as separate cities, so a story can be pinned to either.
 
+**Milestone 7 (sectors):** built on branch `m7-sectors`, stacked on milestone 6.
+- **Rules:** `config/sectors.yaml` holds weighted keywords, negative phrases, Global Voices topic tags and GDELT theme codes for the six sectors.
+  - Threshold 3, at most 2 sectors per story; excerpt keywords count half; GDELT themes add at most +2 together, so they can never tag alone.
+  - Checked by `scripts/validate_config.py` and by `SectorRules` in Java (exact six sectors, no typos, no duplicates, positive weights, no stems shorter than four letters).
+- **Classifier:** `core/sector/SectorClassifier`, deterministic, returns every matched rule.
+- **Ingestion:**
+  - GDELT V1THEMES and Global Voices tags are stored as `article.sector_signals` (V4 migration).
+  - Tags are written with their matched rules.
+  - Each run re-tags live articles whose `sector_rules_version` (a hash of sectors.yaml) is out of date.
+- **API:**
+  - `sector=` filter on `/articles`, `/search` and `/map/cities`.
+  - Every story carries its sector tags with label, score and rules.
+  - `GET /api/v1/sectors` returns the rules plus 7-day counts.
+- **Frontend:**
+  - Sector chips on Home and sector selects on Search and Map, all in the URL.
+  - A "why this sector" disclosure on every story card, including a note when the GDELT theme cap applied.
+  - `/sectors` overview with an honest accuracy note; `/sector/:slug` with feed, country chips, top places this week and a "How we tag" panel listing every rule.
+  - Sidebar sector list.
+- **Evaluation** (`SectorEvaluationTest`, docs/sectors.md):
+
+  | Set | Precision | Recall | Note |
+  |---|---|---|---|
+  | Development, 216 invented | 98% | 88% | tuned on |
+  | Holdout, 60 invented | 100% | 33% | never tuned on |
+  | 66 real items, before tuning | 76% | 69% | |
+  | Same 66, after tuning | 85% | 81% | seen data |
+
+  The holdout result was the important finding: tags are rarely wrong but often missing. The UI says so.
+- **Verified:**
+  - Against fresh real data in PGlite: 63 GDELT and 18 Global Voices items tagged on write; an earlier database's 96 articles were re-tagged after the migration.
+  - Browser at 1280 and 390 px.
+  - Tests: core 101 (+1 opt-in real-sample check), ingest 58 (13 of them Postgres, run in CI), api 44 (7 Postgres, in CI), frontend 93.
+
+**Milestone 8 (social):** built on branch `m8-social`, stacked on milestone 7.
+- **Curation:** `config/social_accounts.yaml` lists 5 Bluesky newsroom accounts (Scroll, Global Voices, The Diplomat, China Digital Times, Rest of World) and 4 YouTube channels.
+  - Each entry has a reason, evidence and date.
+  - Rules are enforced in Java and the Python validator: domain-verified Bluesky handles, no publisher we deny, English only.
+  - Rejected candidates and why are listed in `docs/social.md`.
+- **Ingestion:**
+  - `BlueskyConnector`: public `getAuthorFeed`, original posts only, blocking labels skipped. Every stored post is re-checked each run with `getPosts`; deleted or newly labelled posts are deleted.
+  - `YouTubeConnector`: uploads playlist plus `videos.list`, key in a header only, daily re-check, quota-exceeded handling. It stays off until the owner sets `YOUTUBE_API_KEY`.
+  - Places come only from the post's own words.
+  - `SocialLinker` links posts to stories by shared URL or a quoted headline.
+  - 30-day retention and takedowns via `suppression`; V5 migration.
+- **API:** `GET /api/v1/social?platform=&country=&page=`.
+  - Shown only while the platform's source is enabled and verified.
+  - Related stories pass the display policy.
+- **Frontend:**
+  - `SocialCard`: dashed border, permanent "not verified reporting" label, account reason, click-to-load official Bluesky embed or youtube-nocookie player, "Related reporting: N" or "No matching report in our sources yet".
+  - `/social` with platform and country filters in the URL.
+  - A strip under the home feed; Social in the sidebar and top nav. Phones keep 4 bottom tabs.
+  - About explains embeds, cookies and the YouTube API Services terms.
+- **Verified against live Bluesky:** 250 posts read, 95 kept (50 Scroll; the world-wide outlets only when a covered place is named), 9 linked to stories by URL.
+  - Zero third-party requests before pressing load; the official embed rendered after it.
+  - No horizontal scroll at 390 px.
+  - Found and fixed a NULL-handling bug in the linker on the live run.
+- **Tests:** core 105, ingest 71 (18 Postgres, in CI), api 48 (8 Postgres, in CI), frontend 100. Main JS is 131 KB gzipped.
+
 **Owner actions to go live:**
 1. Create the Neon project.
 2. Run `backend/db/local-init.sql` with strong passwords.
@@ -1189,5 +1247,5 @@ frontend/src/
 All in `docs/database.md`.
 
 **Next:**
-1. The owner deploys (docs/deploy.md).
-2. Milestone 7: sectors.
+1. The owner deploys (docs/deploy.md), and optionally sets `YOUTUBE_API_KEY` (docs/social.md).
+2. Milestone 9: hardening (CSP and security headers, rate limiting, Playwright E2E, accessibility, screenshot checklist, DB-size warning, case study).

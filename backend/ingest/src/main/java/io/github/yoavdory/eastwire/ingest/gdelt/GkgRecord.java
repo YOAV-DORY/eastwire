@@ -2,6 +2,7 @@ package io.github.yoavdory.eastwire.ingest.gdelt;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The parts of one GDELT GKG 2.1 row that EastWire uses.
@@ -9,8 +10,10 @@ import java.util.List;
  * @param date        when GDELT processed the article (V2.1DATE)
  * @param publishedAt publication time if GDELT extracted one (PAGE_PRECISEPUBTIMESTAMP), else null
  * @param title       raw PAGE_TITLE (may contain HTML entities)
+ * @param themes      V1THEMES codes (e.g. ECON_INFLATION), used only as hints for sector tagging
  */
-record GkgRecord(Instant date, String sourceName, String url, String title, Instant publishedAt, List<GkgLocation> locations) {
+record GkgRecord(Instant date, String sourceName, String url, String title, Instant publishedAt, List<GkgLocation> locations,
+        Set<String> themes) {
 
     /** One V2ENHANCEDLOCATIONS entry. GDELT's own geocoding of a place the text mentions. */
     record GkgLocation(Type type, String fullName, String fipsCountry, String adm1, double lat, double lon, String featureId) {

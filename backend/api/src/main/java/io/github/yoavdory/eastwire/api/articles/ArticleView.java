@@ -25,7 +25,7 @@ public record ArticleView(
         String attribution,
         License license,
         List<LocationView> locations,
-        List<String> sectors,
+        List<SectorTag> sectors,
         int alsoReportedBy) {
 
     public record Source(String slug, String name) {
@@ -49,6 +49,22 @@ public record ArticleView(
             Long placeId,
             String placeName,
             String evidence) {
+    }
+
+    /**
+     * A sector tag and why it was given.
+     *
+     * @param rules every rule that contributed, e.g. keyword "inflation" in the headline (+3)
+     */
+    public record SectorTag(String slug, String label, double score, List<Rule> rules) {
+    }
+
+    /**
+     * @param kind   keyword | negative | gdelt_theme | feed_category
+     * @param field  headline | excerpt, for keywords
+     * @param weight what it added to the score
+     */
+    public record Rule(String kind, String value, String field, double weight) {
     }
 
     /** One page of the feed. {@code total} counts all matching articles across pages. */

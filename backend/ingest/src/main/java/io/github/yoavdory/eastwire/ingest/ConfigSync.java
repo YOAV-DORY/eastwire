@@ -5,6 +5,8 @@ import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import io.github.yoavdory.eastwire.core.config.Country;
 import io.github.yoavdory.eastwire.core.config.DomainPolicy;
 import io.github.yoavdory.eastwire.core.config.SourceConfig;
+import io.github.yoavdory.eastwire.core.social.SocialAccount;
+import io.github.yoavdory.eastwire.core.social.SocialAccounts;
 import java.sql.Date;
 import java.util.Locale;
 import java.util.Set;
@@ -55,6 +57,40 @@ public class ConfigSync {
                 .update();
 
         return new Result(config.countries().size(), cities.size(), config.sources().size(), config.domains().size());
+    }
+
+    /**
+     * Copies config/social_accounts.yaml into social_account. An account removed from the file
+     * is disabled and its stored posts deleted at once.
+     */
+    @Transactional
+    public int syncSocial(SocialAccounts accounts) {
+        for (SocialAccount a : accounts.accounts()) {
+            jdbc.sql("""
+                            INSERT INTO social_account (platform, external_id, handle, display_name, kind, reason, evidence_url,
+                                                        enabled, scope, domain)
+                            VALUES (:platform, :id, :handle, :name, :kind, :reason, :evidence, true, :scope, :domain)
+                            ON CONFLICT (platform, external_id) DO UPDATE SET
+                                handle = EXCLUDED.handle, display_name = EXCLUDED.display_name, kind = EXCLUDED.kind,
+                                reason = EXCLUDED.reason, evidence_url = EXCLUDED.evidence_url, enabled = true,
+                                scope = EXCLUDED.scope, domain = EXCLUDED.domain
+                            """)
+                    .param("platform", a.platform().db())
+                    .param("id", a.id())
+                    .param("handle", a.handle())
+                    .param("name", a.name())
+                    .param("kind", a.kind().db())
+                    .param("reason", a.reason())
+                    .param("evidence", a.evidenceUrl())
+                    .param("scope", a.scope().name().toLowerCase(Locale.ROOT))
+                    .param("domain", a.domain())
+                    .update();
+        }
+        String[] keys = accounts.accounts().stream().map(a -> a.platform().db() + "|" + a.id()).toArray(String[]::new);
+        jdbc.sql("UPDATE social_account SET enabled = false WHERE platform || '|' || external_id <> ALL(:keys)")
+                .param("keys", keys).update();
+        jdbc.sql("DELETE FROM social_item WHERE account_id IN (SELECT id FROM social_account WHERE NOT enabled)").update();
+        return accounts.accounts().size();
     }
 
     private void upsertCountry(Country c) {

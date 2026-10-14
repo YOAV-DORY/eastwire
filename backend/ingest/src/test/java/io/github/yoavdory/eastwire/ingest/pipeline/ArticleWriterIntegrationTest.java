@@ -8,6 +8,7 @@ import io.github.yoavdory.eastwire.core.article.Location.Method;
 import io.github.yoavdory.eastwire.core.article.Location.Precision;
 import io.github.yoavdory.eastwire.core.article.Location.Role;
 import io.github.yoavdory.eastwire.core.article.UrlCanonicalizer;
+import io.github.yoavdory.eastwire.core.sector.SectorSignals;
 import io.github.yoavdory.eastwire.ingest.PostgresTestBase;
 import io.github.yoavdory.eastwire.ingest.pipeline.ArticleCandidate.ExcerptKind;
 import io.github.yoavdory.eastwire.ingest.pipeline.ArticleSink.WriteResult.Kind;
@@ -15,6 +16,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -31,6 +33,9 @@ class ArticleWriterIntegrationTest extends PostgresTestBase {
     @Autowired
     RetentionPurger purger;
 
+    @Autowired
+    SectorTagger tagger;
+
     private static Location seoulEvent() {
         return new Location(1835848L, "KR", Role.EVENT, Precision.CITY, Confidence.HIGH, Method.DATELINE, "Dateline: Seoul");
     }
@@ -42,14 +47,15 @@ class ArticleWriterIntegrationTest extends PostgresTestBase {
 
     private static ArticleCandidate globalVoices(String url, Instant published) {
         return new ArticleCandidate("global-voices", url, "Libraries stay open late", LONG_SUMMARY, "Test Author", null,
-                false, ExcerptKind.CC_BY_EXCERPT, published, Instant.now(), "en", List.of(koreaFiled(), seoulEvent()));
+                false, ExcerptKind.CC_BY_EXCERPT, published, Instant.now(), "en", List.of(koreaFiled(), seoulEvent()),
+                SectorSignals.categories(Set.of("South Korea", "Education")));
     }
 
     private static ArticleCandidate gdelt(String url, String title) {
         return new ArticleCandidate("gdelt-gkg", url, title, null, null, null, false, ExcerptKind.NONE, null,
                 Instant.now().minusSeconds(600), "en",
                 List.of(new Location(null, "JP", Role.MENTIONED, Precision.COUNTRY, Confidence.MEDIUM, Method.GDELT_GKG,
-                        "Mentions Japan")));
+                        "Mentions Japan")), SectorSignals.themes(Set.of("ECON_INFLATION")));
     }
 
     @Test
@@ -67,6 +73,38 @@ class ArticleWriterIntegrationTest extends PostgresTestBase {
                 .containsEntry("license_name", "CC BY 3.0")
                 .containsEntry("attribution", "By Test Author, Global Voices · CC BY 3.0 · excerpt, shortened");
         assertThat(count("SELECT count(*) FROM article_location WHERE article_id = " + result.articleId())).isEqualTo(2);
+    }
+
+    @Test
+    void tagsSectorsWithTheRulesThatMatched() {
+        long gv = writer.write(globalVoices("https://globalvoices.org/2026/10/01/libraries/", Instant.now().minus(Duration.ofDays(1))))
+                .articleId();
+        long gd = writer.write(gdelt("https://mainichi.jp/english/articles/20261013/inflation", "Inflation eases in Japan"))
+                .articleId();
+
+        assertThat(sectors(gv)).containsExactly("society");   // Global Voices filed it under Education
+        assertThat(sectors(gd)).containsExactly("economy");
+        String rules = jdbc.sql("SELECT matched_rules::text FROM article_sector WHERE article_id = :id")
+                .param("id", gd).query(String.class).single();
+        assertThat(rules).contains("\"value\": \"inflation\"", "\"field\": \"headline\"", "\"value\": \"ECON_INFLATION\"");
+        assertThat(jdbc.sql("SELECT sector_signals::text FROM article WHERE id = :id").param("id", gd).query(String.class).single())
+                .contains("ECON_INFLATION");
+    }
+
+    @Test
+    void retagsArticlesTaggedByOlderRules() {
+        long id = writer.write(gdelt("https://mainichi.jp/english/articles/20261013/rates", "Inflation eases in Japan")).articleId();
+        jdbc.sql("UPDATE article SET sector_rules_version = 'old' WHERE id = :id").param("id", id).update();
+        jdbc.sql("DELETE FROM article_sector WHERE article_id = :id").param("id", id).update();
+
+        assertThat(tagger.retagStale()).isEqualTo(1);
+        assertThat(sectors(id)).containsExactly("economy");
+        assertThat(tagger.retagStale()).isZero();   // stored signals were reused, version is current again
+    }
+
+    private List<String> sectors(long articleId) {
+        return jdbc.sql("SELECT sector FROM article_sector WHERE article_id = :id ORDER BY score DESC")
+                .param("id", articleId).query(String.class).list();
     }
 
     @Test

@@ -195,3 +195,11 @@
     padding: var(--space-10) var(--space-8) var(--space-16);
   }
 }
+
+.sectorDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin: 0 4px;
+  border-radius: 50%;
+}
