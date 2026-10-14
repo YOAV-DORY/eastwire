@@ -1,64 +1,52 @@
 .page {
   display: grid;
-  gap: var(--space-6);
-  max-width: var(--feed-max);
-}
-
-.hero {
-  container-type: inline-size;
-  display: flex;
-  /* Phones: graphic above, so the headline gets the full width and stays within 3 lines. */
-  flex-direction: column-reverse;
   gap: var(--space-4);
 }
 
-.desktopBreak {
-  display: none;
+.header {
+  padding-top: var(--space-1);
 }
 
-.title {
-  /* --text-display is sized by the hero's width (container units), not the window's. */
-  font-size: var(--text-display);
-  line-height: var(--lh-display);
-  letter-spacing: var(--track-display);
-  font-weight: var(--weight-display);
+/* A newspaper dateline: the day in the serif's italic, then what this front page covers. */
+.dateline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-small);
 }
 
-.mark {
-  flex-shrink: 0;
-  align-self: flex-end;
-  width: 56px;
-  height: 56px;
-}
-
-.mapHero {
-  position: relative;
-}
-
-.openMap {
-  position: absolute;
-  right: var(--space-3);
-  bottom: var(--space-8);
-  z-index: 1;
+.date {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  font-style: italic;
 }
 
 .filters {
-  display: flex;
-  gap: var(--space-2);
-  margin: 0 calc(var(--space-4) * -1);
-  padding: 0 var(--space-4) var(--space-1);
-  overflow-x: auto;
-  scrollbar-width: none;
+  display: grid;
+  gap: 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
 }
 
 .cityPicker {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--space-3);
+  justify-self: start;
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--text-small);
 }
 
 .cityPicker select {
-  min-height: 40px;
+  min-height: var(--tap);
   padding: 0 var(--space-3);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
@@ -67,28 +55,44 @@
   font-size: var(--text-small);
 }
 
-@media (min-width: 768px) {
-  .hero {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-6);
+.layout {
+  display: grid;
+  gap: var(--space-10);
+  margin-top: var(--space-2);
+}
+
+.main {
+  min-width: 0;
+}
+
+.rail {
+  display: grid;
+  align-content: start;
+  min-width: 0;
+}
+
+/* Phones and tablets: the companion comes after the stories, under a rule. */
+@media (max-width: 1023px) {
+  .rail {
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--rule);
+  }
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) var(--rail-w);
+    column-gap: var(--space-12);
   }
 
-  .desktopBreak {
-    display: inline;
+  .rail {
+    padding-left: var(--space-10);
+    border-left: 1px solid var(--rule);
   }
+}
 
-  .mark {
-    align-self: flex-start;
-    width: 140px;
-    height: 140px;
-  }
-
-  .filters {
-    flex-wrap: wrap;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
+@media (max-width: 479px) {
+  .tagline {
+    display: none;
   }
 }

@@ -2,36 +2,59 @@
   display: grid;
   justify-items: start;
   gap: var(--space-3);
-  padding: var(--space-8) var(--space-5);
-  border: 1px dashed var(--border-strong);
+  padding: var(--space-8) var(--space-6);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  background: var(--bg-elev-1);
 }
 
 .mark {
-  color: var(--text-muted);
+  color: var(--text-faint);
 }
 
 .title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
   font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: var(--track-tight);
 }
 
 .cold {
-  padding: var(--space-3) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--bg-elev-1);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.coldDot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  animation: breathe 1.6s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.35;
+  }
 }
 
 .skeletons {
   display: grid;
-  gap: var(--space-4);
 }
 
-.skeletonCard {
+.skeletonStory {
   display: grid;
-  gap: var(--space-3);
-  height: 156px;
-  padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--bg-elev-1);
+  gap: var(--space-2);
+  padding-block: var(--space-5);
+  border-bottom: 1px solid var(--rule);
 }
 
 .banner {

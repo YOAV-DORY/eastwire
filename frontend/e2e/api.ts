@@ -21,6 +21,7 @@ export const ARTICLES: ArticleView[] = [
         placeId: 1853909,
         placeName: 'Osaka',
         evidence: 'Mentions Osaka',
+        primary: true,
       },
     ],
   }),

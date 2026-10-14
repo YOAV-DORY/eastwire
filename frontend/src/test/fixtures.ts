@@ -26,6 +26,7 @@ export function article(overrides: Partial<ArticleView> = {}): ArticleView {
         placeId: 1277333,
         placeName: 'Bengaluru',
         evidence: 'Mentions Bangalore',
+        primary: true,
       },
       {
         role: 'publisher',
@@ -36,6 +37,7 @@ export function article(overrides: Partial<ArticleView> = {}): ArticleView {
         placeId: null,
         placeName: null,
         evidence: 'Publisher: Scroll.in',
+        primary: false,
       },
     ],
     sectors: [],

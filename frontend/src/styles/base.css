@@ -1,12 +1,21 @@
 /* Reset, typography and focus. Tokens come from tokens.css. */
 
-/* Arial with Inter's metrics, so swapping in Inter does not shift the layout. */
+/* Local fonts with the web fonts' metrics, so swapping them in does not shift the layout. */
 @font-face {
-  font-family: "Inter Fallback";
+  font-family: "Schibsted Fallback";
   src: local("Arial");
-  size-adjust: 107.4%;
-  ascent-override: 90.2%;
-  descent-override: 22.48%;
+  size-adjust: 101%;
+  ascent-override: 96%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Georgia");
+  size-adjust: 94%;
+  ascent-override: 98%;
+  descent-override: 26%;
   line-gap-override: 0%;
 }
 
@@ -29,6 +38,7 @@ body {
   font-family: var(--font-sans);
   font-size: var(--text-body);
   line-height: var(--lh-body);
+  font-feature-settings: "ss01";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -41,8 +51,36 @@ figure {
   margin: 0;
 }
 
+/* Headlines are set in the newsroom serif; optical sizing tightens the big ones. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-optical-sizing: auto;
+  letter-spacing: var(--track-tight);
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
 a {
   color: inherit;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+  transition: color var(--dur-fast) var(--ease-standard), text-decoration-color var(--dur-fast) var(--ease-standard);
+}
+
+/* Links show the accent on hover; at rest they stay neutral (or --accent-text in prose). */
+a:hover {
+  text-decoration-color: var(--accent);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--text-on-accent);
 }
 
 button,

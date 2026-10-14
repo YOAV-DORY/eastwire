@@ -3,16 +3,52 @@
 .ew-map {
   width: 100%;
   height: 100%;
-  border-radius: var(--radius-lg);
+  border-radius: inherit;
   background: var(--bg-elev-1);
   /* Keeps Leaflet's internal z-indexes (up to 1000) below the sticky top bar. */
   isolation: isolate;
   font-family: var(--font-sans);
 }
 
-/* OSM tiles are light; in dark theme they are inverted and toned down to match the UI. */
+/*
+ * OSM tiles are toned down so they read as a quiet base: inverted for the dark theme,
+ * desaturated for the light one. Our English pin labels sit on top.
+ */
 [data-theme="dark"] .ew-tiles {
-  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.3);
+  filter: invert(1) hue-rotate(180deg) brightness(0.78) contrast(0.82) saturate(0.15);
+}
+
+[data-theme="light"] .ew-tiles {
+  filter: grayscale(0.85) contrast(0.88) brightness(1.04) sepia(0.08);
+}
+
+/* ---------------------------------------------------------------- English city labels */
+.ew-map .ew-label {
+  padding: 1px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  box-shadow: none;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.ew-map .ew-label::before {
+  display: none;
+}
+
+/* The pin of the story the reader is pointing at, or the cluster holding it. */
+.ew-pin.ew-hot svg {
+  transform: translateY(-3px) scale(1.18);
+  filter: drop-shadow(0 0 6px var(--accent));
+}
+
+.ew-cluster.ew-hot {
+  box-shadow: 0 0 0 9px var(--accent-glow), 0 0 14px var(--accent);
 }
 
 /* ---------------------------------------------------------------- pins */
@@ -77,8 +113,9 @@
   background: var(--accent);
   box-shadow: 0 0 0 6px var(--accent-glow);
   color: #000;
-  font-weight: 800;
+  font-weight: 700;
   font-size: var(--text-small);
+  transition: box-shadow var(--dur-fast) var(--ease-standard);
 }
 
 /* ---------------------------------------------------------------- population layer */
@@ -108,13 +145,13 @@
 }
 
 .ew-popup strong {
-  font-size: var(--text-body);
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
 }
 
 .ew-popup-counts,
 .ew-popup-note {
   color: var(--text-muted);
-  font-family: var(--font-mono);
 }
 
 .ew-popup a {
@@ -135,8 +172,8 @@
 .ew-map .leaflet-control-attribution {
   background: color-mix(in srgb, var(--bg) 80%, transparent);
   color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 11px;
+  font-family: var(--font-sans);
+  font-size: 12px;
 }
 
 .ew-map .leaflet-control-attribution a {

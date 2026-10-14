@@ -26,3 +26,6 @@ dist-ssr
 # Playwright output (screenshots, traces, HTML report)
 test-results/
 playwright-report/
+
+# Before/after screenshots from scripts/screenshots.mjs
+redesign-shots/

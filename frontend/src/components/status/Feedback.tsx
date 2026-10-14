@@ -31,22 +31,23 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry: () 
 /** Shown while the free-tier server wakes up (it sleeps after 15 idle minutes). */
 export function ColdStart() {
   return (
-    <p className={`${styles.cold} mono muted`} role="status">
-      Waking the free-tier server… this can take up to a minute.
+    <p className={styles.cold} role="status">
+      <span className={styles.coldDot} aria-hidden="true" />
+      Waking the free-tier server. The first visit after a quiet spell can take up to a minute.
     </p>
   )
 }
 
-/** Card-shaped placeholders with the same height as real cards, so nothing jumps. */
+/** Story-shaped placeholders: a headline, its line and a summary, so nothing jumps when stories arrive. */
 export function FeedSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div className={styles.skeletons} aria-hidden="true">
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className={styles.skeletonCard}>
-          <Skeleton width="35%" />
-          <Skeleton width="90%" height="1.3em" />
-          <Skeleton width="70%" />
-          <Skeleton width="45%" />
+        <div key={i} className={styles.skeletonStory}>
+          <Skeleton width="88%" height="1.35em" />
+          <Skeleton width="55%" height="1.35em" />
+          <Skeleton width="38%" height="0.85em" />
+          <Skeleton width="70%" height="0.95em" />
         </div>
       ))}
     </div>

@@ -1,48 +1,21 @@
+/*
+ * Stories sit on the page, divided by hairlines, not in boxes. Three weights:
+ * lead (the day's first story), standard (headline, line, summary) and compact.
+ */
+
 .card {
+  position: relative;
   display: grid;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--bg-elev-1);
-  transition:
-    transform var(--dur-base) var(--ease-standard),
-    border-color var(--dur-base) var(--ease-standard),
-    box-shadow var(--dur-base) var(--ease-standard);
-}
-
-.card:hover {
-  transform: translateY(-1px);
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-hover);
-}
-
-.card:focus-within {
-  border-color: var(--border-strong);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card:hover {
-    transform: none;
-  }
-}
-
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-}
-
-.place {
-  color: var(--text);
+  gap: var(--space-2);
+  min-width: 0;
+  padding-block: var(--space-5);
+  transition: background-color var(--dur-fast) var(--ease-standard);
 }
 
 .headline {
-  font-size: var(--text-body);
-  line-height: 1.4;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: var(--text-headline);
+  line-height: var(--lh-headline);
+  overflow-wrap: anywhere;
 }
 
 .headline a {
@@ -52,39 +25,162 @@
 
 .headline a:hover {
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
 }
 
 .arrow {
   display: inline;
-  margin-left: var(--space-1);
-  vertical-align: -2px;
-  color: var(--text-muted);
+  margin-left: 0.2em;
+  vertical-align: -0.08em;
+  color: var(--text-faint);
+  transition: color var(--dur-fast) var(--ease-standard), transform var(--dur-fast) var(--ease-standard);
 }
 
-.excerpt {
-  color: var(--text-muted);
+.headline a:hover .arrow {
+  color: var(--accent-text);
+  transform: translate(1px, -1px);
 }
 
-.footer {
+/* Publisher · place · date, one quiet line. */
+.meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2) var(--space-3);
+  gap: 2px 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  line-height: var(--lh-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.item + .item::before {
+  content: "·";
+  margin: 0 0.5em;
+  color: var(--text-faint);
+}
+
+.sticker {
+  margin-left: var(--space-3);
 }
 
 .publisher {
   color: var(--text);
+  font-weight: 500;
 }
 
-.badge {
-  padding: 0 var(--space-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+.summary {
+  max-width: var(--measure);
   color: var(--text-muted);
 }
 
-.locations {
+.license {
+  color: var(--text-faint);
+  font-size: var(--text-micro);
+  line-height: 1.5;
+}
+
+.license a {
+  color: inherit;
+}
+
+/* ------------------------------------------------------------------ variants */
+
+.lead {
+  gap: var(--space-3);
+  padding-block: var(--space-2) var(--space-6);
+}
+
+.lead .headline {
+  font-size: var(--text-lead);
+  line-height: var(--lh-lead);
+  font-weight: 600;
+  letter-spacing: -0.018em;
+}
+
+.lead .summary {
+  color: var(--text);
+  font-size: var(--text-body);
+  opacity: 0.86;
+}
+
+.compact {
+  gap: var(--space-1);
+  padding-block: var(--space-4);
+}
+
+.compact .headline {
+  font-size: var(--text-headline-sm);
+  line-height: 1.3;
+}
+
+.highlighted {
+  background: var(--accent-wash);
+  box-shadow: -12px 0 0 var(--accent-wash), 12px 0 0 var(--accent-wash);
+}
+
+/* ------------------------------------------------------------------ details */
+
+.detailsWrap {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.detailsToggle {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  margin-left: -6px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-faint);
+  font-size: var(--text-small);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-standard), background-color var(--dur-fast) var(--ease-standard);
+}
+
+.detailsToggle:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.chevron {
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.detailsToggle[aria-expanded='true'] .chevron {
+  transform: rotate(180deg);
+}
+
+@media (pointer: coarse) {
+  .detailsToggle {
+    min-height: var(--tap);
+  }
+}
+
+.details {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elev-1);
+  font-size: var(--text-small);
+  animation: open var(--dur-enter) var(--ease-out);
+}
+
+@keyframes open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.places {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -93,25 +189,24 @@
   list-style: none;
 }
 
-.location {
-  padding: 1px var(--space-2);
+.place {
+  padding: 2px var(--space-2);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   color: var(--text-muted);
-  font-size: var(--text-small);
   line-height: var(--lh-small);
 }
 
-/* Low confidence is shown, not hidden: dashed outline plus a text note for screen readers. */
+.main {
+  border-color: var(--text-faint);
+  color: var(--text);
+}
+
+/* Low confidence is shown, not hidden: a dashed outline plus a note for screen readers. */
 .low {
   border-style: dashed;
 }
 
-.attribution {
-  font-size: var(--text-small);
-  line-height: var(--lh-small);
-}
-
-.attribution a {
-  color: inherit;
+.provenance {
+  color: var(--text-muted);
 }

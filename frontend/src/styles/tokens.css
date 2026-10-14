@@ -1,63 +1,71 @@
 /*
- * EastWire design tokens (docs/PLAN.md, section 17.2).
- * Linear's calm dark surface + Gumroad's pink, rationed to five roles:
- * primary buttons, active filters, map pins, "New" badges, search focus ring.
+ * EastWire design tokens. Direction: an editorial "news atlas".
+ * Warm graphite surfaces (dark) or warm paper (light), crisp hairlines, a newsroom serif
+ * for headlines and a grotesk drawn for a news publisher for everything else.
+ * One accent, Gumroad-warm pink, for: primary buttons, active filters, map pins, the search
+ * focus ring, "New" stickers and links on hover. Everything else stays neutral.
  * Contrast ratios are checked by src/styles/tokens.test.ts.
  */
 
 :root,
 [data-theme="dark"] {
   color-scheme: dark;
-  /* surfaces */
-  --bg: #08090a;
-  --bg-elev-1: #111214;
-  --bg-elev-2: #17181b;
-  --bg-hover: #1d1e22;
-  --bg-social: #0e0f11;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
+  /* surfaces, in tiers: page < raised < raised-2 < hover */
+  --bg: #0f1012;
+  --bg-elev-1: #16171a;
+  --bg-elev-2: #1d1e22;
+  --bg-hover: #23242a;
+  --bg-social: #131416;
+  --border: rgba(255, 255, 255, 0.075);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --rule: rgba(255, 255, 255, 0.09); /* hairlines between stories */
   /* text */
-  --text: #f7f8f8;
-  --text-muted: #8a8f98;
-  --text-disabled: #62666d; /* disabled or decorative only */
+  --text: #f2f0eb;
+  --text-muted: #a8a69f;
+  --text-faint: #8d8b85; /* tertiary, still AA on every surface */
+  --text-disabled: #64635f; /* disabled or decorative only */
   --text-on-accent: #000000;
-  /* accents */
+  /* accent */
   --accent: #ff90e8;
   --accent-hover: #ffa6ee;
   --accent-press: #f07adb;
   --accent-text: #ff90e8;
   --accent-glow: rgba(255, 144, 232, 0.22);
+  --accent-wash: rgba(255, 144, 232, 0.08); /* selected rows, highlighted pins' stories */
   --accent-2: #ffe27a; /* stale / attention markers only */
-  --danger: #ff5c5c;
+  --danger: #ff6b6b;
   --ok: #3dd68c;
-  /* sectors: dots and chips only, always next to a text label */
+  /* sectors: dots only, always next to a text label */
   --sector-economy: #2fb7c4;
   --sector-geopolitics: #f2994a;
-  --sector-technology: #5b8def;
+  --sector-technology: #6b9af0;
   --sector-business: #a78bfa;
-  --sector-society: #ff6b6b;
+  --sector-society: #ff7a7a;
   --sector-environment: #3dd68c;
-  /* elevation: borders first; shadows only for hover and popovers */
-  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.45);
-  --shadow-pop: 0 16px 48px rgba(0, 0, 0, 0.55);
+  /* elevation: hairlines first; shadows only for floating things */
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-pop: 0 18px 48px rgba(0, 0, 0, 0.55);
   --shadow-chunky: 2px 2px 0 0 #000;
 }
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #fbfbfc;
-  --bg-elev-1: #ffffff;
-  --bg-elev-2: #f4f5f7;
-  --bg-hover: #eeeff2;
-  --bg-social: #f6f6f8;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.16);
-  --text: #0b0b0d;
-  --text-muted: #5c6068;
-  --text-disabled: #9a9ea6;
-  /* Pink fails as text on white (about 2:1), so links and rings use a deeper pink. */
-  --accent-text: #b5179e;
-  --accent-glow: rgba(181, 23, 158, 0.18);
+  --bg: #f7f5f0;
+  --bg-elev-1: #fffefb;
+  --bg-elev-2: #efece5;
+  --bg-hover: #e9e5dc;
+  --bg-social: #f1eee7;
+  --border: rgba(22, 21, 15, 0.09);
+  --border-strong: rgba(22, 21, 15, 0.18);
+  --rule: rgba(22, 21, 15, 0.12);
+  --text: #16150f;
+  --text-muted: #57554f;
+  --text-faint: #6b6963;
+  --text-disabled: #a19e96;
+  /* Pink fails as text on paper (about 2:1), so links and rings use a deeper pink. */
+  --accent-text: #b0168f;
+  --accent-glow: rgba(176, 22, 143, 0.18);
+  --accent-wash: rgba(176, 22, 143, 0.07);
   --danger: #c62828;
   --ok: #1e8a55;
   --sector-economy: #0e7c86;
@@ -66,29 +74,43 @@
   --sector-business: #6d4acf;
   --sector-society: #c7363b;
   --sector-environment: #1e8a55;
-  --shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.08);
-  --shadow-pop: 0 12px 40px rgba(0, 0, 0, 0.14);
+  --shadow-hover: 0 6px 20px rgba(22, 21, 15, 0.08);
+  --shadow-pop: 0 14px 40px rgba(22, 21, 15, 0.16);
 }
 
 :root {
-  /* type */
-  --font-sans: "Inter Variable", "Inter Fallback", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* type families */
+  --font-serif: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
+  --font-sans: "Schibsted Grotesk Variable", "Schibsted Fallback", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
-  /* Home hero only. cqi = the hero's own width (it is a size container), so the three lines
-     fit beside the sidebar and graphic at every width. */
-  --text-display: clamp(2.5rem, calc(9cqi - 1rem), 5.5rem);
-  --lh-display: 1;
-  --track-display: -0.045em;
-  --weight-display: 800;
-  --text-h1: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+
+  /* type scale: serif for headlines, sans for reading and interface; nothing below 12px */
+  --text-lead: clamp(1.875rem, 1.3rem + 1.9vw, 2.875rem); /* the lead story, 30–46px */
+  --lh-lead: 1.08;
+  --text-h1: clamp(2rem, 1.45rem + 1.7vw, 3rem); /* page titles, 32–48px */
   --lh-h1: 1.05;
-  --track-h1: -0.03em;
-  --weight-h1: 700;
-  --text-body: 0.9375rem; /* 15px; 16px from 768px */
+  --text-h2: 1.5rem; /* section and panel titles, 24px */
+  --lh-h2: 1.15;
+  --text-headline: 1.3125rem; /* a story in the list, 21px */
+  --lh-headline: 1.22;
+  --text-headline-sm: 1.0625rem; /* compact stories, 17px */
+  --text-body: 1rem; /* 16px; 17px from 768px */
   --lh-body: 1.6;
-  --text-small: 0.8125rem; /* 13px: secondary text, mono metadata, chips */
+  --text-small: 0.875rem; /* 14px: meta lines, controls */
   --lh-small: 1.45;
-  /* spacing: 4px base */
+  --text-micro: 0.75rem; /* 12px: kickers and labels, upper case */
+  --track-tight: -0.012em;
+  --track-kicker: 0.09em;
+
+  /* Older names, kept so every component reads from the same scale. */
+  --text-display: var(--text-lead);
+  --lh-display: var(--lh-lead);
+  --track-display: var(--track-tight);
+  --weight-display: 600;
+  --track-h1: var(--track-tight);
+  --weight-h1: 600;
+
+  /* spacing: 4/8 px scale */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -100,27 +122,33 @@
   --space-12: 48px;
   --space-16: 64px;
   --space-20: 80px;
-  /* radius */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+
+  /* radius: small and consistent; editorial surfaces are mostly square */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
   --radius-pill: 999px;
-  /* motion */
+
+  /* motion: short and calm */
   --dur-fast: 150ms;
   --dur-base: 200ms;
+  --dur-enter: 240ms;
   --dur-pin: 320ms;
   --dur-pulse: 2000ms;
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
   /* layout */
-  --topbar-h: 56px;
+  --header-h: 60px;
+  --topbar-h: var(--header-h);
   --bottomnav-h: 64px;
-  --sidebar-w: 240px;
-  --content-max: 1200px;
+  --content-max: 1240px;
   --feed-max: 720px;
-  --rail-w: 320px;
-  --measure: 68ch;
+  --rail-w: 340px;
+  --gutter: 16px;
+  --measure: 66ch;
+  --tap: 44px; /* minimum touch target */
   --z-map: 0;
   --z-sticky: 1100; /* above Leaflet's internal z-indexes */
   --z-dialog: 1200;
@@ -128,7 +156,14 @@
 
 @media (min-width: 768px) {
   :root {
-    --text-body: 1rem;
+    --text-body: 1.0625rem;
+    --gutter: 32px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --gutter: 40px;
   }
 }
 
@@ -136,6 +171,7 @@
   :root {
     --dur-fast: 0.01ms;
     --dur-base: 0.01ms;
+    --dur-enter: 0.01ms;
     --dur-pin: 0.01ms;
   }
 }

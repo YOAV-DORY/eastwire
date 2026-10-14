@@ -53,8 +53,8 @@ describe('StoryCard', () => {
       <StoryCard
         article={article({
           locations: [
-            { role: 'mentioned', precision: 'city', confidence: 'low', method: 'gazetteer', country: 'JP', placeId: 1850147, placeName: 'Tokyo', evidence: 'Mentions Tokyo' },
-            { role: 'event', precision: 'city', confidence: 'high', method: 'dateline', country: 'JP', placeId: 1853909, placeName: 'Osaka', evidence: 'Dateline: Osaka' },
+            { role: 'mentioned', precision: 'city', confidence: 'low', method: 'gazetteer', country: 'JP', placeId: 1850147, placeName: 'Tokyo', evidence: 'Mentions Tokyo' , primary: true },
+            { role: 'event', precision: 'city', confidence: 'high', method: 'dateline', country: 'JP', placeId: 1853909, placeName: 'Osaka', evidence: 'Dateline: Osaka' , primary: true },
           ],
         })}
         countryNames={NAMES}
