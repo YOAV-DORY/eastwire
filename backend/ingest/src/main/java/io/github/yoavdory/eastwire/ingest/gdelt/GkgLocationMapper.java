@@ -78,6 +78,19 @@ final class GkgLocationMapper {
         return new ArrayList<>(unique.values());
     }
 
+    /**
+     * Whether the first place the text mentions, of any country, is a covered one. Only then
+     * is the first covered place the story's lead: a Gulf story that later names China is not
+     * China news. Without positions in the text there is no lead.
+     */
+    boolean leadIsCovered(List<GkgLocation> mentions) {
+        return mentions.stream()
+                .filter(g -> g.offset() != Integer.MAX_VALUE)
+                .min(Comparator.comparingInt(GkgLocation::offset))
+                .map(g -> byFips.containsKey(g.fipsCountry()))
+                .orElse(false);
+    }
+
     Optional<City> matchCity(String iso2, GkgLocation g) {
         String name = Geo.fold(g.shortName());
         record Candidate(City city, double km, boolean nameMatches) {

@@ -180,7 +180,7 @@ public class GdeltGkgConnector implements Connector {
         }
         List<Location> all = new ArrayList<>(mentioned);
         publisherLocation(r.url()).ifPresent(all::add);
-        all = PrimaryPlaces.mark(Text.title(r.title()), all, gazetteer, true);
+        all = PrimaryPlaces.mark(Text.title(r.title()), all, gazetteer, locations.leadIsCovered(r.locations()));
         return Optional.of(new ArticleCandidate(SLUG, r.url(), Text.title(r.title()), null, null, null, false,
                 ArticleCandidate.ExcerptKind.NONE, r.publishedAt(), r.date(), "en", all, SectorSignals.themes(r.themes())));
     }
