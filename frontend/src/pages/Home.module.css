@@ -1,0 +1,89 @@
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--topbar-h);
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.main {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-4) var(--space-20);
+}
+
+.hero {
+  display: flex;
+  /* Phones: graphic above, so the headline gets the full width and stays within 3 lines. */
+  flex-direction: column-reverse;
+  gap: var(--space-4);
+}
+
+.desktopBreak {
+  display: none;
+}
+
+.title {
+  font-size: var(--text-display);
+  line-height: var(--lh-display);
+  letter-spacing: var(--track-display);
+  font-weight: var(--weight-display);
+}
+
+.mark {
+  flex-shrink: 0;
+  align-self: flex-end;
+  width: 56px;
+  height: 56px;
+}
+
+.lede {
+  max-width: 60ch;
+  margin-top: var(--space-8);
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+}
+
+.status {
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .bar {
+    padding: 0 var(--space-8);
+  }
+
+  .main {
+    padding: var(--space-20) var(--space-8);
+  }
+
+  .hero {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-6);
+  }
+
+  .desktopBreak {
+    display: inline;
+  }
+
+  .mark {
+    align-self: flex-start;
+    width: 160px;
+    height: 160px;
+  }
+}

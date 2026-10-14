@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: eastwire-api
+  main:
+    banner-mode: "off"
+
+server:
+  # Render injects PORT.
+  port: ${PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never
+
+eastwire:
+  # Path to the repo-level config/ directory. Gradle's bootRun and tests set it automatically.
+  config-dir: ${EASTWIRE_CONFIG_DIR:config}
+  cors:
+    # Comma-separated. Add the Cloudflare Pages origin when deploying (milestone 4).
+    allowed-origins: ${EASTWIRE_CORS_ORIGINS:http://localhost:5174}

@@ -588,7 +588,7 @@ The calm, dark, precise product surface comes from Linear. Gumroad's loud pink a
    - "New" badges
    - search focus ring
 
-   Pink appears nowhere else.
+   The only other pink is the one flat SVG graphic in the homepage hero, which the brief allows. Pink appears nowhere else.
 2. **Provenance and freshness are always visible.** They're never decoration.
 3. **Max 3 text sizes per view.**
    - Home: display + body + small.
@@ -1101,7 +1101,7 @@ frontend/src/
 4. Home hero headline is left-aligned, at most 3 lines at both widths. The SVG graphic doesn't cover the text.
 5. Map height is the same before and after tiles load. Pins and clusters are pink. Attribution is visible.
 6. The search bar is the most obvious control. A focused screenshot shows the pink ring. The `/` hint is visible on desktop.
-7. **Pink audit:** pink appears only in the 5 allowed roles. Text sizes per view ≤ 3.
+7. **Pink audit:** pink appears only in the 5 allowed roles, plus the homepage hero graphic. Text sizes per view ≤ 3.
 8. **Cards:**
    - 12 px radius, 1 px border, mono timestamp, sector dot with label, source, `↗`;
    - no images;
@@ -1118,18 +1118,24 @@ frontend/src/
 
 ## Status and next concrete step
 
-**Milestone 1 is done locally** in `~/Desktop/Personal/Projects/eastwire`. Nothing is committed yet. It contains:
-- source matrix and `config/sources.yaml`
-- 33 publisher domains (5 allow, 19 deny, 9 pending), with rules in `docs/domain-review.md`
-- `countries.yaml` with ISO↔FIPS codes
-- 170-city `cities.csv` built from GeoNames, plus curation and documentation
-- `scripts/validate_config.py`, tested against deliberately broken config
+**Milestone 1 (compliance groundwork):** committed and pushed to https://github.com/YOAV-DORY/eastwire (public).
 
-**Owner items still open:**
-- Japan Times: read the policy pages in a browser and save PDFs.
-- NHK: send the Article 11 email.
-- Asahi: send the notification email after launch.
+**Milestone 2 (skeleton):** built on branch `m2-skeleton`; not committed yet.
+- **Backend** (Gradle 9.7, Spring Boot 4.1.1, Java 21 toolchain downloaded automatically):
+  - `core`: `ComplianceConfig` loader (fails closed on rule violations), `DisplayPolicy`, `Excerpts`, Flyway V1 schema + V2 role grants. 58 unit tests.
+  - `ingest`: CLI app that runs migrations and syncs config/ into the DB. Testcontainers tests are skipped without Docker. Verified end-to-end against PGlite (Postgres 18.6), twice, with the same result.
+  - `api`: `/api/v1/health`, `/api/v1/sources`, CORS limited to GET from the frontend origin. 6 MockMvc tests; also checked live.
+- **Frontend** (Vite 8, React 19, TypeScript 6, React Router 8):
+  - tokens/base/utility CSS
+  - Button, ButtonLink, Chip, Sticker, Kbd, Skeleton, ThemeToggle
+  - Wordmark and HeroMark SVGs
+  - placeholder Home, NotFound, and the dev-only `/dev/gallery`
+  - 45 Vitest tests, including the token contrast checks
+  - 102 KB gzipped JS
+  - checked visually at 390/1280 px, dark and light
+- **CI** (`.github/workflows/ci.yml`): config validation, backend build (runs Testcontainers), frontend lint/test/build, actions pinned to SHAs.
+- **Local DB:** `compose.yaml` + `backend/db/local-init.sql`; setup in `docs/database.md`.
 
 **Next:**
-1. Make the first commit and create the public GitHub repo (needs owner approval).
-2. Start milestone 2. The machine has Java 25, so the Gradle toolchain should pin Java 21; Gradle can download it automatically.
+1. Commit milestone 2, push the branch, open a PR so CI runs the integration tests (needs owner approval).
+2. Milestone 3: the GDELT GKG and Global Voices connectors.

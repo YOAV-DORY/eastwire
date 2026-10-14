@@ -13,3 +13,11 @@ data/raw/
 .DS_Store
 .idea/
 .vscode/
+
+# Backend build output
+backend/.gradle/
+backend/build/
+backend/*/build/
+
+# Frontend test output
+frontend/.vitest/
