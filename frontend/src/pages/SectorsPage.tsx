@@ -6,6 +6,7 @@ import { PageHeader } from '../components/layout/PageHeader'
 import { RULES_FILE } from '../components/news/SectorRules'
 import { ErrorState } from '../components/status/Feedback'
 import { Skeleton } from '../components/ui/Skeleton'
+import { usePageTitle } from '../hooks/usePageTitle'
 import { SECTORS, sectorColor } from '../sectors'
 import styles from './SectorsPage.module.css'
 
@@ -13,6 +14,7 @@ const DOCS = 'https://github.com/YOAV-DORY/eastwire/blob/main/docs/sectors.md'
 
 /** /sectors — the six sectors as an index: what each means and how many recent stories carry it. */
 export function SectorsPage() {
+  usePageTitle('Sectors')
   const sectors = useSectors()
   const byId = new Map((sectors.data?.sectors ?? []).map((s) => [s.slug, s]))
   return (
@@ -56,8 +58,7 @@ export function SectorsPage() {
 
       {sectors.data && (
         <p className={styles.untagged}>
-          <span className="num">{sectors.data.untagged7d}</span>{' '}
-          {sectors.data.untagged7d === 1 ? 'story' : 'stories'} from the last 7 days matched no sector and show no tag.
+          {`${sectors.data.untagged7d} ${sectors.data.untagged7d === 1 ? 'story' : 'stories'} from the last 7 days matched no sector and show no tag.`}
         </p>
       )}
 

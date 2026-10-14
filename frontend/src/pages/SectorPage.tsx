@@ -9,6 +9,7 @@ import { StoryFeed } from '../components/news/StoryFeed'
 import { Button } from '../components/ui/Button'
 import { FilterTabs } from '../components/ui/FilterTabs'
 import { DEFAULT_ROLES } from '../lib/map'
+import { usePageTitle } from '../hooks/usePageTitle'
 import { isSectorId, sectorColor, sectorLabel, type SectorId } from '../sectors'
 import { NotFound } from './NotFound'
 import styles from './SectorPage.module.css'
@@ -36,6 +37,7 @@ function Sector({ slug }: { slug: SectorId }) {
   const topPlaces = (map.data?.cities ?? []).slice(0, 5)
   const scope = country ? (countryNames[country] ?? country) : undefined
   const select = (next?: string) => setParams(next ? { country: next } : {})
+  usePageTitle([label, scope].filter(Boolean).join(' · '))
 
   return (
     <div className={clsx('container', styles.page)} style={{ '--sector': sectorColor(slug) } as CSSProperties}>

@@ -21,10 +21,10 @@ describe('sector pages', () => {
   it('/sectors lists the six sectors with definitions and counts', async () => {
     stubApi(API)
     renderRoute('/sectors')
-    expect(await screen.findByRole('heading', { name: 'Sectors', level: 1 })).toBeInTheDocument()
-    const economy = await screen.findByRole('link', { name: /Economy.*The economy as a whole.*12 stories · 7 days/ })
+    expect(await screen.findByRole('heading', { name: 'Six ways into the news', level: 1 })).toBeInTheDocument()
+    const economy = await screen.findByRole('link', { name: /Economy.*The economy as a whole.*12 stories this week/ })
     expect(economy).toHaveAttribute('href', '/sector/economy')
-    expect(screen.getAllByRole('link', { name: /· 7 days/ })).toHaveLength(6)
+    expect(screen.getAllByRole('link', { name: /this week/ })).toHaveLength(6)
     expect(screen.getByText(/40 stories from the last 7 days matched no sector/)).toBeInTheDocument()
   })
 
@@ -37,10 +37,10 @@ describe('sector pages', () => {
     await waitFor(() =>
       expect(calls.some((u) => u.pathname === '/api/v1/articles' && u.searchParams.get('sector') === 'economy')).toBe(true),
     )
-    const places = screen.getByRole('complementary', { name: 'Top places this week' })
+    const places = screen.getByRole('region', { name: 'Top places this week' })
     expect(await within(places).findByRole('link', { name: 'Tokyo' })).toHaveAttribute('href', '/map/city/1850147?sector=economy')
 
-    await userEvent.click(screen.getByText('How we tag Economy'))
+    await userEvent.click(screen.getByText('How a story gets this tag'))
     expect(screen.getByText(/tagged Economy when its score reaches 3/)).toBeInTheDocument()
     expect(screen.getByText('tariff*')).toBeInTheDocument()
     expect(screen.getByText('economy class')).toBeInTheDocument()

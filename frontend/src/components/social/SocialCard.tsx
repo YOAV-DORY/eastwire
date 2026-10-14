@@ -26,9 +26,7 @@ export function SocialCard({ item, now }: { item: SocialItemView; now?: Date }) 
         <strong className={styles.account}>{item.account.name}</strong>
         <span className={styles.byline}>
           <span className={styles.handle}>{item.platform === 'bluesky' ? `@${item.account.handle}` : item.account.handle}</span>
-          <span aria-hidden="true"> · </span>
-          {KIND[item.account.kind]}
-          <span aria-hidden="true"> · </span>
+          {` · ${PLATFORM[item.platform]} · ${KIND[item.account.kind]} · `}
           <time className="num" dateTime={item.createdAt} title={formatUtc(item.createdAt)}>
             {relativeTime(item.createdAt, now)}
           </time>

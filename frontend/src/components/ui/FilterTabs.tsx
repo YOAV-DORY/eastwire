@@ -42,7 +42,8 @@ export function FilterTabs({
         >
           {o.leading}
           {o.label}
-          {o.count !== undefined && <span className={styles.count}>{o.count}</span>}
+          {/* The space keeps the accessible name "India 78", not "India78"; flex layout drops it visually. */}
+          {o.count !== undefined && <> <span className={styles.count}>{o.count}</span></>}
         </button>
       ))}
     </div>

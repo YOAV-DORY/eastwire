@@ -4,6 +4,7 @@ import type { FreshnessState, SourceStatus, Status } from '../api/types'
 import { PageHeader } from '../components/layout/PageHeader'
 import { ErrorState, FeedSkeleton } from '../components/status/Feedback'
 import { formatUtc, relativeTime } from '../lib/time'
+import { usePageTitle } from '../hooks/usePageTitle'
 import styles from './StatusPage.module.css'
 
 const STATE_LABEL: Record<FreshnessState, string> = {
@@ -15,6 +16,7 @@ const STATE_LABEL: Record<FreshnessState, string> = {
 
 /** Per-source freshness: checking a source and finding something new are reported separately. */
 export function StatusPage() {
+  usePageTitle('Status')
   const status = useStatus()
   return (
     <div className={clsx('container', styles.page)}>

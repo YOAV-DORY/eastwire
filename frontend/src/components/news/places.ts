@@ -2,16 +2,14 @@ import type { LocationView } from '../../api/types'
 
 /**
  * The place a story is about: its main-subject city if there is one, else its main-subject
- * country. Falls back to the first place mentioned only for stories stored before the API
- * marked main subjects. Never the publisher's base.
+ * country. A story with no main subject among our places shows none: a passing mention is
+ * not what the story is about, and the publisher's base never is.
  */
 export function primaryPlace(locations: LocationView[], countryNames: Record<string, string> = {}): string | null {
-  const about = locations.filter((l) => l.role !== 'publisher')
-  const main = about.filter((l) => l.primary)
-  const pool = main.length > 0 ? main : about
-  const city = pool.find((l) => l.precision === 'city' && l.placeName)
+  const main = locations.filter((l) => l.role !== 'publisher' && l.primary)
+  const city = main.find((l) => l.precision === 'city' && l.placeName)
   if (city) return city.placeName
-  const first = pool[0]
+  const first = main[0]
   return first ? (countryNames[first.country] ?? first.country) : null
 }
 

@@ -30,45 +30,70 @@ describe('map page', () => {
     renderRoute('/map')
     const map = await screen.findByTestId('news-map')
     expect(within(map).getByText('Tokyo')).toBeInTheDocument()
-    expect(screen.getByText(/Country level only, not placed on a city: India 42/)).toBeInTheDocument()
+    expect(screen.getByText(/About a country but no one city \(not pinned\): India 42/)).toBeInTheDocument()
   })
 
   it('settings go into the URL and the request', async () => {
     const calls = stubApi(API)
     const router = renderRoute('/map')
-    await userEvent.click(await screen.findByRole('button', { name: '24 hours' }))
+    const settings = within(await screen.findByRole('group', { name: 'Map settings' }))
+    await userEvent.click(settings.getByRole('button', { name: '24 hours' }))
     await waitFor(() => expect(router.state.location.search).toBe('?window=24h'))
     await waitFor(() =>
       expect(calls.some((u) => u.pathname === '/api/v1/map/cities' && u.searchParams.get('window') === '24h')).toBe(true),
     )
 
-    await userEvent.click(screen.getByRole('checkbox', { name: 'Publisher' }))
+    await userEvent.click(settings.getByText('More options'))
+    await userEvent.click(settings.getByRole('checkbox', { name: 'Publisher based there' }))
     await waitFor(() => expect(router.state.location.search).toBe('?window=24h&roles=mentioned%2Cevent%2Cpublisher'))
+  })
+
+  it('keeps the population layer off by default', async () => {
+    stubApi(API)
+    renderRoute('/map')
+    const settings = within(await screen.findByRole('group', { name: 'Map settings' }))
+    expect(settings.getByRole('checkbox', { name: 'Population layer' })).not.toBeChecked()
   })
 
   it('the last place role cannot be switched off', async () => {
     stubApi(API)
     renderRoute('/map?roles=event')
-    expect(await screen.findByRole('checkbox', { name: 'Dateline' })).toBeDisabled()
+    const settings = within(await screen.findByRole('group', { name: 'Map settings' }))
+    expect(settings.getByRole('checkbox', { name: 'Datelined there' })).toBeDisabled()
   })
 
-  it('list view is an accessible table of the same cities', async () => {
+  it('on phones a Map/List switch shows one at a time, through the URL', async () => {
     stubApi(API)
-    renderRoute('/map?view=list')
+    const router = renderRoute('/map')
+    const view = within(await screen.findByRole('group', { name: 'View' }))
+    expect(view.getByRole('button', { name: 'Map' })).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.click(view.getByRole('button', { name: 'List' }))
+    await waitFor(() => expect(router.state.location.search).toBe('?view=list'))
+    expect(view.getByRole('button', { name: 'List' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('table view is an accessible table of the same cities', async () => {
+    stubApi(API)
+    renderRoute('/map?view=table')
     const table = await screen.findByRole('table')
-    expect(within(table).getByRole('link', { name: 'Tokyo' })).toHaveAttribute('href', '/map/city/1850147?view=list')
+    expect(within(table).getByRole('link', { name: 'Tokyo' })).toHaveAttribute('href', '/map/city/1850147?view=table')
     expect(within(table).getByText('· low confidence')).toBeInTheDocument()
     expect(screen.queryByTestId('news-map')).not.toBeInTheDocument()
   })
 
-  it('a city route opens its panel with counts, coordinates and stories', async () => {
-    stubApi(API)
+  it('choosing a city narrows the story list to that city', async () => {
+    const calls = stubApi(API)
     renderRoute('/map/city/1850147')
     const panel = await screen.findByRole('region', { name: 'Tokyo' })
-    expect(within(panel).getByText('Japan · 35.69°N 139.69°E')).toBeInTheDocument()
-    expect(within(panel).getByText('Mentioned').nextSibling).toHaveTextContent('11')
-    expect(await within(panel).findByText('Tokyo rail strike')).toBeInTheDocument()
-    expect(within(panel).getByText('2 h ago').closest('p')).toHaveTextContent('Last item seen 2 h ago')
+    expect(within(panel).getByText('Japan')).toBeInTheDocument()
+    expect(within(panel).getByText('About the city').nextSibling).toHaveTextContent('11')
+    expect(within(panel).getByText('2 h ago').closest('p')).toHaveTextContent('Last story 2 h ago')
+    expect(within(panel).getByText('35.69°N 139.69°E')).toBeInTheDocument()
+    expect(await screen.findByText('Tokyo rail strike')).toBeInTheDocument()
+    await waitFor(() =>
+      expect(calls.some((u) => u.pathname === '/api/v1/articles' && u.searchParams.get('city') === '1850147')).toBe(true),
+    )
+    expect(document.title).toBe('Tokyo on the map · EastWire')
   })
 
   it('an unknown city says so', async () => {

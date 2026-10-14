@@ -14,7 +14,8 @@ describe('SocialCard', () => {
   it('is labelled as not verified reporting and says why the account is listed', () => {
     render(<SocialCard item={socialItem()} now={NOW} />)
     expect(screen.getByText('Social post · not verified reporting')).toBeInTheDocument()
-    expect(screen.getByText('Why this account: Invented newsroom for tests.')).toBeInTheDocument()
+    expect(screen.getByText('Why this account')).toBeInTheDocument()
+    expect(screen.getByText('Invented newsroom for tests.')).toBeInTheDocument()
     expect(screen.getByText(/Bluesky · Newsroom ·/)).toBeInTheDocument()
     expect(screen.getByText('No matching report in our sources yet')).toBeInTheDocument()
   })

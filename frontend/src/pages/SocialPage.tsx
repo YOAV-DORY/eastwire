@@ -9,6 +9,7 @@ import { ColdStart, EmptyState, ErrorState, FeedSkeleton } from '../components/s
 import { Button } from '../components/ui/Button'
 import { FilterTabs } from '../components/ui/FilterTabs'
 import { useSlow } from '../hooks/useSlow'
+import { usePageTitle } from '../hooks/usePageTitle'
 import styles from './SocialPage.module.css'
 
 const PLATFORMS: { value: SocialPlatform; label: string }[] = [
@@ -24,6 +25,7 @@ export function SocialPage() {
   const platform = PLATFORMS.find((p) => p.value === platformParam)?.value
   const country = params.get('country') ?? undefined
 
+  usePageTitle('Social posts & videos')
   const countries = useCountries()
   const social = useSocial({ platform, country })
   const slow = useSlow(social.isLoading)

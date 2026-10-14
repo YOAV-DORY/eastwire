@@ -8,6 +8,7 @@ import { StoryFeed } from '../components/news/StoryFeed'
 import { StaleBanner } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
 import { FilterTabs } from '../components/ui/FilterTabs'
+import { usePageTitle } from '../hooks/usePageTitle'
 import { DEFAULT_ROLES } from '../lib/map'
 import { relativeTime } from '../lib/time'
 import { SECTORS, isSectorId, sectorColor, sectorLabel } from '../sectors'
@@ -55,6 +56,7 @@ export function Home() {
   }
 
   const heading = ['Latest', scope, sector && sectorLabel(sector)].filter(Boolean).join(' · ')
+  usePageTitle([scope, sector && sectorLabel(sector)].filter(Boolean).join(' · ') || undefined)
   const emptyTitle = `Nothing from our sources${sector ? ` tagged ${sectorLabel(sector)}` : ''}${scope ? ` about ${scope}` : ''} right now`
   const emptyAction = sector ? (
     <Button onClick={() => select({ country, city })}>All sectors</Button>

@@ -11,21 +11,28 @@ const BASE = {
 }
 
 describe('home feed', () => {
-  it('lists stories with a count and country chips', async () => {
+  it('opens with a lead story, then a short list, under country tabs', async () => {
     stubApi({ ...BASE, '/api/v1/articles': page([article(), article({ id: 2, title: 'Second story' })]) })
     renderRoute('/')
 
     expect(await screen.findByText('Second story')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Latest · 2 stories')
-    expect(screen.getByRole('button', { name: 'India 78' })).toHaveAttribute('aria-pressed', 'false')
-    expect(screen.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Latest news from China, India, South Korea and Japan')
+    expect(screen.getByRole('heading', { level: 2, name: /^Latest/ })).toHaveTextContent('Latest · 2 stories')
+    // The first story is the lead (a level-2 headline); the rest are level 3.
+    expect(screen.getByRole('heading', { level: 2, name: /Metro line opens in Bengaluru/ })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 3, name: /Second story/ })).toBeInTheDocument()
+    const tabs = within(screen.getByRole('group', { name: 'Filter by country' }))
+    expect(tabs.getByRole('button', { name: 'India 78' })).toHaveAttribute('aria-pressed', 'false')
+    expect(tabs.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('link', { name: /Open the full map/ })).toHaveAttribute('href', '/map')
   })
 
   it('filters by country through the URL and asks the API for that country', async () => {
     const calls = stubApi({ ...BASE, '/api/v1/articles': page([article()]) })
     const router = renderRoute('/')
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Japan 2' }))
+    const tabs = await screen.findByRole('group', { name: 'Filter by country' })
+    await userEvent.click(await within(tabs).findByRole('button', { name: 'Japan 2' }))
 
     await waitFor(() => expect(router.state.location.search).toBe('?country=JP'))
     await waitFor(() =>
@@ -46,7 +53,7 @@ describe('home feed', () => {
         calls.some((u) => u.pathname === '/api/v1/articles' && u.searchParams.get('sector') === 'economy' && u.searchParams.get('country') === 'JP'),
       ).toBe(true),
     )
-    expect(await screen.findByText('Nothing from our sources tagged Economy for Japan right now')).toBeInTheDocument()
+    expect(await screen.findByText('Nothing from our sources tagged Economy about Japan right now')).toBeInTheDocument()
     const sectors = screen.getByRole('group', { name: 'Filter by sector' })
     expect(within(sectors).getByRole('button', { name: 'All sectors' })).toHaveAttribute('aria-pressed', 'false')
     expect(within(sectors).getByRole('button', { name: 'Economy' })).toHaveAttribute('aria-pressed', 'true')
@@ -56,8 +63,8 @@ describe('home feed', () => {
     stubApi({ ...BASE, '/api/v1/articles': page([]) })
     renderRoute('/?country=KR')
 
-    expect(await screen.findByText('Nothing from our sources for South Korea right now')).toBeInTheDocument()
-    expect(screen.getByText('This reflects our limited list of sources, not an absence of news.')).toBeInTheDocument()
+    expect(await screen.findByText('Nothing from our sources about South Korea right now')).toBeInTheDocument()
+    expect(screen.getByText('This reflects our short list of sources, not an absence of news.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'All countries' })).toBeInTheDocument()
   })
 

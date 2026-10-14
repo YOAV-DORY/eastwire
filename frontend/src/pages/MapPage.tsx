@@ -11,6 +11,7 @@ import { MapLegend } from '../components/map/MapLegend'
 import { StoryFeed } from '../components/news/StoryFeed'
 import { ErrorState } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
+import { usePageTitle } from '../hooks/usePageTitle'
 import { readMapState, writeMapState, type MapState } from '../lib/map'
 import { SECTORS, sectorLabel, type SectorId } from '../sectors'
 import styles from './MapPage.module.css'
@@ -63,6 +64,7 @@ export function MapPage() {
     : undefined
   const selectedPlace = places.data?.find((p) => p.id === selectedId)
   const selectedPin = pins.find((p) => p.id === selectedId)
+  usePageTitle(selectedPlace ? `${selectedPlace.name} on the map` : 'Map')
   const days = WINDOWS.find((w) => w.value === state.window)?.days ?? 7
   const windowLabel = WINDOWS.find((w) => w.value === state.window)?.label ?? '7 days'
 

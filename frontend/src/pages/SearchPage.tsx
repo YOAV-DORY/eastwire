@@ -5,6 +5,7 @@ import { StoryCard } from '../components/news/StoryCard'
 import { SearchBar } from '../components/search/SearchBar'
 import { ColdStart, EmptyState, ErrorState, FeedSkeleton } from '../components/status/Feedback'
 import { useSlow } from '../hooks/useSlow'
+import { usePageTitle } from '../hooks/usePageTitle'
 import { SECTORS, isSectorId } from '../sectors'
 import styles from './SearchPage.module.css'
 
@@ -57,6 +58,7 @@ export function SearchPage() {
 
   const data = search.data
   const hasQuery = filters.q.trim().length >= 2
+  usePageTitle(hasQuery ? `Search: ${filters.q.trim()}` : 'Search')
 
   return (
     <div className={`container ${styles.page}`}>
@@ -218,8 +220,7 @@ function Suggestions({ items, label }: { items: { q: string; count: number }[]; 
         {items.map((s) => (
           <li key={s.q}>
             <Link to={`/search?q=${encodeURIComponent(s.q)}`}>
-              {s.q}
-              <span className={styles.suggestionCount}>{s.count}</span>
+              {s.q} <span className={styles.suggestionCount}>{s.count}</span>
             </Link>
           </li>
         ))}

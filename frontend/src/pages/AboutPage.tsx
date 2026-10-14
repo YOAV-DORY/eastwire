@@ -7,6 +7,7 @@ import type { SourceView } from '../api/types'
 import { PageHeader } from '../components/layout/PageHeader'
 import { FeedSkeleton } from '../components/status/Feedback'
 import { formatDate } from '../lib/time'
+import { usePageTitle } from '../hooks/usePageTitle'
 import styles from './AboutPage.module.css'
 
 const REPO = 'https://github.com/YOAV-DORY/eastwire/blob/main/docs'
@@ -46,6 +47,7 @@ const GROUPS: { title: string; note: string; folded?: boolean; match: (s: Source
 
 /** /about: the method page. What is shown, from where, and what is missing. */
 export function AboutPage() {
+  usePageTitle('Sources & method')
   const sources = useSources()
   return (
     <div className={clsx('container', styles.page)}>

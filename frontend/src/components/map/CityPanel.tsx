@@ -20,7 +20,7 @@ export function CityPanel({
   onClose: () => void
 }) {
   return (
-    <header className={styles.panel} aria-labelledby="city-title">
+    <section className={styles.panel} aria-labelledby="city-title">
       <div className={styles.top}>
         <div>
           <p className="kicker">{countryNames[place.country] ?? place.country}</p>
@@ -61,6 +61,6 @@ export function CityPanel({
         {' · '}
         <span className="num">{formatCoords(place.lat, place.lon)}</span>
       </p>
-    </header>
+    </section>
   )
 }

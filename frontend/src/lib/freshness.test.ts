@@ -6,8 +6,8 @@ const NOW = new Date('2026-10-13T12:00:00Z')
 
 describe('freshnessLabel', () => {
   it.each([
-    ['fresh', '2026-10-13T11:48:00Z', 'Updated 12 min ago'],
-    ['stale', '2026-10-13T09:00:00Z', 'Stale · updated 3 h ago'],
+    ['fresh', '2026-10-13T11:48:00Z', 'Sources updated 12 min ago'],
+    ['stale', '2026-10-13T09:00:00Z', 'Stale · sources updated 3 h ago'],
     ['outage', '2026-10-11T09:00:00Z', 'Sources offline · last update 11 Oct 2026'],
   ] as const)('%s', (state, at, expected) => {
     expect(freshnessLabel(status(state, at), false, NOW)).toBe(expected)
