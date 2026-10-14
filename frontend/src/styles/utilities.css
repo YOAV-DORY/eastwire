@@ -10,6 +10,13 @@
   border: 0;
 }
 
+.clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -17,12 +24,36 @@
   overflow: hidden;
 }
 
-/* Small monospace metadata: timestamps, source names, coordinates. */
+/* Small monospace metadata: coordinates, rule weights, counts in tables. */
 .mono {
   font-family: var(--font-mono);
-  font-size: var(--text-small);
+  font-size: 0.8125rem;
   line-height: var(--lh-small);
   font-variant-numeric: tabular-nums;
+}
+
+/* Section labels: small capitals with air, above a hairline or a list. */
+.kicker {
+  font-family: var(--font-sans);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Counts and times line up in columns. */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The page column: centred, with gutters that grow on wider screens. */
+.container {
+  width: 100%;
+  max-width: calc(var(--content-max) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
 }
 
 .muted {

@@ -13,6 +13,8 @@ export interface LocationView {
   placeId: number | null
   placeName: string | null
   evidence: string | null
+  /** The story is about this place (headline, dateline, lead), not a passing mention. */
+  primary: boolean
 }
 
 export interface ArticleView {

@@ -24,3 +24,21 @@ export function formatUtc(iso: string): string {
   const time = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }).format(d)
   return `${formatDate(iso)}, ${time} UTC`
 }
+
+/**
+ * When a story was published, for its card: "35 min ago" today, "Yesterday", then a date
+ * ("9 Oct"; with the year if it is not this year). A story's own date, never the site's.
+ */
+export function storyDate(iso: string, now: Date = new Date()): string {
+  const d = new Date(iso)
+  const hours = (now.getTime() - d.getTime()) / 3_600_000
+  if (hours < 24) return relativeTime(iso, now)
+  if (hours < 48) return 'Yesterday'
+  const sameYear = d.getUTCFullYear() === now.getUTCFullYear()
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    ...(sameYear ? {} : { year: 'numeric' }),
+    timeZone: 'UTC',
+  }).format(d)
+}

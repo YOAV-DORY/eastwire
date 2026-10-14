@@ -6,6 +6,7 @@ import io.github.yoavdory.eastwire.core.social.SocialAccounts;
 import io.github.yoavdory.eastwire.ingest.http.HttpFetcher;
 import io.github.yoavdory.eastwire.ingest.pipeline.RetentionPurger;
 import io.github.yoavdory.eastwire.ingest.pipeline.SectorTagger;
+import io.github.yoavdory.eastwire.ingest.pipeline.StoryHygiene;
 import io.github.yoavdory.eastwire.ingest.social.SocialLinker;
 import io.github.yoavdory.eastwire.ingest.run.CircuitBreaker;
 import io.github.yoavdory.eastwire.ingest.run.RunOutcome;
@@ -49,6 +50,7 @@ class IngestRunner implements ApplicationRunner {
     private final RunRecorder recorder;
     private final RetentionPurger purger;
     private final SectorTagger sectors;
+    private final StoryHygiene hygiene;
     private final SocialAccounts socialAccounts;
     private final SocialLinker socialLinker;
     private final Map<String, Connector> connectors;
@@ -57,13 +59,15 @@ class IngestRunner implements ApplicationRunner {
     private final boolean useLock;
 
     IngestRunner(ComplianceConfig config, ConfigSync configSync, RunRecorder recorder, RetentionPurger purger,
-            SectorTagger sectors, SocialAccounts socialAccounts, SocialLinker socialLinker, List<Connector> connectors, DataSource dataSource, Clock clock,
+            SectorTagger sectors, StoryHygiene hygiene, SocialAccounts socialAccounts, SocialLinker socialLinker,
+            List<Connector> connectors, DataSource dataSource, Clock clock,
             @Value("${eastwire.ingest.advisory-lock}") boolean useLock) {
         this.config = config;
         this.configSync = configSync;
         this.recorder = recorder;
         this.purger = purger;
         this.sectors = sectors;
+        this.hygiene = hygiene;
         this.socialAccounts = socialAccounts;
         this.socialLinker = socialLinker;
         this.connectors = connectors.stream().collect(Collectors.toMap(Connector::sourceSlug, Function.identity()));
@@ -133,6 +137,12 @@ class IngestRunner implements ApplicationRunner {
                 failed++;
             }
             log.info("{}: {} ({} seen, {} new)", source.slug(), outcome.status(), outcome.itemsSeen(), outcome.itemsNew());
+        }
+
+        StoryHygiene.Result hygieneResult = hygiene.run();
+        if (hygieneResult.notNewsRemoved() + hygieneResult.articlesJudged() > 0) {
+            log.info("Removed {} stored items that are not news; judged main-subject places of {} older stories",
+                    hygieneResult.notNewsRemoved(), hygieneResult.articlesJudged());
         }
 
         int retagged = sectors.retagStale();

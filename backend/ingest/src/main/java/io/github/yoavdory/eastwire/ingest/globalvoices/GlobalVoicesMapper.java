@@ -12,6 +12,7 @@ import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import io.github.yoavdory.eastwire.core.config.Country;
 import io.github.yoavdory.eastwire.core.geo.DatelineDetector;
 import io.github.yoavdory.eastwire.core.geo.Gazetteer;
+import io.github.yoavdory.eastwire.core.geo.PrimaryPlaces;
 import io.github.yoavdory.eastwire.core.sector.SectorSignals;
 import io.github.yoavdory.eastwire.ingest.pipeline.ArticleCandidate;
 import io.github.yoavdory.eastwire.ingest.pipeline.Text;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
  *   <li>Event location: only from a dateline at the start of the summary.</li>
  *   <li>Publisher location: none. Global Voices is an international network.</li>
  *   <li>Sector hints: all of the item's Global Voices tags; config/sectors.yaml decides which count.</li>
+ *   <li>Main subject: {@code PrimaryPlaces} (headline, dateline, or the only country it is filed under).</li>
  * </ul>
  */
 final class GlobalVoicesMapper {
@@ -84,10 +86,11 @@ final class GlobalVoicesMapper {
         datelines.detect(summary).ifPresent(city -> locations.add(new Location(city.geonamesId(), city.countryIso2(),
                 Role.EVENT, Precision.CITY, Confidence.HIGH, Method.DATELINE, "Dateline: " + city.name())));
 
+        List<Location> marked = PrimaryPlaces.mark(title, locations, gazetteer, false);
         String author = entry.getAuthor() == null || entry.getAuthor().isBlank() ? null : entry.getAuthor().strip();
         return Optional.of(new ArticleCandidate(sourceSlug, entry.getLink().strip(), title, summary, author, null,
                 PartnerReprints.isPartnerReprint(content), ArticleCandidate.ExcerptKind.CC_BY_EXCERPT,
-                toInstant(entry.getPublishedDate()), now, "en", locations, SectorSignals.categories(categories)));
+                toInstant(entry.getPublishedDate()), now, "en", marked, SectorSignals.categories(categories)));
     }
 
     private static Instant toInstant(Date date) {

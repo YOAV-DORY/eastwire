@@ -49,9 +49,11 @@ final class GkgLocationMapper {
         this.citiesByCountry = config.cities().stream().collect(Collectors.groupingBy(City::countryIso2));
     }
 
+    /** Covered places in the order the text first mentions them (the first is the story's lead place). */
     List<Location> map(List<GkgLocation> mentions) {
         Map<String, Location> unique = new LinkedHashMap<>();
-        for (GkgLocation g : mentions) {
+        List<GkgLocation> inTextOrder = mentions.stream().sorted(Comparator.comparingInt(GkgLocation::offset)).toList();
+        for (GkgLocation g : inTextOrder) {
             Country country = byFips.get(g.fipsCountry());
             if (country == null) {
                 continue;
@@ -74,6 +76,19 @@ final class GkgLocationMapper {
             }
         }
         return new ArrayList<>(unique.values());
+    }
+
+    /**
+     * Whether the first place the text mentions, of any country, is a covered one. Only then
+     * is the first covered place the story's lead: a Gulf story that later names China is not
+     * China news. Without positions in the text there is no lead.
+     */
+    boolean leadIsCovered(List<GkgLocation> mentions) {
+        return mentions.stream()
+                .filter(g -> g.offset() != Integer.MAX_VALUE)
+                .min(Comparator.comparingInt(GkgLocation::offset))
+                .map(g -> byFips.containsKey(g.fipsCountry()))
+                .orElse(false);
     }
 
     Optional<City> matchCity(String iso2, GkgLocation g) {

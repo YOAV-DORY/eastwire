@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { COUNTRIES, socialItem, status, VIDEO } from '../test/fixtures'
@@ -10,8 +10,8 @@ describe('social page', () => {
   it('shows curated posts under a permanent not-verified notice', async () => {
     stubApi({ ...BASE, '/api/v1/social': { items: [socialItem(), VIDEO], page: 1, size: 12, total: 2, hasMore: false } })
     renderRoute('/social')
-    expect(await screen.findByRole('heading', { name: 'Social posts & videos', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText('Not verified reporting. Shown from curated accounts.')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Posts & videos', level: 1 })).toBeInTheDocument()
+    expect(screen.getByText('Not verified reporting.')).toBeInTheDocument()
     expect(await screen.findByText('2 items · last 30 days')).toBeInTheDocument()
     expect(screen.getAllByRole('article')).toHaveLength(2)
   })
@@ -36,7 +36,8 @@ describe('social page', () => {
       '/api/v1/social': { items: [socialItem()], page: 1, size: 3, total: 1, hasMore: false },
     })
     renderRoute('/')
-    expect(await screen.findByRole('complementary', { name: 'Social posts & videos' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'See all' })).toHaveAttribute('href', '/social')
+    const preview = await screen.findByRole('region', { name: 'From newsrooms on social' })
+    expect(within(preview).getByText('Not verified reporting')).toBeInTheDocument()
+    expect(within(preview).getByRole('link', { name: 'All posts and videos' })).toHaveAttribute('href', '/social')
   })
 })

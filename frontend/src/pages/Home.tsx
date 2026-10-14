@@ -1,16 +1,14 @@
-import { useCallback, useMemo } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
+import clsx from 'clsx'
+import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { useCountries, useMapCities, usePlaces, useStatus } from '../api/queries'
-import type { CityPin } from '../api/types'
 import { Flag } from '../components/graphics/Flag'
-import { HeroMark } from '../components/graphics/HeroMark'
-import { LazyNewsMap } from '../components/map/LazyNewsMap'
+import { CountryCounts, MapCompanion, SocialPreview } from '../components/home/Companion'
 import { StoryFeed } from '../components/news/StoryFeed'
-import { SearchBar } from '../components/search/SearchBar'
-import { SocialStrip } from '../components/social/SocialStrip'
 import { StaleBanner } from '../components/status/Feedback'
-import { Button, ButtonLink } from '../components/ui/Button'
-import { Chip } from '../components/ui/Chip'
+import { Button } from '../components/ui/Button'
+import { FilterTabs } from '../components/ui/FilterTabs'
+import { usePageTitle } from '../hooks/usePageTitle'
 import { DEFAULT_ROLES } from '../lib/map'
 import { relativeTime } from '../lib/time'
 import { SECTORS, isSectorId, sectorColor, sectorLabel } from '../sectors'
@@ -22,19 +20,25 @@ interface Filters {
   sector?: string
 }
 
+const today = () =>
+  new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())
+
+/**
+ * The front page: news first. A lead story and a short list fill the first screen; the map
+ * sits beside them on wide screens and below them on phones, with a way into the full map.
+ */
 export function Home() {
   const [params, setParams] = useSearchParams()
   const country = params.get('country') ?? undefined
   const city = params.get('city') ?? undefined
   const sectorParam = params.get('sector')
   const sector = isSectorId(sectorParam) ? sectorParam : undefined
+  const [highlighted, setHighlighted] = useState<number | null>(null)
 
   const countries = useCountries()
   const places = usePlaces(country)
   const status = useStatus()
   const map = useMapCities({ window: '7d', roles: DEFAULT_ROLES, country, sector })
-  const navigate = useNavigate()
-  const openCity = useCallback((pin: CityPin) => navigate(`/map/city/${pin.id}`), [navigate])
 
   const countryNames = useMemo(
     () => Object.fromEntries((countries.data ?? []).map((c) => [c.iso2, c.name])),
@@ -52,7 +56,8 @@ export function Home() {
   }
 
   const heading = ['Latest', scope, sector && sectorLabel(sector)].filter(Boolean).join(' · ')
-  const emptyTitle = `Nothing from our sources${sector ? ` tagged ${sectorLabel(sector)}` : ''}${scope ? ` for ${scope}` : ''} right now`
+  usePageTitle([scope, sector && sectorLabel(sector)].filter(Boolean).join(' · ') || undefined)
+  const emptyTitle = `Nothing from our sources${sector ? ` tagged ${sectorLabel(sector)}` : ''}${scope ? ` about ${scope}` : ''} right now`
   const emptyAction = sector ? (
     <Button onClick={() => select({ country, city })}>All sectors</Button>
   ) : scope ? (
@@ -62,30 +67,59 @@ export function Home() {
   ) : undefined
 
   return (
-    <div className={styles.page}>
-      <section className={styles.hero} aria-labelledby="hero-title">
-        <h1 id="hero-title" className={styles.title}>
-          Asian news, <br className={styles.desktopBreak} />
-          on the map, <br className={styles.desktopBreak} />
-          with sources shown.
-        </h1>
-        <HeroMark className={styles.mark} />
-      </section>
+    <div className={clsx('container', styles.page)}>
+      <header className={styles.header}>
+        <h1 className="visually-hidden">Latest news from China, India, South Korea and Japan</h1>
+        <p className={styles.dateline}>
+          <span className={styles.date}>{today()}</span>
+          <span className={styles.tagline}>China, India, South Korea and Japan, from sources that allow it</span>
+        </p>
+      </header>
 
-      <div className={styles.mapHero}>
-        <LazyNewsMap
-          height="clamp(320px, 52vh, 440px)"
-          label="Map of this week's stories by city"
-          pins={map.data?.cities ?? []}
-          onSelect={openCity}
-          staticOnTouch
+      <div className={styles.filters}>
+        <FilterTabs
+          label="Filter by country"
+          value={country}
+          onChange={(c) => select({ country: c, sector })}
+          options={[
+            { value: undefined, label: 'All' },
+            ...(countries.data ?? []).map((c) => ({
+              value: c.iso2,
+              label: c.name,
+              leading: <Flag country={c.iso2} />,
+              count: c.last24h,
+              countTitle: `${c.last24h} stories about ${c.name} in the last 24 hours`,
+            })),
+          ]}
         />
-        <ButtonLink href="/map" className={styles.openMap}>
-          Open full map
-        </ButtonLink>
+        <FilterTabs
+          quiet
+          label="Filter by sector"
+          value={sector}
+          onChange={(s) => select({ country, city, sector: s })}
+          options={[
+            { value: undefined, label: 'All sectors' },
+            ...SECTORS.map((s) => ({
+              value: s.id,
+              label: s.label,
+              leading: <span className={styles.dot} style={{ background: sectorColor(s.id) }} aria-hidden="true" />,
+            })),
+          ]}
+        />
+        {country && (places.data?.length ?? 0) > 0 && (
+          <label className={styles.cityPicker}>
+            <span>City</span>
+            <select value={city ?? ''} onChange={(e) => select({ country, city: e.target.value || undefined, sector })}>
+              <option value="">All of {countryNames[country] ?? country}</option>
+              {places.data?.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
-
-      <SearchBar variant="hero" keep={{ country, sector }} />
 
       {(status.data?.state === 'stale' || status.data?.state === 'outage') && status.data.lastSuccessAt && (
         <StaleBanner
@@ -94,63 +128,27 @@ export function Home() {
         />
       )}
 
-      <div className={styles.filters} role="group" aria-label="Filter by sector">
-        <Chip selected={!sector} onClick={() => select({ country, city })}>
-          All sectors
-        </Chip>
-        {SECTORS.map((s) => (
-          <Chip
-            key={s.id}
-            selected={sector === s.id}
-            dotColor={sectorColor(s.id)}
-            onClick={() => select({ country, city, sector: s.id })}
-          >
-            {s.label}
-          </Chip>
-        ))}
+      <div className={styles.layout}>
+        <div className={styles.main}>
+          <StoryFeed
+            layout="front"
+            filters={{ country, city, sector }}
+            heading={heading}
+            countryNames={countryNames}
+            emptyTitle={emptyTitle}
+            emptyAction={emptyAction}
+            onHighlight={setHighlighted}
+            highlightedPlace={highlighted}
+          />
+        </div>
+        <aside className={styles.rail} aria-label="Map, countries and social posts">
+          <MapCompanion data={map.data} countryNames={countryNames} country={country} highlightedId={highlighted} />
+          {countries.data && (
+            <CountryCounts countries={countries.data} selected={country} onSelect={(c) => select({ country: c, sector })} />
+          )}
+          <SocialPreview country={country} />
+        </aside>
       </div>
-
-      <div className={styles.filters} role="group" aria-label="Filter by country">
-        <Chip selected={!country} onClick={() => select({ sector })}>
-          All
-        </Chip>
-        {(countries.data ?? []).map((c) => (
-          <Chip
-            key={c.iso2}
-            selected={country === c.iso2}
-            leading={<Flag country={c.iso2} />}
-            count={c.last24h}
-            title={`${c.last24h} stories in the last 24 hours`}
-            onClick={() => select({ country: c.iso2, sector })}
-          >
-            {c.name}
-          </Chip>
-        ))}
-      </div>
-
-      {country && (places.data?.length ?? 0) > 0 && (
-        <label className={styles.cityPicker}>
-          <span className="mono muted">City</span>
-          <select value={city ?? ''} onChange={(e) => select({ country, city: e.target.value || undefined, sector })}>
-            <option value="">All of {countryNames[country] ?? country}</option>
-            {places.data?.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-
-      <StoryFeed
-        filters={{ country, city, sector }}
-        heading={heading}
-        countryNames={countryNames}
-        emptyTitle={emptyTitle}
-        emptyAction={emptyAction}
-      />
-
-      <SocialStrip country={country} />
     </div>
   )
 }

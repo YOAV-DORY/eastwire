@@ -74,4 +74,19 @@ class GkgLocationMapperTest {
         assertThat(map(UNITED_STATES + ";" + TEXAS_CITY)).isEmpty();
         assertThat(map(INDIA + ";" + INDIA + ";" + NEW_DELHI)).hasSize(2);
     }
+
+    @Test
+    void keepsPlacesInTheOrderTheTextMentionsThem() {
+        // Seoul is listed first but mentioned at character 40; India at character 16.
+        assertThat(map(SEOUL + ";" + INDIA)).extracting(Location::countryIso2).containsExactly("IN", "KR");
+    }
+
+    @Test
+    void theLeadPlaceCountsOnlyWhenTheTextOpensWithACoveredCountry() {
+        String saudiFirst = "1#Saudi Arabia#SA#SA##25#45#SA#5";
+        assertThat(mapper.leadIsCovered(GkgParser.parseLocations(SEOUL + ";" + INDIA))).isTrue();
+        assertThat(mapper.leadIsCovered(GkgParser.parseLocations(SEOUL + ";" + saudiFirst))).isFalse();
+        // V1 locations carry no position, so there is no lead at all.
+        assertThat(mapper.leadIsCovered(GkgParser.parseLocations("1#India#IN#IN##20#77#IN"))).isFalse();
+    }
 }

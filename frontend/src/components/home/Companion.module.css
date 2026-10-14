@@ -1,0 +1,117 @@
+.panel {
+  display: grid;
+  gap: var(--space-3);
+  padding-block: var(--space-6);
+  border-top: 1px solid var(--rule);
+}
+
+.panel:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.note {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: start;
+  min-height: var(--tap);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.more:hover {
+  color: var(--accent-text);
+}
+
+.countries {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.countryRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-standard);
+}
+
+.countryRow:hover {
+  background: var(--bg-hover);
+}
+
+.countryRow[aria-pressed='true'] {
+  background: var(--accent-wash);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.countryName {
+  flex: 1;
+}
+
+.countryCount {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  justify-self: start;
+  padding: 1px var(--space-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+}
+
+.posts {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.postText {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--text-small);
+}
+
+.postMeta {
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.postMeta a {
+  color: var(--text);
+  font-weight: 500;
+}

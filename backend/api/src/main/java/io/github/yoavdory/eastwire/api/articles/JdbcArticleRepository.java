@@ -20,8 +20,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class JdbcArticleRepository implements ArticleRepository {
 
-    /** Country and city filters match what the article is about, not where its publisher is. */
-    private static final String ABOUT_ROLES = "('mentioned', 'event')";
+    /**
+     * Country and city filters match what the article is about: a main-subject place in the
+     * text or dateline (article_location.is_primary), never a passing mention or the publisher's base.
+     */
+    private static final String ABOUT = "l.role IN ('mentioned', 'event') AND l.is_primary";
 
     private final JdbcClient jdbc;
 
@@ -73,12 +76,12 @@ public class JdbcArticleRepository implements ArticleRepository {
         }
         if (q.country() != null) {
             conditions.add("EXISTS (SELECT 1 FROM article_location l WHERE l.article_id = a.id "
-                    + "AND l.country_iso2 = :country AND l.role IN " + ABOUT_ROLES + ")");
+                    + "AND l.country_iso2 = :country AND " + ABOUT + ")");
             params.put("country", q.country());
         }
         if (q.cityId() != null) {
             conditions.add("EXISTS (SELECT 1 FROM article_location l WHERE l.article_id = a.id "
-                    + "AND l.place_id = :city AND l.role IN " + ABOUT_ROLES + ")");
+                    + "AND l.place_id = :city AND " + ABOUT + ")");
             params.put("city", q.cityId());
         }
         if (q.sector() != null) {
@@ -104,7 +107,7 @@ public class JdbcArticleRepository implements ArticleRepository {
         Map<Long, List<LocationRow>> locations = new LinkedHashMap<>();
         jdbc.sql("""
                         SELECT l.article_id, l.role, l.precision, l.confidence, l.method, l.country_iso2, l.place_id,
-                               p.name AS place_name, l.evidence_snippet
+                               p.name AS place_name, l.evidence_snippet, COALESCE(l.is_primary, false) AS is_primary
                         FROM article_location l LEFT JOIN place p ON p.geonames_id = l.place_id
                         WHERE l.article_id IN (:ids)
                         ORDER BY l.id
@@ -114,7 +117,7 @@ public class JdbcArticleRepository implements ArticleRepository {
                     locations.computeIfAbsent(rs.getLong("article_id"), k -> new ArrayList<>()).add(new LocationRow(
                             rs.getString("role"), rs.getString("precision"), rs.getString("confidence"),
                             rs.getString("method"), rs.getString("country_iso2"), (Long) rs.getObject("place_id"),
-                            rs.getString("place_name"), rs.getString("evidence_snippet")));
+                            rs.getString("place_name"), rs.getString("evidence_snippet"), rs.getBoolean("is_primary")));
                     return null;
                 })
                 .list();

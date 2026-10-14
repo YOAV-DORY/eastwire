@@ -1,0 +1,240 @@
+.page {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.layout {
+  display: grid;
+  gap: var(--space-8);
+}
+
+/* Phones: a compact index under the header. Wide screens: it stays beside the text. */
+.toc ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-4);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  text-decoration: none;
+}
+
+.toc a:hover {
+  color: var(--text);
+}
+
+.toc .num {
+  color: var(--text-faint);
+}
+
+.body {
+  display: grid;
+  gap: var(--space-12);
+  max-width: 42rem;
+  min-width: 0;
+}
+
+.section {
+  display: grid;
+  gap: var(--space-4);
+  scroll-margin-top: calc(var(--header-h) + var(--space-6));
+}
+
+.section h2 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  font-size: var(--text-h2);
+  line-height: 1.2;
+}
+
+.n {
+  color: var(--text-faint);
+  font-family: var(--font-sans);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+
+.section p {
+  max-width: var(--measure);
+}
+
+.section a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--text-faint);
+  text-underline-offset: 3px;
+}
+
+.section a:hover {
+  color: var(--accent-text);
+  text-decoration-color: var(--accent);
+}
+
+/* A pull-out line: the sentence a skimming reader should not miss. */
+.aside {
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--border-strong);
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.group {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-4);
+}
+
+.groupTitle {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  font-weight: 600;
+}
+
+.groupTitle .num {
+  margin-left: var(--space-1);
+  color: var(--text-faint);
+  font-weight: 500;
+}
+
+.groupNote {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+/* Sources we don't use fold away: a ruled line that opens to the list. */
+.folded {
+  margin-top: var(--space-2);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.folded summary {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3) 0 var(--space-3) var(--space-6);
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+}
+
+.folded summary::-webkit-details-marker {
+  display: none;
+}
+
+.folded summary::before {
+  content: "+";
+  position: absolute;
+  left: 0;
+  top: var(--space-3);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.folded[open] summary::before {
+  content: "−";
+}
+
+.folded + .folded {
+  margin-top: 0;
+  border-top: 0;
+}
+
+.folded .sources {
+  margin-top: 0;
+}
+
+.folded .sources li:last-child {
+  border-bottom: 0;
+}
+
+.sources {
+  display: grid;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+
+.sources li {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.sourceHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.sourceHead strong {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.sourceHead span {
+  color: var(--text-faint);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+}
+
+.sources p {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.section .evidence {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  justify-self: start;
+  min-height: var(--tap);
+  margin: calc(-1 * var(--space-2)) 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  text-decoration: none;
+}
+
+.section .evidence:hover {
+  color: var(--accent-text);
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: var(--space-16);
+    align-items: start;
+  }
+
+  .toc {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-8));
+  }
+
+  .toc ol {
+    display: grid;
+    gap: 0;
+  }
+
+  .toc a {
+    min-height: 36px;
+    font-size: 0.9375rem;
+  }
+}

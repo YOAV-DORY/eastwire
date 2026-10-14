@@ -1,14 +1,17 @@
+import clsx from 'clsx'
+import { PageHeader } from '../components/layout/PageHeader'
 import { ButtonLink } from '../components/ui/Button'
+import { usePageTitle } from '../hooks/usePageTitle'
 import styles from './NotFound.module.css'
 
 export function NotFound() {
+  usePageTitle('Page not found')
   return (
-    <article className={styles.main}>
-      <h1 className={styles.title}>Page not found</h1>
-      <p className="muted">This address doesn&apos;t exist on EastWire.</p>
-      <ButtonLink href="/" size="lg">
-        Go to the homepage
+    <div className={clsx('container', styles.page)}>
+      <PageHeader kicker="404" title="Page not found" lede="This address doesn't exist on EastWire. The latest stories are one click away." />
+      <ButtonLink href="/" variant="primary" size="lg">
+        Go to the front page
       </ButtonLink>
-    </article>
+    </div>
   )
 }

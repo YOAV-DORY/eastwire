@@ -1,0 +1,30 @@
+.header {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 44rem;
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--rule);
+}
+
+.title {
+  font-size: var(--text-h1);
+  line-height: var(--lh-h1);
+}
+
+/* The lede is set in the serif, a step up from body text, like a standfirst. */
+.lede {
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+  font-size: 1.1875rem;
+  line-height: 1.5;
+}
+
+.lede a {
+  color: inherit;
+  text-decoration-color: var(--text-faint);
+}
+
+.lede a:hover {
+  color: var(--text);
+  text-decoration-color: var(--accent);
+}

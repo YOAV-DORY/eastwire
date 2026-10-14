@@ -15,7 +15,13 @@ function prefersReducedMotion(): boolean {
 export function LazyNewsMap({ height, label, ...props }: NewsMapProps & { height: string; label: string }) {
   return (
     <div className={styles.box} style={{ height }} role="region" aria-label={label}>
-      <Suspense fallback={<div className={styles.placeholder} aria-hidden="true" />}>
+      <Suspense
+        fallback={
+          <div className={styles.placeholder} aria-hidden="true">
+            <span>Drawing the map…</span>
+          </div>
+        }
+      >
         <NewsMap {...props} reducedMotion={prefersReducedMotion()} />
       </Suspense>
     </div>

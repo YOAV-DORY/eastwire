@@ -7,20 +7,25 @@
   overflow: hidden;
 }
 
+/* While Leaflet loads: a faint chart grid (meridians and parallels) and a quiet caption. */
 .placeholder {
+  display: flex;
+  align-items: flex-end;
   width: 100%;
   height: 100%;
-  background: var(--bg-elev-1);
-  animation: pulse 1.6s var(--ease-standard) infinite;
+  padding: var(--space-4);
+  background-color: var(--bg-elev-1);
+  background-image:
+    repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(0deg, var(--rule) 0 1px, transparent 1px 64px);
+  color: var(--text-faint);
+  font-size: var(--text-small);
+  animation: breathe 1.8s var(--ease-standard) infinite;
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
+@keyframes breathe {
   50% {
-    opacity: 0.6;
+    opacity: 0.65;
   }
 }
 

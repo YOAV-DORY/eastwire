@@ -44,7 +44,7 @@ class GeoController {
                                                                   > now() - interval '24 hours') AS last24h,
                                count(DISTINCT a.id) AS total
                         FROM article_location l JOIN article a ON a.id = l.article_id
-                        WHERE l.role IN ('mentioned', 'event') AND a.expires_at > now()
+                        WHERE l.role IN ('mentioned', 'event') AND l.is_primary AND a.expires_at > now()
                         GROUP BY l.country_iso2
                         """)
                 .query((rs, n) -> counts.put(rs.getString("country_iso2"), new Counts(rs.getLong("last24h"), rs.getLong("total"))))

@@ -36,7 +36,7 @@ export function MapLegend({
         <li>
           <Pin total={1} />
           <Pin total={5} />
-          <Pin total={20} /> <span>Stories placed in a city (1–4, 5–19, 20+)</span>
+          <Pin total={20} /> <span>Stories about a city (1–4, 5–19, 20+)</span>
         </li>
         <li>
           <Pin total={1} low /> <span>Dashed: low confidence only</span>
@@ -47,8 +47,8 @@ export function MapLegend({
           </li>
         )}
       </ul>
-      <p className={`${styles.countryOnly} mono`}>
-        Country level only, not placed on a city:{' '}
+      <p className={styles.countryOnly}>
+        About a country but no one city (not pinned):{' '}
         {countryOnly.length === 0
           ? 'none'
           : countryOnly.map((c) => `${countryNames[c.country] ?? c.country} ${c.count}`).join(' · ')}

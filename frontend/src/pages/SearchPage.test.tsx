@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { SHORTCUTS_STORAGE_KEY } from '../hooks/useShortcuts'
@@ -12,27 +12,34 @@ const BASE = {
   '/api/v1/places': [],
 }
 
+const SUGGESTIONS = [
+  { q: 'bank', count: 7 },
+  { q: 'AI', count: 3 },
+  { q: 'IPO', count: 2 },
+  { q: 'Mumbai', count: 2 },
+]
+
 describe('search', () => {
-  it('submitting the home search bar opens shareable results', async () => {
+  it('submitting the search bar opens shareable results', async () => {
     const calls = stubApi({ ...BASE, '/api/v1/search': page([article({ title: 'Chip exports climb' })]) })
-    const router = renderRoute('/')
+    const router = renderRoute('/search')
 
     await userEvent.type(await screen.findByRole('searchbox', { name: 'Search stories' }), 'chip exports{Enter}')
 
-    await waitFor(() => expect(router.state.location.pathname).toBe('/search'))
-    expect(router.state.location.search).toBe('?q=chip+exports')
+    await waitFor(() => expect(router.state.location.search).toBe('?q=chip+exports'))
     expect(await screen.findByText('Chip exports climb')).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Results for “chip exports”')
     const searchCall = calls.find((u) => u.pathname === '/api/v1/search')
     expect(searchCall?.searchParams.get('q')).toBe('chip exports')
     expect(searchCall?.searchParams.get('sort')).toBe('relevance')
+    expect(document.title).toBe('Search: chip exports · EastWire')
   })
 
   it('ignores a one-letter search', async () => {
     stubApi(BASE)
-    const router = renderRoute('/')
+    const router = renderRoute('/search')
     await userEvent.type(await screen.findByRole('searchbox', { name: 'Search stories' }), 'a{Enter}')
-    expect(router.state.location.pathname).toBe('/')
+    expect(router.state.location.search).toBe('')
   })
 
   it('every filter lives in the URL and changing one goes back to page 1', async () => {
@@ -56,29 +63,48 @@ describe('search', () => {
     expect(screen.getByRole('link', { name: '← Previous' })).toHaveAttribute('href', '/search?q=rail&sort=date')
   })
 
-  it('without a query it explains the syntax, and an empty result is honest', async () => {
-    stubApi({ ...BASE, '/api/v1/search': page([]) })
+  it('without a query it offers searches that return stories now, and explains the syntax', async () => {
+    stubApi({ ...BASE, '/api/v1/search/suggestions': SUGGESTIONS })
     renderRoute('/search')
-    expect(await screen.findByRole('link', { name: '"heat wave"' })).toBeInTheDocument()
+    const tries = await screen.findByRole('region', { name: 'Try a search' })
+    expect(await within(tries).findByRole('link', { name: 'bank 7' })).toHaveAttribute('href', '/search?q=bank')
+    expect(within(tries).getAllByRole('link')).toHaveLength(4)
+    expect(within(tries).getByText('"heat wave"')).toBeInTheDocument()
+  })
 
-    await userEvent.click(screen.getByRole('link', { name: 'semiconductors' }))
-    expect(await screen.findByText('No stories in our sources match “semiconductors”')).toBeInTheDocument()
+  it('a search with no results says so and offers three that work', async () => {
+    stubApi({ ...BASE, '/api/v1/search': page([]), '/api/v1/search/suggestions': SUGGESTIONS })
+    renderRoute('/search?q=bank')
+    expect(await screen.findByText('Nothing in our sources matches “bank”')).toBeInTheDocument()
+    const offers = (await screen.findByText('These return stories now:')).closest('div')!
+    // The search that just failed is never offered again.
+    expect(within(offers).getAllByRole('link').map((a) => a.textContent)).toEqual(['AI 3', 'IPO 2', 'Mumbai 2'])
   })
 })
 
 describe('keyboard shortcuts', () => {
-  it('"/" focuses the search field', async () => {
+  it('"/" opens search from any page, with the field ready', async () => {
     stubApi(BASE)
-    renderRoute('/')
+    const router = renderRoute('/')
+    await screen.findByRole('heading', { level: 1 })
+    await userEvent.keyboard('/')
+    await waitFor(() => expect(router.state.location.pathname).toBe('/search'))
+    expect(await screen.findByRole('searchbox', { name: 'Search stories' })).toHaveFocus()
+  })
+
+  it('"/" focuses the search field on the search page', async () => {
+    stubApi({ ...BASE, '/api/v1/search': page([article()]) })
+    renderRoute('/search?q=rail')
     const input = await screen.findByRole('searchbox', { name: 'Search stories' })
+    expect(input).not.toHaveFocus()
     await userEvent.keyboard('/')
     expect(input).toHaveFocus()
   })
 
   it('can be turned off', async () => {
     localStorage.setItem(SHORTCUTS_STORAGE_KEY, 'off')
-    stubApi(BASE)
-    renderRoute('/')
+    stubApi({ ...BASE, '/api/v1/search': page([article()]) })
+    renderRoute('/search?q=rail')
     const input = await screen.findByRole('searchbox', { name: 'Search stories' })
     await userEvent.keyboard('/')
     expect(input).not.toHaveFocus()
@@ -86,7 +112,7 @@ describe('keyboard shortcuts', () => {
 
   it('typing "/" inside a field is just text', async () => {
     stubApi(BASE)
-    renderRoute('/')
+    renderRoute('/search')
     const input = await screen.findByRole('searchbox', { name: 'Search stories' })
     await userEvent.type(input, 'a/b')
     expect(input).toHaveValue('a/b')

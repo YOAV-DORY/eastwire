@@ -1,6 +1,7 @@
 package io.github.yoavdory.eastwire.ingest;
 
 import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
+import io.github.yoavdory.eastwire.core.config.QualityRules;
 import io.github.yoavdory.eastwire.core.geo.Gazetteer;
 import io.github.yoavdory.eastwire.core.policy.DisplayPolicy;
 import io.github.yoavdory.eastwire.core.sector.SectorClassifier;
@@ -39,6 +40,11 @@ public class IngestApplication {
     @Bean
     SectorClassifier sectorClassifier(@Value("${eastwire.config-dir}") Path configDir) {
         return new SectorClassifier(SectorRules.load(configDir));
+    }
+
+    @Bean
+    QualityRules qualityRules(@Value("${eastwire.config-dir}") Path configDir) {
+        return QualityRules.load(configDir);
     }
 
     @Bean

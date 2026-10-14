@@ -1,29 +1,31 @@
 import clsx from 'clsx'
-import { Compass, Info, Keyboard, LayoutList, Map, MessagesSquare, Search, Shapes } from 'lucide-react'
-import { useMemo, useState, type ReactNode } from 'react'
-import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router'
-import { useCountries, useStatus } from '../../api/queries'
-import { Flag } from '../graphics/Flag'
+import { Activity, BookOpen, Ellipsis, Keyboard, LayoutList, Map, MessagesSquare, Search, Shapes, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router'
+import { useStatus } from '../../api/queries'
+import { useHotkeys, useShortcutsSetting } from '../../hooks/useShortcuts'
 import { Wordmark } from '../graphics/Wordmark'
 import { SEARCH_INPUT_ATTR } from '../search/SearchBar'
 import { ShortcutsDialog } from '../search/ShortcutsDialog'
-import { useHotkeys, useShortcutsSetting } from '../../hooks/useShortcuts'
 import { FreshnessIndicator } from '../status/FreshnessIndicator'
 import { ThemeToggle } from '../ui/ThemeToggle'
-import { SECTORS, sectorColor } from '../../sectors'
 import styles from './AppShell.module.css'
 
+/** Every main page. Phones show the first four in the bottom bar and the rest under "More". */
 const NAV = [
-  { to: '/', label: 'Latest', icon: LayoutList, match: null, bottom: true },
-  { to: '/map', label: 'Map', icon: Map, match: '/map', bottom: true },
-  { to: '/search', label: 'Search', icon: Search, match: '/search', bottom: true },
+  { to: '/', label: 'Latest', short: 'Home', icon: LayoutList, match: null },
+  { to: '/map', label: 'Map', short: 'Map', icon: Map, match: '/map' },
+  { to: '/search', label: 'Search', short: 'Search', icon: Search, match: '/search' },
   // One sector's page (/sector/economy) is part of the Sectors section too.
-  { to: '/sectors', label: 'Sectors', icon: Shapes, match: '/sector', bottom: true },
-  // Phones keep four tabs; the home page links to the social section instead.
-  { to: '/social', label: 'Social', icon: MessagesSquare, match: '/social', bottom: false },
+  { to: '/sectors', label: 'Sectors', short: 'Sectors', icon: Shapes, match: '/sector' },
+  { to: '/social', label: 'Social', short: 'Social', icon: MessagesSquare, match: '/social' },
+  { to: '/about', label: 'Sources & method', short: 'Sources & method', icon: BookOpen, match: '/about' },
 ] as const
 
-type NavItem = (typeof NAV)[number]
+const BOTTOM = NAV.slice(0, 4)
+const MORE = [...NAV.slice(4), { to: '/status', label: 'Status', short: 'Status', icon: Activity, match: '/status' }] as const
+
+type NavItem = (typeof NAV)[number] | (typeof MORE)[number]
 
 /** "Latest" is the home page only; every other item covers its whole section. */
 function isCurrent(item: NavItem, pathname: string) {
@@ -31,8 +33,8 @@ function isCurrent(item: NavItem, pathname: string) {
 }
 
 /**
- * Top bar everywhere; primary navigation lives in exactly one place per width:
- * bottom nav (< 768 px), top bar (768–1023 px), sidebar (≥ 1024 px).
+ * Masthead with the full navigation on wide screens; on phones a bottom bar with four
+ * sections and "More" for the rest. One scroll for the whole page: no sidebar.
  */
 export function AppShell() {
   const { pathname } = useLocation()
@@ -40,6 +42,7 @@ export function AppShell() {
   const navigate = useNavigate()
   const shortcuts = useShortcutsSetting()
   const [helpOpen, setHelpOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
   const bindings = useMemo(
     () => ({
       // "/" focuses the search field on the page, or opens the search page.
@@ -53,39 +56,68 @@ export function AppShell() {
     [navigate],
   )
   useHotkeys(shortcuts.enabled, bindings)
+  const moreCurrent = MORE.some((item) => isCurrent(item, pathname))
 
   return (
     <div className={styles.shell}>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <header className={styles.topbar}>
-        <Link to="/" className={styles.brand} aria-label="EastWire home">
-          <Wordmark />
-        </Link>
-        <nav className={styles.topnav} aria-label="Primary">
-          {NAV.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={styles.topnavLink}
-              aria-current={isCurrent(item, pathname) ? 'page' : undefined}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <div className={styles.actions}>
-          <FreshnessIndicator status={status.data} loading={status.isLoading} />
-          <ThemeToggle />
+      <header className={styles.masthead}>
+        <div className={clsx('container', styles.mastheadInner)}>
+          <Link to="/" className={styles.brand} aria-label="EastWire home">
+            <Wordmark />
+          </Link>
+          <nav className={styles.topnav} aria-label="Primary">
+            {NAV.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={styles.topnavLink}
+                aria-current={isCurrent(item, pathname) ? 'page' : undefined}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <div className={styles.actions}>
+            <FreshnessIndicator status={status.data} loading={status.isLoading} />
+            <ThemeToggle />
+          </div>
         </div>
       </header>
-      <Sidebar onShowShortcuts={() => setHelpOpen(true)} />
+
       <main id="main" className={styles.main}>
         <Outlet />
       </main>
+
+      <footer className={styles.footer}>
+        <div className={clsx('container', styles.footerInner)}>
+          <div className={styles.footerAbout}>
+            <Wordmark />
+            <p>
+              News from China, India, South Korea and Japan, from sources whose terms allow it, with every source shown.
+              Headlines link to the original; we never copy articles.
+            </p>
+          </div>
+          <nav aria-label="Footer" className={styles.footerLinks}>
+            <Link to="/about">Sources &amp; method</Link>
+            <Link to="/status">Status</Link>
+            <a href="https://github.com/YOAV-DORY/eastwire">Code on GitHub</a>
+            <button type="button" className={styles.linkButton} onClick={() => setHelpOpen(true)}>
+              Keyboard shortcuts
+            </button>
+          </nav>
+          <p className={styles.credits}>
+            Discovery data: <a href="https://www.gdeltproject.org/">The GDELT Project</a>. Maps: ©{' '}
+            <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors. Cities:{' '}
+            <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0).
+          </p>
+        </div>
+      </footer>
+
       <nav className={styles.bottomnav} aria-label="Primary">
-        {NAV.filter((item) => item.bottom).map((item) => (
+        {BOTTOM.map((item) => (
           <Link
             key={item.to}
             to={item.to}
@@ -93,10 +125,30 @@ export function AppShell() {
             aria-current={isCurrent(item, pathname) ? 'page' : undefined}
           >
             <item.icon size={20} strokeWidth={1.75} aria-hidden="true" />
-            <span>{item.label === 'Latest' ? 'Home' : item.label}</span>
+            <span>{item.short}</span>
           </Link>
         ))}
+        <button
+          type="button"
+          className={clsx(styles.bottomnavLink, moreCurrent && styles.bottomnavActive)}
+          aria-haspopup="dialog"
+          aria-expanded={moreOpen}
+          onClick={() => setMoreOpen(true)}
+        >
+          <Ellipsis size={20} strokeWidth={1.75} aria-hidden="true" />
+          <span>More</span>
+        </button>
       </nav>
+
+      <MoreSheet
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        pathname={pathname}
+        onShortcuts={() => {
+          setMoreOpen(false)
+          setHelpOpen(true)
+        }}
+      />
       <ShortcutsDialog
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
@@ -107,75 +159,65 @@ export function AppShell() {
   )
 }
 
-function Sidebar({ onShowShortcuts }: { onShowShortcuts: () => void }) {
-  const { pathname } = useLocation()
-  const countries = useCountries()
-  const [params] = useSearchParams()
-  const active = params.get('country')
+/** The rest of the site on phones: a bottom sheet opened by "More". */
+function MoreSheet({
+  open,
+  onClose,
+  pathname,
+  onShortcuts,
+}: {
+  open: boolean
+  onClose: () => void
+  pathname: string
+  onShortcuts: () => void
+}) {
+  const ref = useRef<HTMLDialogElement>(null)
+  useEffect(() => {
+    const dialog = ref.current
+    if (!dialog) return
+    if (open && !dialog.open) dialog.showModal?.()
+    if (!open && dialog.open) dialog.close?.()
+  }, [open])
   return (
-    <aside className={styles.sidebar} aria-label="Sections">
-      <nav aria-label="Primary">
-        <SidebarGroup>
-          {NAV.map((item) => (
+    <dialog
+      ref={ref}
+      className={styles.sheet}
+      aria-labelledby="more-title"
+      onClose={onClose}
+      onCancel={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
+    >
+      <div className={styles.sheetHead}>
+        <h2 id="more-title" className="kicker">
+          More
+        </h2>
+        <button type="button" className={styles.sheetClose} onClick={onClose} aria-label="Close">
+          <X size={20} strokeWidth={1.75} />
+        </button>
+      </div>
+      <ul className={styles.sheetList}>
+        {MORE.map((item) => (
+          <li key={item.to}>
             <Link
-              key={item.to}
               to={item.to}
-              className={styles.sideLink}
+              className={styles.sheetLink}
               aria-current={isCurrent(item, pathname) ? 'page' : undefined}
+              onClick={onClose}
             >
-              <item.icon size={16} strokeWidth={1.75} aria-hidden="true" />
+              <item.icon size={20} strokeWidth={1.75} aria-hidden="true" />
               {item.label}
             </Link>
-          ))}
-        </SidebarGroup>
-      </nav>
-      <SidebarGroup title="Countries">
-        {(countries.data ?? []).map((c) => (
-          <Link
-            key={c.iso2}
-            to={`/?country=${c.iso2}`}
-            className={clsx(styles.sideLink, active === c.iso2 && styles.sideLinkActive)}
-            aria-current={active === c.iso2 ? 'page' : undefined}
-          >
-            <Flag country={c.iso2} />
-            <span className={styles.grow}>{c.name}</span>
-            <span className="mono muted" title="Stories in the last 24 hours">
-              {c.last24h}
-            </span>
-          </Link>
+          </li>
         ))}
-      </SidebarGroup>
-      <SidebarGroup title="Sectors">
-        {SECTORS.map((sector) => (
-          <NavLink key={sector.id} to={`/sector/${sector.id}`} className={styles.sideLink}>
-            <span className={styles.sectorDot} style={{ background: sectorColor(sector.id) }} aria-hidden="true" />
-            {sector.label}
-          </NavLink>
-        ))}
-      </SidebarGroup>
-      <SidebarGroup title="About">
-        <NavLink to="/about" className={styles.sideLink}>
-          <Info size={16} strokeWidth={1.75} aria-hidden="true" />
-          Sources &amp; method
-        </NavLink>
-        <NavLink to="/status" className={styles.sideLink}>
-          <Compass size={16} strokeWidth={1.75} aria-hidden="true" />
-          Status
-        </NavLink>
-        <button type="button" className={clsx(styles.sideLink, styles.sideButton)} onClick={onShowShortcuts}>
-          <Keyboard size={16} strokeWidth={1.75} aria-hidden="true" />
-          Keyboard shortcuts
-        </button>
-      </SidebarGroup>
-    </aside>
-  )
-}
-
-function SidebarGroup({ title, children }: { title?: string; children: ReactNode }) {
-  return (
-    <div className={styles.group}>
-      {title && <p className={`${styles.groupTitle} mono muted`}>{title}</p>}
-      {children}
-    </div>
+        <li>
+          <button type="button" className={styles.sheetLink} onClick={onShortcuts}>
+            <Keyboard size={20} strokeWidth={1.75} aria-hidden="true" />
+            Keyboard shortcuts
+          </button>
+        </li>
+      </ul>
+    </dialog>
   )
 }

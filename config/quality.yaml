@@ -1,0 +1,19 @@
+# Stories that are not news. Skipped at ingestion, and removed from storage at the next run
+# if a rule is added later. Matching is case-insensitive.
+#
+# Press releases: paid or company-written announcements that some publishers host next to
+# their reporting. Business Standard runs ANI's press-release wire under
+# /content/press-releases-ani/ (about a third of its GDELT-discovered items, 2026-10-14).
+
+not_news:
+  url_contains:
+    - /press-releases
+    - /press-release/
+    - /pr-newswire/
+    - /business-wire/
+    - /sponsored/
+    - /brand-studio/
+  title_contains:
+    - "®"
+    - "™"
+    - "(sponsored)"

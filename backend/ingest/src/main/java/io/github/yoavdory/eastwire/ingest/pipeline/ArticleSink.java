@@ -21,7 +21,9 @@ public interface ArticleSink {
             /** Older than the source's retention window. */
             TOO_OLD,
             /** Unusable data (bad URL, empty title). */
-            INVALID
+            INVALID,
+            /** Not news: a press release or sponsored item (config/quality.yaml). */
+            NOT_NEWS
         }
 
         public static WriteResult of(Kind kind, String reason) {

@@ -40,7 +40,7 @@ function RuleList({
   if (items.length === 0) return null
   return (
     <section className={styles.group}>
-      <h3 className={`${styles.groupTitle} mono muted`}>
+      <h3 className={styles.groupTitle}>
         {title} · {items.length}
       </h3>
       {hint && <p className="muted">{hint}</p>}

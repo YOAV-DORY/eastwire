@@ -15,8 +15,13 @@ import java.util.Set;
 record GkgRecord(Instant date, String sourceName, String url, String title, Instant publishedAt, List<GkgLocation> locations,
         Set<String> themes) {
 
-    /** One V2ENHANCEDLOCATIONS entry. GDELT's own geocoding of a place the text mentions. */
-    record GkgLocation(Type type, String fullName, String fipsCountry, String adm1, double lat, double lon, String featureId) {
+    /**
+     * One V2ENHANCEDLOCATIONS entry. GDELT's own geocoding of a place the text mentions.
+     *
+     * @param offset character position of the first mention in the full text (lower = earlier)
+     */
+    record GkgLocation(Type type, String fullName, String fipsCountry, String adm1, double lat, double lon, String featureId,
+            int offset) {
 
         /** The part before the first comma: "New Delhi" of "New Delhi, Delhi, India". */
         String shortName() {

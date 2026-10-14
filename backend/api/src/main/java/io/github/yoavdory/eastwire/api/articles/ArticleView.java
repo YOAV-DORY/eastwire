@@ -7,7 +7,7 @@ import java.util.List;
  * One story card, as the frontend receives it. Built only from what the display policy allows.
  *
  * @param viaDiscovery   true when found through GDELT (shown as "via GDELT")
- * @param isNew          discovered in the last hour
+ * @param isNew          published in the last hour (discovered, if the source gives no time)
  * @param alsoReportedBy other stored articles in the same story cluster
  */
 public record ArticleView(
@@ -39,6 +39,7 @@ public record ArticleView(
      * @param precision  city | admin1 | country
      * @param confidence high | medium | low
      * @param placeName  city name for city precision, else null
+     * @param primary    the story is about this place (headline, dateline, lead), not a passing mention
      */
     public record LocationView(
             String role,
@@ -48,7 +49,8 @@ public record ArticleView(
             String country,
             Long placeId,
             String placeName,
-            String evidence) {
+            String evidence,
+            boolean primary) {
     }
 
     /**

@@ -21,6 +21,7 @@ export const ARTICLES: ArticleView[] = [
         placeId: 1853909,
         placeName: 'Osaka',
         evidence: 'Mentions Osaka',
+        primary: true,
       },
     ],
   }),
@@ -42,11 +43,13 @@ const TILE = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQV
 
 function articlesFor(url: URL) {
   const country = url.searchParams.get('country')
+  const city = Number(url.searchParams.get('city')) || undefined
   const sector = url.searchParams.get('sector')
   const q = url.searchParams.get('q')?.toLowerCase()
   const items = ARTICLES.filter(
     (a) =>
       (!country || a.locations.some((l) => l.country === country)) &&
+      (!city || a.locations.some((l) => l.primary && l.placeId === city)) &&
       (!sector || a.sectors.some((s) => s.slug === sector)) &&
       (!q || a.title.toLowerCase().includes(q.replaceAll('"', ''))),
   )
@@ -89,6 +92,12 @@ export async function mockApi(page: Page): Promise<URL[]> {
           return { items: [socialItem(), VIDEO], page: 1, size: 12, total: 2, hasMore: false }
         case '/api/v1/sources':
           return []
+        case '/api/v1/search/suggestions':
+          return [
+            { q: 'Osaka', count: 1 },
+            { q: 'rupee', count: 1 },
+            { q: 'metro', count: 1 },
+          ]
         default:
           return null
       }
