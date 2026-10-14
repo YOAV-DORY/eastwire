@@ -43,6 +43,11 @@ public class StatusRepository {
                 .list();
     }
 
+    /** Size of the whole database, as Neon counts it against the free tier. */
+    public long databaseBytes() {
+        return jdbc.sql("SELECT pg_database_size(current_database())").query(Long.class).single();
+    }
+
     private static Instant instant(Timestamp ts) {
         return ts == null ? null : ts.toInstant();
     }

@@ -106,6 +106,8 @@ export interface Status {
   state: FreshnessState
   lastSuccessAt: string | null
   sources: SourceStatus[]
+  /** Database size against the free tier's limit; "warn" from 800 MB. */
+  database?: { sizeBytes: number; limitBytes: number; state: 'ok' | 'warn' }
 }
 
 export interface CountryView {

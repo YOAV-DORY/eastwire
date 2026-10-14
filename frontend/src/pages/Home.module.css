@@ -5,6 +5,7 @@
 }
 
 .hero {
+  container-type: inline-size;
   display: flex;
   /* Phones: graphic above, so the headline gets the full width and stays within 3 lines. */
   flex-direction: column-reverse;
@@ -16,6 +17,7 @@
 }
 
 .title {
+  /* --text-display is sized by the hero's width (container units), not the window's. */
   font-size: var(--text-display);
   line-height: var(--lh-display);
   letter-spacing: var(--track-display);

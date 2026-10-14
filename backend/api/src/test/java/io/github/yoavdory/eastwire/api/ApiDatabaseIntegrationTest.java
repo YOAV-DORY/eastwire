@@ -24,7 +24,8 @@ import org.testcontainers.utility.DockerImageName;
  * The real SQL against Postgres: filters, expiry, counts and status. The schema comes from the
  * same Flyway migrations the ingest job runs. Needs Docker: skipped locally without it.
  */
-@SpringBootTest(properties = {"spring.flyway.enabled=true", "spring.datasource.hikari.read-only=false"})
+@SpringBootTest(properties = {"spring.flyway.enabled=true", "spring.datasource.hikari.read-only=false",
+        "eastwire.rate-limit.per-minute=100000"})
 @AutoConfigureMockMvc
 @Import(ApiDatabaseIntegrationTest.Containers.class)
 @Testcontainers(disabledWithoutDocker = true)

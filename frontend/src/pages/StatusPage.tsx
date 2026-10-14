@@ -18,7 +18,7 @@ export function StatusPage() {
       {status.isLoading && <FeedSkeleton count={2} />}
       {status.isError && <ErrorState message="Status is unavailable right now." onRetry={() => void status.refetch()} />}
       {status.data && (
-        <div className={styles.tableWrap}>
+        <div className={styles.tableWrap} role="region" aria-label="Source status table" tabIndex={0}>
           <table className={styles.table}>
             <thead>
               <tr>
@@ -50,6 +50,21 @@ export function StatusPage() {
           </table>
         </div>
       )}
+      {status.data?.database && <DatabaseSize {...status.data.database} />}
     </article>
+  )
+}
+
+const MB = 1024 * 1024
+
+/** How full the free database is. Retention keeps it small; this says so if that ever fails. */
+function DatabaseSize({ sizeBytes, limitBytes, state }: { sizeBytes: number; limitBytes: number; state: 'ok' | 'warn' }) {
+  const used = `${Math.round(sizeBytes / MB)} MB of ${Math.round(limitBytes / MB / 1024)} GB`
+  return state === 'warn' ? (
+    <p className={styles.warn} role="status">
+      Database: {used}. Close to the free tier&apos;s limit, so retention needs a look.
+    </p>
+  ) : (
+    <p className="mono muted">Database: {used} (free tier)</p>
   )
 }

@@ -20,6 +20,8 @@ spring:
 server:
   # Render injects PORT.
   port: ${PORT:8080}
+  # Render's proxy sends X-Forwarded-For; Tomcat uses it for the client address (rate limit).
+  forward-headers-strategy: native
   error:
     include-stacktrace: never
     include-message: never
@@ -30,3 +32,10 @@ eastwire:
   cors:
     # Comma-separated. Add the Cloudflare Pages origin when deploying.
     allowed-origins: ${EASTWIRE_CORS_ORIGINS:http://localhost:5174}
+  rate-limit:
+    # Requests per minute per client IP for /api/** (not /api/v1/health).
+    per-minute: ${EASTWIRE_RATE_LIMIT_PER_MINUTE:120}
+  status:
+    # Neon Free allows 1 GB per project (docs/deploy.md); /status warns from 800 MB.
+    database-limit-bytes: 1073741824
+    database-warn-bytes: 838860800

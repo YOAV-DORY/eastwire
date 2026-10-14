@@ -17,7 +17,7 @@ export function CityListView({
     return <p className="muted">No stories are placed in a city for these filters.</p>
   }
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} role="region" aria-label="Cities with stories" tabIndex={0}>
       <table className={styles.table}>
         <caption className="visually-hidden">Cities with stories, most stories first</caption>
         <thead>

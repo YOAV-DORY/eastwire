@@ -16,9 +16,12 @@ export class ApiError extends Error {
     this.status = status
   }
 
-  /** Worth retrying: network failures, timeouts and 5xx (the free-tier server may be asleep). */
+  /**
+   * Worth retrying: network failures, timeouts, 5xx (the free-tier server may be asleep) and
+   * 429 (the per-minute limit resets within a minute; the retry delays cover it).
+   */
   get retryable(): boolean {
-    return this.status === 0 || this.status >= 500
+    return this.status === 0 || this.status === 429 || this.status >= 500
   }
 }
 
