@@ -1,0 +1,20 @@
+# Render Blueprint for the public API (docs/deploy.md). Free plan: the service sleeps after
+# 15 idle minutes and takes about a minute to wake; the frontend shows a "waking up" note.
+services:
+  - type: web
+    name: eastwire-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: EASTWIRE_DB_URL        # jdbc:postgresql://<neon-host>/eastwire?sslmode=require
+        sync: false
+      - key: EASTWIRE_DB_USER
+        value: api_reader
+      - key: EASTWIRE_DB_PASSWORD
+        sync: false
+      - key: EASTWIRE_CORS_ORIGINS  # e.g. https://eastwire.pages.dev
+        sync: false

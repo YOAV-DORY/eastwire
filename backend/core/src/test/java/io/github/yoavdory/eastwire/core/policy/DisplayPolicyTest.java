@@ -125,20 +125,29 @@ class DisplayPolicyTest {
             DisplayDecision d = policy.decide(new DisplayRequest("global-voices", URL, "Juliana Harsianti", null, false));
             assertThat(d.visible()).isTrue();
             assertThat(d.excerptMaxChars()).isEqualTo(300);
-            assertThat(d.attribution()).isEqualTo("By Juliana Harsianti, Global Voices · CC BY 3.0 · excerpt, shortened");
+            assertThat(d.attributionLine(true)).isEqualTo("By Juliana Harsianti, Global Voices · CC BY 3.0 · excerpt, shortened");
+            assertThat(d.licenseUrl()).isEqualTo("https://creativecommons.org/licenses/by/3.0/");
+        }
+
+        @Test
+        void saysExcerptOnlyWhenAnExcerptIsShown() {
+            DisplayDecision d = policy.decide(new DisplayRequest("global-voices", URL, "Juliana Harsianti", null, false));
+            assertThat(d.attributionLine(false)).isEqualTo("By Juliana Harsianti, Global Voices · CC BY 3.0");
         }
 
         @Test
         void dropsTheBylineCleanlyWhenThereIsNoAuthor() {
             DisplayDecision d = policy.decide(new DisplayRequest("global-voices", URL, null, null, false));
-            assertThat(d.attribution()).isEqualTo("Global Voices · CC BY 3.0 · excerpt, shortened");
+            assertThat(d.attributionLine(true)).isEqualTo("Global Voices · CC BY 3.0 · excerpt, shortened");
         }
 
         @Test
-        void partnerReprintsAreLinkOnly() {
+        void partnerReprintsAreLinkOnlyAndClaimNoLicense() {
             DisplayDecision d = policy.decide(new DisplayRequest("global-voices", URL, "Someone", null, true));
             assertThat(d.visible()).isTrue();
             assertThat(d.excerptMaxChars()).isZero();
+            assertThat(d.licenseName()).isNull();
+            assertThat(d.attributionLine(false)).isEqualTo("By Someone, Global Voices");
         }
 
         @Test

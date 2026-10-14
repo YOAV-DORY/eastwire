@@ -1,0 +1,47 @@
+.box {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-5);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.mark {
+  color: var(--text-muted);
+}
+
+.title {
+  font-weight: 600;
+}
+
+.cold {
+  padding: var(--space-3) 0;
+}
+
+.skeletons {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.skeletonCard {
+  display: grid;
+  gap: var(--space-3);
+  height: 156px;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elev-1);
+}
+
+.banner {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--accent-2);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elev-1);
+  font-size: var(--text-small);
+}
+
+.banner[data-state="outage"] {
+  border-left-color: var(--danger);
+}

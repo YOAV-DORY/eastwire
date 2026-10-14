@@ -143,6 +143,11 @@ def main(argv):
     with open(path("cities.csv"), encoding="utf-8") as f:
         city_ids = check_cities(list(csv.DictReader(f)), countries, report)
     check_sources(load_yaml(path("sources.yaml"))["sources"], city_ids, report)
+    with open(path("cities.csv"), encoding="utf-8") as f:
+        city_names = {r["name"] for r in csv.DictReader(f)}
+    for name in load_yaml(path("city_curation.yaml")).get("requires_country_context", []):
+        if name not in city_names:
+            report.error("city_curation.yaml", f"requires_country_context name {name!r} is not in cities.csv")
     domains = load_yaml(path("domains.yaml"))["domains"]
     check_domains(domains, report)
 

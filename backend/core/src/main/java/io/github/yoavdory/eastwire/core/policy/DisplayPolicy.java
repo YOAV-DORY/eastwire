@@ -79,19 +79,25 @@ public final class DisplayPolicy {
             return DisplayDecision.hidden("url outside the publisher's allowed section");
         }
         // Discovered items are headline links only, whatever the source's own display mode says.
-        return new DisplayDecision(true, "ok", 0, false, domain.get().publisher(), source.attribution(), source.label());
+        return new DisplayDecision(true, "ok", 0, false, domain.get().publisher(), source.attribution(),
+                null, null, null, source.label());
     }
 
     private DisplayDecision decideDirect(SourceConfig source, DisplayRequest request) {
         int excerpt = source.displayMode() == DisplayMode.HEADLINE_EXCERPT ? source.maxExcerptChars() : 0;
-        if (request.partnerReprint() && "link_only".equals(source.partnerReprints())) {
+        // A partner's reprint is not necessarily under the source's license: no excerpt, no license claim.
+        boolean partnerReprint = request.partnerReprint() && "link_only".equals(source.partnerReprints());
+        if (partnerReprint) {
             excerpt = 0;
         }
         if ("headline_only".equals(source.wireCreditMode()) && isWireCredit(request.credit())) {
             excerpt = 0;
         }
+        boolean licensed = source.license() != null && !partnerReprint;
         return new DisplayDecision(true, "ok", Math.max(excerpt, 0), false, source.name(),
-                attribution(source.attribution(), request.author()), source.label());
+                attribution(source.attribution(), request.author()),
+                licensed ? source.license().name() : null, licensed ? source.license().url() : null,
+                source.excerptNote(), source.label());
     }
 
     /** Fills "{author}" in a template; drops the "By {author}, " part when there is no byline. */

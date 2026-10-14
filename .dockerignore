@@ -1,0 +1,9 @@
+.git
+.venv
+.claude
+data
+frontend
+backend/.gradle
+backend/build
+backend/*/build
+**/.DS_Store

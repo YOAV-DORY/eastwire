@@ -62,12 +62,37 @@ Conditions that come with an allow:
 | nhk.or.jp | NHK WORLD-JAPAN | JP | pending | P2 | Links are permitted, except links "generated in large numbers through automated means such as bots". | [terms art. 11](https://www3.nhk.or.jp/nhkworld/en/terms/) |
 | japantimes.co.jp, hani.co.kr, nippon.com, news.cn, xinhuanet.com, chinadaily.com.cn, newindianexpress.com, nikkei.com | — | — | pending | P1 | Not yet reviewed, or terms not readable. | — |
 
+## Second batch (2026-10-13): chosen by volume
+
+The first batch came from a list of well-known outlets. The second came from data: 13 GDELT GKG
+files (12,401 rows, about 3 hours) were counted for publishers that mention China, India, South Korea
+or Japan. The English GKG stream turned out to be **dominated by Indian publishers**; Japanese and
+Korean publishers barely appear.
+
+| Domain | Rows in sample | Decision | Rule | Basis (paraphrased) | Evidence |
+|---|---|---|---|---|---|
+| indiatimes.com (Times of India, ET) | 119 | deny | D2 | Bars aggregating, scraping or redistributing content and automated summarization or aggregation without approval | [terms](https://www.indiatimes.com/termsandcondition) |
+| aninews.in | 90 | deny | D2 | Bars displaying, publishing or framing content from the site | [terms](https://www.aninews.in/term-condition/) |
+| moneycontrol.com | 44 | deny | D2 | Bars direct or indirect redistribution and public display | [terms](https://www.moneycontrol.com/cdata/termsofuse.php) |
+| business-standard.com | 34 | **allow** | A1 | Only restricts scraping of its own services and user posts | [terms](https://www.business-standard.com/terms-conditions) |
+| livelaw.in | 31 | deny | D2 | Bars display, "including framing and inline linking" | [terms](https://www.livelaw.in/terms-and-conditions) |
+| manilatimes.net | 22 | deny | D2 | Personal non-commercial use only; no display or communication to the public | [terms](https://www.manilatimes.net/terms-of-service) |
+| chinadaily.com.cn | 21 | deny | D2 | Footer: no republication or use in any form without written authorization | [site](https://www.chinadaily.com.cn/) |
+| asiaone.com | 21 | deny | D1 | Linking to provide access to content needs written consent | [terms](https://www.asiaone.com/terms-and-conditions) |
+| rediff.com | 16 | deny | D2 | No reproduction, distribution or display | [terms](https://www.rediff.com/terms.html) |
+| bignewsnetwork.com and 8 sister sites | 200+ | deny | Q1 | Aggregator network republishing wire copy | — |
+| tribuneindia.com, newindianexpress.com, freepressjournal.in, outlookindia.com, deccanchronicle.com | — | pending | P1 | Reader terms not found or not readable | — |
+
+Already decided in batch 1 and frequent in the sample: thehindu.com (58), hindustantimes.com (53),
+thehindubusinessline.com (36), livemint.com (28), koreaherald.com (12); all denied.
+
 ## What this means for coverage
 
-- **Allowed now:**
+- **Allowed now** (6):
   - Japan: Mainichi, Asahi.
   - China: Sixth Tone, Caixin Global.
-  - India: Scroll.
+  - India: Scroll, Business Standard.
+- **Most high-volume publishers deny display without permission.** Of the frequent original-reporting publishers in the sample, only Business Standard could be allowed. GDELT will stay a small, India-leaning layer. Global Voices (CC BY) and, later, social accounts carry most of the Japan and Korea coverage.
 - **South Korea has no allowed national outlet.** Every Korean publisher reviewed (Korea Herald, JoongAng Daily, Yonhap), plus the already-excluded Korea Times, forbids display without permission. Korean news will appear only when an allowed outlet elsewhere covers Korea, or through Global Voices.
 - This is a large gap, and the site must say so on `/about/sources`. The realistic fixes are:
   - ask Hankyoreh and others for permission;

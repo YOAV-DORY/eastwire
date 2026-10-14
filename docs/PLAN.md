@@ -1118,24 +1118,53 @@ frontend/src/
 
 ## Status and next concrete step
 
-**Milestone 1 (compliance groundwork):** committed and pushed to https://github.com/YOAV-DORY/eastwire (public).
+**Milestone 1 (compliance groundwork):** on `main`.
 
-**Milestone 2 (skeleton):** built on branch `m2-skeleton`; not committed yet.
-- **Backend** (Gradle 9.7, Spring Boot 4.1.1, Java 21 toolchain downloaded automatically):
-  - `core`: `ComplianceConfig` loader (fails closed on rule violations), `DisplayPolicy`, `Excerpts`, Flyway V1 schema + V2 role grants. 58 unit tests.
-  - `ingest`: CLI app that runs migrations and syncs config/ into the DB. Testcontainers tests are skipped without Docker. Verified end-to-end against PGlite (Postgres 18.6), twice, with the same result.
-  - `api`: `/api/v1/health`, `/api/v1/sources`, CORS limited to GET from the frontend origin. 6 MockMvc tests; also checked live.
-- **Frontend** (Vite 8, React 19, TypeScript 6, React Router 8):
-  - tokens/base/utility CSS
-  - Button, ButtonLink, Chip, Sticker, Kbd, Skeleton, ThemeToggle
-  - Wordmark and HeroMark SVGs
-  - placeholder Home, NotFound, and the dev-only `/dev/gallery`
-  - 45 Vitest tests, including the token contrast checks
-  - 102 KB gzipped JS
-  - checked visually at 390/1280 px, dark and light
-- **CI** (`.github/workflows/ci.yml`): config validation, backend build (runs Testcontainers), frontend lint/test/build, actions pinned to SHAs.
-- **Local DB:** `compose.yaml` + `backend/db/local-init.sql`; setup in `docs/database.md`.
+**Milestone 2 (skeleton):** PR #1, CI green (including the Postgres integration tests).
+
+**Milestone 3 (ingestion v1):** built on branch `m3-ingestion`, stacked on milestone 2.
+- **Connectors:**
+  - GDELT GKG raw files: cursor over 15-minute slots, a newest-slot 404 waits for the next run, gaps recorded.
+  - Global Voices RSS: conditional GET, country from GV's own tags, partner-reprint detection, illegal XML bytes stripped, stops after 2 network failures in a row.
+- **Pipeline:** ArticleWriter (policy → URL dedupe → takedowns → excerpt → insert → locations → pg_trgm story clustering), RetentionPurger.
+- **Run machinery:** HttpFetcher (backoff with jitter, Retry-After), RunRecorder (`ingestion_run` + `source_status`), circuit breaker (3 failures → 3 h), advisory lock, exit code 1 only when every connector fails.
+- **Shared code in `core`:** UrlCanonicalizer, Gazetteer (some names need their country nearby), DatelineDetector; V3 migration.
+- **Accuracy fixes found by running against live data:**
+  - the credit line names the license and "excerpt" only when they apply;
+  - partner reprints claim no CC BY;
+  - national capitals get LOW confidence.
+- **Tests:** core 88, ingest 56 (+11 Postgres integration tests that run in CI), api 6.
+- **End-to-end checks against the real GDELT and Global Voices, writing into PGlite:**
+  - the packaged jar runs in 27 s;
+  - a second run is mostly 304s;
+  - a failing connector is isolated;
+  - all failing gives exit 1;
+  - the circuit opens after 3 failures.
+- **Measured volume:** 25,799 GDELT rows over 6 h gave 2 allowed articles. Global Voices gave 18 articles within the 90-day window.
+- **Hourly workflow:** `.github/workflows/ingest.yml`, off until `INGEST_ENABLED=true`.
+
+**Milestone 3, second domain batch:** domains were chosen by GKG volume. Business Standard is now allowed (6 allowed in total); Times of India, ANI, Moneycontrol and others are denied. The same 6-hour window now gives 78 GDELT items instead of 2.
+
+**Milestone 4 (read API + homepage):** built on branch `m4-read-api`, stacked on milestone 3.
+- **API:**
+  - Endpoints: `/articles` (country/city/date filters, pagination, `DisplayPolicy` re-checked on every read), `/status` (oldest last success, fresh/stale/outage/unknown), `/countries` (24 h counts) and `/places`.
+  - The database answers 503 with a friendly message when unreachable.
+- **Frontend:**
+  - AppShell: top bar, sidebar with country counts, bottom nav.
+  - Home: hero, country chips with flags, city picker, StoryCard feed with Load more.
+  - FreshnessIndicator, stale/empty/error/cold-start states.
+  - Pages: /status, /about (sources, gaps, places, credits), honest "coming in milestone N" pages.
+- **Deployment:** API Dockerfile with a CI build and smoke test, `render.yaml`, Pages `_redirects`/`_headers`, `docs/deploy.md`.
+- **Verified locally against real ingested data:** live API, browser at 390 and 1280 px, no console errors, 1 `main`/1 `h1`.
+- **Tests:** api 28 (+4 Postgres in CI), frontend 67.
+
+**Owner actions to go live:**
+1. Create the Neon project.
+2. Run `backend/db/local-init.sql` with strong passwords.
+3. `gh secret set` the three `EASTWIRE_DB_*` secrets, then `gh variable set INGEST_ENABLED --body true`.
+
+All in `docs/database.md`.
 
 **Next:**
-1. Commit milestone 2, push the branch, open a PR so CI runs the integration tests (needs owner approval).
-2. Milestone 3: the GDELT GKG and Global Voices connectors.
+1. The owner deploys (docs/deploy.md).
+2. Milestone 5: search.

@@ -33,6 +33,23 @@ aliases:
     Jeju City: [Jeju]
   JP: {}
 
+# City names that are also ordinary English words, personal names or other things
+# (Saga, Nara, Akita the dog breed, King Sejong...). The gazetteer counts a match only when
+# the same text also names the city's country, e.g. "Saga, Japan" or "...in Japan's Saga".
+requires_country_context:
+  - Saga
+  - Tsu
+  - Nara
+  - Mito
+  - Kochi
+  - Akita
+  - Naha
+  - Fukui
+  - Daman
+  - Muan
+  - Sejong
+  - Andong
+
 # GeoNames records left out of the city list on purpose.
 exclude:
   - geonames_id: 1790842
