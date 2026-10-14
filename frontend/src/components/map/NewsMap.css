@@ -15,17 +15,11 @@
  * desaturated for the light one. Our English pin labels sit on top.
  */
 [data-theme="dark"] .ew-tiles {
-  filter: invert(1) hue-rotate(180deg) brightness(0.78) contrast(0.82) saturate(0.15);
+  filter: invert(1) hue-rotate(180deg) saturate(0.3) brightness(1.08) contrast(0.9);
 }
 
 [data-theme="light"] .ew-tiles {
   filter: grayscale(0.85) contrast(0.88) brightness(1.04) sepia(0.08);
-}
-
-/* Tiles overlap by half a pixel, so the filtered tiles show no hairline seams between them. */
-.ew-map .leaflet-tile-container img.leaflet-tile {
-  width: 256.5px !important;
-  height: 256.5px !important;
 }
 
 /* ---------------------------------------------------------------- English city labels */
@@ -184,4 +178,26 @@
 
 .ew-map .leaflet-control-attribution a {
   color: var(--text);
+}
+
+/* ---------------------------------------------------------------- touch */
+/* Fingers need 44px: pins and clusters get an invisible hit area, zoom buttons grow. */
+@media (pointer: coarse) {
+  .ew-pin::after,
+  .ew-cluster::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+  }
+
+  .ew-map.leaflet-touch .leaflet-bar a {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+  }
 }

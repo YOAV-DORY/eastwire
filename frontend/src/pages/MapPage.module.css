@@ -57,14 +57,14 @@
 /* A segmented control: the chosen segment is pink, the rest quiet. */
 .segmented {
   display: inline-flex;
-  padding: 3px;
+  padding: 0;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   background: var(--bg-elev-1);
 }
 
 .segmented button {
-  min-height: 38px;
+  min-height: var(--tap);
   padding: 0 var(--space-4);
   border: 0;
   border-radius: var(--radius-pill);

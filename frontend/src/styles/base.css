@@ -106,7 +106,10 @@ svg {
   left: var(--space-4);
   top: -100px;
   z-index: var(--z-dialog);
-  padding: var(--space-2) var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 var(--space-4);
   border-radius: var(--radius-md);
   background: var(--bg-elev-2);
   color: var(--text);

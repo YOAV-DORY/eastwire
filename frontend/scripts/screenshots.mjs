@@ -51,11 +51,15 @@ for (const vp of VIEWPORTS) {
         return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none'
       }
       const small = mobile
-        ? [...document.querySelectorAll('a, button, input, select, [role="button"]')]
+        ? [...document.querySelectorAll('a, button, input, select, summary, [role="button"]')]
             .filter(vis)
             .filter((el) => !el.closest('.leaflet-control-attribution'))
+            // Pins and clusters keep their drawn size; CSS gives them a 44px hit area on touch screens.
+            .filter((el) => !el.matches('.leaflet-marker-icon'))
+            // Links inside running text are exempt (WCAG 2.5.8); every other control needs 44px of height.
+            .filter((el) => !(el.tagName === 'A' && el.closest('p, h1, h2, h3, h4, dd, blockquote')))
             .map((el) => ({ el, r: el.getBoundingClientRect() }))
-            .filter(({ r }) => r.height < 44 && r.width < 44)
+            .filter(({ r }) => r.height < 44)
             .map(({ el, r }) => `${el.tagName.toLowerCase()} "${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 30)}" ${Math.round(r.width)}x${Math.round(r.height)}`)
         : []
       const tiny = [...document.querySelectorAll('body *')]

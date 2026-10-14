@@ -27,7 +27,7 @@
 }
 
 .compact {
-  height: 48px;
+  height: 52px;
   padding: 0 var(--space-1) 0 var(--space-4);
   border-radius: var(--radius-lg);
 }
@@ -68,8 +68,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: var(--tap);
+  height: var(--tap);
   border: 0;
   border-radius: var(--radius-pill);
   background: transparent;
@@ -103,8 +103,8 @@
 }
 
 .compact .submit {
-  height: 40px;
-  min-width: 40px;
+  height: var(--tap);
+  min-width: var(--tap);
   border-radius: var(--radius-md);
 }
 

@@ -1,5 +1,6 @@
 .page {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
 }
 
@@ -23,6 +24,8 @@
 
 .filters label {
   display: grid;
+  flex: 1 1 8.5rem;
+  max-width: 12rem;
   gap: var(--space-1);
   color: var(--text-muted);
   font-size: var(--text-small);
@@ -30,6 +33,7 @@
 
 .filters select,
 .filters input {
+  width: 100%;
   min-height: var(--tap);
   padding: 0 var(--space-3);
   border: 1px solid var(--border-strong);
