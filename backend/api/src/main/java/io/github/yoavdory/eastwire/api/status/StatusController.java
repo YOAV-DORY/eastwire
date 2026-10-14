@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,17 +37,27 @@ class StatusController {
             boolean circuitOpen) {
     }
 
-    record Status(String state, Instant lastSuccessAt, List<SourceStatus> sources) {
+    /** @param state ok, or warn once the database nears the free tier's limit */
+    record Database(long sizeBytes, long limitBytes, String state) {
+    }
+
+    record Status(String state, Instant lastSuccessAt, List<SourceStatus> sources, Database database) {
     }
 
     private final StatusRepository repository;
     private final ComplianceConfig config;
     private final Clock clock;
+    private final long databaseLimit;
+    private final long databaseWarn;
 
-    StatusController(StatusRepository repository, ComplianceConfig config, Clock clock) {
+    StatusController(StatusRepository repository, ComplianceConfig config, Clock clock,
+            @Value("${eastwire.status.database-limit-bytes}") long databaseLimit,
+            @Value("${eastwire.status.database-warn-bytes}") long databaseWarn) {
         this.repository = repository;
         this.config = config;
         this.clock = clock;
+        this.databaseLimit = databaseLimit;
+        this.databaseWarn = databaseWarn;
     }
 
     @GetMapping("/api/v1/status")
@@ -63,7 +74,12 @@ class StatusController {
         String overall = anyNeverRan && oldest == null ? "unknown" : state(anyNeverRan ? null : oldest, now);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(Duration.ofSeconds(30)).cachePublic())
-                .body(new Status(overall, anyNeverRan ? null : oldest, sources));
+                .body(new Status(overall, anyNeverRan ? null : oldest, sources, database()));
+    }
+
+    private Database database() {
+        long size = repository.databaseBytes();
+        return new Database(size, databaseLimit, size >= databaseWarn ? "warn" : "ok");
     }
 
     static String state(Instant lastSuccess, Instant now) {

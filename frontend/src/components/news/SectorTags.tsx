@@ -21,13 +21,14 @@ export function SectorTags({ sectors }: { sectors: SectorTag[] }) {
             <button
               type="button"
               className={styles.tag}
+              // Starts with the visible label (WCAG 2.5.3) and says what pressing it does.
+              aria-label={`${s.label}: why this sector`}
               aria-expanded={open === s.slug}
               aria-controls={`${baseId}-${s.slug}`}
               onClick={() => setOpen(open === s.slug ? null : s.slug)}
             >
               <span className={styles.dot} style={{ background: sectorColor(s.slug) }} aria-hidden="true" />
               {s.label}
-              <span className="visually-hidden">: why this sector</span>
             </button>
           </li>
         ))}

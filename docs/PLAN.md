@@ -1239,6 +1239,29 @@ frontend/src/
   - Found and fixed a NULL-handling bug in the linker on the live run.
 - **Tests:** core 105, ingest 71 (18 Postgres, in CI), api 48 (8 Postgres, in CI), frontend 100. Main JS is 131 KB gzipped.
 
+**Milestone 9 (hardening):** built on branch `m9-hardening`, stacked on milestone 8.
+- **Site headers:**
+  - Strict CSP: no inline scripts (the theme script moved to `theme-init.js`); the API origin is written in at build time from `VITE_API_BASE_URL`; frames only for the two official embeds.
+  - HSTS, COOP, X-Frame-Options, Referrer-Policy, Permissions-Policy.
+- **API:**
+  - Per-IP rate limit (120/min, 429 with `Retry-After`; health exempt; client IP from Render's X-Forwarded-For).
+  - JSON-only security headers.
+  - `/status` reports database size against the free tier and warns from 800 MB.
+  - The client retries 429s.
+- **Playwright** against the production build served with the real `_headers` (`scripts/serve-dist.mjs`), API mocked with invented data, at 1280×800 and 390×844:
+  - flows: filter → URL → reload, shared search URL, sector tag explanation, map pin → panel, population legend, no social request before load, no CSP violations;
+  - axe on 9 routes in both themes (0 serious or critical);
+  - layout checklist: no horizontal scroll, one nav per width, hero ≤ 3 lines and not covered, reduced motion, focus ring, CLS < 0.05;
+  - screenshots saved for the human pass.
+- **CI** gets an e2e job that keeps screenshots and the report as an artifact.
+- **Found and fixed by these checks:**
+  - scrollable tables without keyboard focus;
+  - the sector tag's accessible name in Chrome;
+  - the hero wrapping to four lines between 1024 and 1280 px (now sized in container units);
+  - the inline theme script that the CSP would have blocked.
+- **Docs:** `docs/security.md`, README case study, `docs/linkedin-post.md` draft.
+- **Tests:** core 105, ingest 71 (18 Postgres in CI), api 51 (8 Postgres in CI), frontend 102 + 62 end-to-end. Main JS is 131 KB gzipped.
+
 **Owner actions to go live:**
 1. Create the Neon project.
 2. Run `backend/db/local-init.sql` with strong passwords.
@@ -1247,5 +1270,6 @@ frontend/src/
 All in `docs/database.md`.
 
 **Next:**
-1. The owner deploys (docs/deploy.md), and optionally sets `YOUTUBE_API_KEY` (docs/social.md).
-2. Milestone 9: hardening (CSP and security headers, rate limiting, Playwright E2E, accessibility, screenshot checklist, DB-size warning, case study).
+1. Merge PRs #1 → #8 in order.
+2. The owner deploys (docs/deploy.md): set `EASTWIRE_CORS_ORIGINS` on Render to the Pages origin and `VITE_API_BASE_URL` on Pages to the Render URL. Optionally set `YOUTUBE_API_KEY` (docs/social.md).
+3. The "Later" list (section 3): Japan Times and NHK once their checks clear, journalists, more countries.

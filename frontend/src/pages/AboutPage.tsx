@@ -29,7 +29,7 @@ export function AboutPage() {
         <h2 className={`${styles.heading} mono muted`}>Sources</h2>
         {sources.isLoading && <FeedSkeleton count={1} />}
         {sources.data && (
-          <div className={styles.tableWrap}>
+          <div className={styles.tableWrap} role="region" aria-label="Sources table" tabIndex={0}>
             <table className={styles.table}>
               <thead>
                 <tr>

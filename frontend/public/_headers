@@ -1,8 +1,19 @@
-# Cloudflare Pages response headers. A full Content-Security-Policy follows in milestone 9.
+# Cloudflare Pages response headers.
+# __API_ORIGIN__ is replaced at build time with the origin of VITE_API_BASE_URL (vite.config.ts),
+# so the page may talk to exactly one API host.
+#
+# Content-Security-Policy, by directive:
+#   script-src   our bundle and theme-init.js, plus Bluesky's official embed script (loaded on click)
+#   style-src    'unsafe-inline' because Leaflet and the embeds set style attributes; scripts stay locked
+#   img-src      map tiles (OpenStreetMap) and YouTube API thumbnails
+#   frame-src    the two official embeds, loaded only when the reader asks
 /*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://embed.bsky.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org https://i.ytimg.com; font-src 'self'; connect-src 'self' __API_ORIGIN__; frame-src https://embed.bsky.app https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
+  Cross-Origin-Opener-Policy: same-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
 
 /assets/*

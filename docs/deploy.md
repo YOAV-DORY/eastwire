@@ -38,6 +38,8 @@ Dockerfile shows up before Render tries to deploy it.
    - Build command: `npm run build`
    - Output directory: `dist`
    - Environment variables: `VITE_API_BASE_URL` = the Render URL from step 2 (no trailing slash), and `NODE_VERSION` = `24`.
+     The build also writes this origin into the Content-Security-Policy (`connect-src`), so if
+     it is missing or wrong the site loads but every API call is blocked. Rebuild after changing it.
 3. Deploy. `public/_redirects` makes every route serve the app; `public/_headers` sets basic security headers. The full Content-Security-Policy comes in milestone 9.
 4. Put the Pages address into Render's `EASTWIRE_CORS_ORIGINS` (step 2) and redeploy the API.
 

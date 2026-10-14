@@ -71,6 +71,18 @@ class StatusControllerTest {
     }
 
     @Test
+    void warnsWhenTheDatabaseNearsTheFreeTierLimit() throws Exception {
+        when(repository.enabledSources()).thenReturn(List.of(source("gdelt-gkg", Duration.ofMinutes(10), 0)));
+        when(repository.databaseBytes()).thenReturn(120_000_000L);
+        mvc.perform(get("/api/v1/status"))
+                .andExpect(jsonPath("$.database.sizeBytes").value(120_000_000L))
+                .andExpect(jsonPath("$.database.limitBytes").value(1_073_741_824L))
+                .andExpect(jsonPath("$.database.state").value("ok"));
+        when(repository.databaseBytes()).thenReturn(900_000_000L);
+        mvc.perform(get("/api/v1/status")).andExpect(jsonPath("$.database.state").value("warn"));
+    }
+
+    @Test
     void classifiesAge() {
         assertThat(StatusController.state(NOW.minus(Duration.ofMinutes(119)), NOW)).isEqualTo("fresh");
         assertThat(StatusController.state(NOW.minus(Duration.ofHours(2)), NOW)).isEqualTo("stale");
