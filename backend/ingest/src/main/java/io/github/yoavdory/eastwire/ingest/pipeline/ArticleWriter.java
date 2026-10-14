@@ -24,7 +24,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 /**
  * Stores candidates as articles. For each one, in a single transaction:
  * display policy → URL dedupe → takedown check → excerpt cut to the permitted length →
- * insert → locations → cluster with near-identical headlines from the last 48 hours.
+ * insert → locations → sectors → cluster with near-identical headlines from the last 48 hours.
  */
 @Component
 public class ArticleWriter implements ArticleSink {
@@ -37,14 +37,17 @@ public class ArticleWriter implements ArticleSink {
     private final TransactionTemplate tx;
     private final ComplianceConfig config;
     private final DisplayPolicy policy;
+    private final SectorTagger sectors;
     private final Clock clock;
     private final Map<String, Short> sourceIds = new ConcurrentHashMap<>();
 
-    public ArticleWriter(JdbcClient jdbc, TransactionTemplate tx, ComplianceConfig config, DisplayPolicy policy, Clock clock) {
+    public ArticleWriter(JdbcClient jdbc, TransactionTemplate tx, ComplianceConfig config, DisplayPolicy policy,
+            SectorTagger sectors, Clock clock) {
         this.jdbc = jdbc;
         this.tx = tx;
         this.config = config;
         this.policy = policy;
+        this.sectors = sectors;
         this.clock = clock;
     }
 
@@ -90,6 +93,7 @@ public class ArticleWriter implements ArticleSink {
                 return WriteResult.of(Kind.DUPLICATE, "already stored");
             }
             c.locations().forEach(location -> insertLocation(id.get(), location));
+            sectors.tag(id.get(), c.title(), finalExcerpt, c.signals());
             cluster(id.get(), c.title(), now);
             return WriteResult.created(id.get());
         });

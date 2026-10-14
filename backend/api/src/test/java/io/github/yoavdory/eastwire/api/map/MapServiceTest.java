@@ -29,7 +29,7 @@ class MapServiceTest {
     private static MapService service(List<LocationRow> rows) {
         MapRepository repo = new MapRepository(null) {
             @Override
-            public List<LocationRow> locations(Instant since, String country) {
+            public List<LocationRow> locations(Instant since, String country, String sector) {
                 return rows;
             }
         };
@@ -45,7 +45,7 @@ class MapServiceTest {
                 row(1, MAINICHI + "1", "event", "city", "high", "JP", TOKYO),
                 row(2, MAINICHI + "2", "mentioned", "city", "medium", "JP", TOKYO),
                 row(3, MAINICHI + "3", "mentioned", "city", "low", "JP", OSAKA)))
-                .map(MapService.Window.WEEK, Set.of("mentioned", "event"), null);
+                .map(MapService.Window.WEEK, Set.of("mentioned", "event"), null, null);
 
         assertThat(data.cities()).extracting(MapService.CityPin::name).containsExactly("Tokyo", "Osaka");
         MapService.CityPin tokyo = data.cities().getFirst();
@@ -65,7 +65,7 @@ class MapServiceTest {
                 row(2, MAINICHI + "2", "mentioned", "country", "medium", "JP", null),
                 row(2, MAINICHI + "2", "mentioned", "city", "medium", "JP", TOKYO),   // has a city: not country-only
                 row(3, "https://scroll.in/article/3", "mentioned", "country", "medium", "IN", null)))
-                .map(MapService.Window.WEEK, Set.of("mentioned", "event"), null);
+                .map(MapService.Window.WEEK, Set.of("mentioned", "event"), null, null);
 
         assertThat(data.cities()).singleElement().extracting(MapService.CityPin::total).isEqualTo(1);
         assertThat(data.countryOnly()).containsExactly(new MapService.CountryOnly("IN", 1), new MapService.CountryOnly("JP", 1));
@@ -76,7 +76,7 @@ class MapServiceTest {
         MapService.MapData data = service(List.of(
                 row(1, "https://www.scmp.com/news/1", "mentioned", "city", "medium", "JP", TOKYO),
                 row(2, "https://unreviewed.example/2", "mentioned", "country", "medium", "JP", null)))
-                .map(MapService.Window.WEEK, Set.of("mentioned", "event"), null);
+                .map(MapService.Window.WEEK, Set.of("mentioned", "event"), null, null);
 
         assertThat(data.cities()).isEmpty();
         assertThat(data.countryOnly()).isEmpty();
@@ -87,7 +87,7 @@ class MapServiceTest {
         MapService.MapData data = service(List.of(
                 row(1, MAINICHI + "1", "publisher", "country", "high", "JP", null),
                 row(2, MAINICHI + "2", "event", "city", "high", "JP", OSAKA)))
-                .map(MapService.Window.DAY, Set.of("event"), null);
+                .map(MapService.Window.DAY, Set.of("event"), null, null);
 
         assertThat(data.cities()).singleElement().extracting(MapService.CityPin::event).isEqualTo(1);
         assertThat(data.countryOnly()).isEmpty();

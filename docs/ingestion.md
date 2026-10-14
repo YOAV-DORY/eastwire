@@ -19,9 +19,11 @@ allows. It is a command-line Spring Boot app: it runs once and exits.
    4. Excerpt cut to the source's permitted length, at a sentence boundary.
    5. Insert.
    6. Locations.
-   7. Story clustering: a headline at least 60% similar (pg_trgm) to one from the last 48 h joins its cluster. That cluster size is what "also reported by N" will show.
-5. **Purge.** Articles past their source's retention window, and taken-down items, are deleted.
-6. **Exit code.** Non-zero only if *every* attempted connector failed. GitHub then marks the run failed and emails the repository owner.
+   7. Sectors: tagged from the headline, the stored excerpt, GDELT themes and Global Voices tags, with the matched rules saved ([`sectors.md`](sectors.md)).
+   8. Story clustering: a headline at least 60% similar (pg_trgm) to one from the last 48 h joins its cluster. That cluster size is what "also reported by N" will show.
+5. **Re-tag.** Live articles tagged by an older version of `config/sectors.yaml` (or never tagged) are tagged again from their stored signals.
+6. **Purge.** Articles past their source's retention window, and taken-down items, are deleted.
+7. **Exit code.** Non-zero only if *every* attempted connector failed. GitHub then marks the run failed and emails the repository owner.
 
 Every attempt is a row in `ingestion_run`, with status, counts and connector details. The
 latest state per source is in `source_status`:

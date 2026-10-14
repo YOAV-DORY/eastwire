@@ -6,6 +6,8 @@ import io.github.yoavdory.eastwire.api.articles.ArticleRow.LocationRow;
 import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import io.github.yoavdory.eastwire.core.config.RepoConfig;
 import io.github.yoavdory.eastwire.core.policy.DisplayPolicy;
+import io.github.yoavdory.eastwire.core.sector.SectorRules;
+import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 class ArticleServiceTest {
 
     private static final ComplianceConfig CONFIG = RepoConfig.load();
+    private static final SectorRules SECTORS = SectorRules.load(Path.of(System.getProperty(ComplianceConfig.CONFIG_DIR_PROPERTY)));
     private static final Instant NOW = Instant.parse("2026-10-13T12:00:00Z");
 
     private static ArticleRow row(long id, String source, String url, String excerpt, Instant discovered, int clusterSize) {
@@ -39,7 +42,7 @@ class ArticleServiceTest {
                 return rows.size();
             }
         };
-        return new ArticleService(repo, new DisplayPolicy(CONFIG), CONFIG, Clock.fixed(NOW, ZoneOffset.UTC));
+        return new ArticleService(repo, new DisplayPolicy(CONFIG), CONFIG, SECTORS, Clock.fixed(NOW, ZoneOffset.UTC));
     }
 
     private static final ArticleQuery FIRST_PAGE = new ArticleQuery(null, null, null, null, 1, 20);
@@ -54,6 +57,18 @@ class ArticleServiceTest {
         assertThat(v.alsoReportedBy()).isEqualTo(2);
         assertThat(v.excerpt()).isNull();
         assertThat(v.locations()).singleElement().extracting(ArticleView.LocationView::placeName).isEqualTo("Tokyo");
+    }
+
+    @Test
+    void sectorTagsCarryTheirLabelAndTheRulesThatMatched() {
+        ArticleRow tagged = row(1, "gdelt-gkg", "https://scroll.in/article/1/x", null, NOW, 1).withDetails(List.of(), List.of(
+                new ArticleRow.SectorRow("economy", 4.0, """
+                        [{"kind": "keyword", "value": "inflation", "field": "headline", "weight": 3.0},
+                         {"kind": "gdelt_theme", "value": "ECON_INFLATION", "weight": 1.0}]""")));
+        ArticleView.SectorTag tag = service(List.of(tagged)).page(FIRST_PAGE).items().getFirst().sectors().getFirst();
+        assertThat(tag.label()).isEqualTo("Economy");
+        assertThat(tag.rules()).containsExactly(new ArticleView.Rule("keyword", "inflation", "headline", 3.0),
+                new ArticleView.Rule("gdelt_theme", "ECON_INFLATION", null, 1.0));
     }
 
     @Test

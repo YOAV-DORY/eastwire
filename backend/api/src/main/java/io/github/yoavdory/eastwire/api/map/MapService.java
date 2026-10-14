@@ -86,9 +86,9 @@ public class MapService {
         this.clock = clock;
     }
 
-    public MapData map(Window window, Set<String> roles, String country) {
+    public MapData map(Window window, Set<String> roles, String country, String sector) {
         Instant since = clock.instant().minus(window.length);
-        List<LocationRow> rows = repository.locations(since, country).stream()
+        List<LocationRow> rows = repository.locations(since, country, sector).stream()
                 .filter(r -> roles.contains(r.role()))
                 .toList();
 

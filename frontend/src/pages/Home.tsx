@@ -1,31 +1,37 @@
 import { useCallback, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import { useArticleFeed, useCountries, useMapCities, usePlaces, useStatus } from '../api/queries'
+import { useCountries, useMapCities, usePlaces, useStatus } from '../api/queries'
 import type { CityPin } from '../api/types'
-import { LazyNewsMap } from '../components/map/LazyNewsMap'
-import { ButtonLink } from '../components/ui/Button'
 import { Flag } from '../components/graphics/Flag'
 import { HeroMark } from '../components/graphics/HeroMark'
-import { StoryCard } from '../components/news/StoryCard'
-import { ColdStart, EmptyState, ErrorState, FeedSkeleton, StaleBanner } from '../components/status/Feedback'
-import { Button } from '../components/ui/Button'
-import { Chip } from '../components/ui/Chip'
+import { LazyNewsMap } from '../components/map/LazyNewsMap'
+import { StoryFeed } from '../components/news/StoryFeed'
 import { SearchBar } from '../components/search/SearchBar'
-import { useSlow } from '../hooks/useSlow'
+import { StaleBanner } from '../components/status/Feedback'
+import { Button, ButtonLink } from '../components/ui/Button'
+import { Chip } from '../components/ui/Chip'
 import { DEFAULT_ROLES } from '../lib/map'
 import { relativeTime } from '../lib/time'
+import { SECTORS, isSectorId, sectorColor, sectorLabel } from '../sectors'
 import styles from './Home.module.css'
+
+interface Filters {
+  country?: string
+  city?: string
+  sector?: string
+}
 
 export function Home() {
   const [params, setParams] = useSearchParams()
   const country = params.get('country') ?? undefined
   const city = params.get('city') ?? undefined
+  const sectorParam = params.get('sector')
+  const sector = isSectorId(sectorParam) ? sectorParam : undefined
 
   const countries = useCountries()
   const places = usePlaces(country)
   const status = useStatus()
-  const feed = useArticleFeed({ country, city })
-  const map = useMapCities({ window: '7d', roles: DEFAULT_ROLES, country })
+  const map = useMapCities({ window: '7d', roles: DEFAULT_ROLES, country, sector })
   const navigate = useNavigate()
   const openCity = useCallback((pin: CityPin) => navigate(`/map/city/${pin.id}`), [navigate])
 
@@ -36,16 +42,23 @@ export function Home() {
   const cityName = places.data?.find((p) => String(p.id) === city)?.name
   const scope = cityName ?? (country ? (countryNames[country] ?? country) : undefined)
 
-  const slow = useSlow(feed.isLoading)
-  const items = feed.data?.pages.flatMap((p) => p.items) ?? []
-  const total = feed.data?.pages[0]?.total ?? 0
-
-  const select = (next: { country?: string; city?: string }) => {
+  const select = (next: Filters) => {
     const p = new URLSearchParams()
     if (next.country) p.set('country', next.country)
     if (next.city) p.set('city', next.city)
+    if (next.sector) p.set('sector', next.sector)
     setParams(p)
   }
+
+  const heading = ['Latest', scope, sector && sectorLabel(sector)].filter(Boolean).join(' · ')
+  const emptyTitle = `Nothing from our sources${sector ? ` tagged ${sectorLabel(sector)}` : ''}${scope ? ` for ${scope}` : ''} right now`
+  const emptyAction = sector ? (
+    <Button onClick={() => select({ country, city })}>All sectors</Button>
+  ) : scope ? (
+    <Button onClick={() => select(city ? { country } : {})}>
+      {city ? `All of ${countryNames[country ?? ''] ?? country}` : 'All countries'}
+    </Button>
+  ) : undefined
 
   return (
     <div className={styles.page}>
@@ -71,7 +84,7 @@ export function Home() {
         </ButtonLink>
       </div>
 
-      <SearchBar variant="hero" keep={{ country }} />
+      <SearchBar variant="hero" keep={{ country, sector }} />
 
       {(status.data?.state === 'stale' || status.data?.state === 'outage') && status.data.lastSuccessAt && (
         <StaleBanner
@@ -80,8 +93,24 @@ export function Home() {
         />
       )}
 
+      <div className={styles.filters} role="group" aria-label="Filter by sector">
+        <Chip selected={!sector} onClick={() => select({ country, city })}>
+          All sectors
+        </Chip>
+        {SECTORS.map((s) => (
+          <Chip
+            key={s.id}
+            selected={sector === s.id}
+            dotColor={sectorColor(s.id)}
+            onClick={() => select({ country, city, sector: s.id })}
+          >
+            {s.label}
+          </Chip>
+        ))}
+      </div>
+
       <div className={styles.filters} role="group" aria-label="Filter by country">
-        <Chip selected={!country} onClick={() => select({})}>
+        <Chip selected={!country} onClick={() => select({ sector })}>
           All
         </Chip>
         {(countries.data ?? []).map((c) => (
@@ -91,7 +120,7 @@ export function Home() {
             leading={<Flag country={c.iso2} />}
             count={c.last24h}
             title={`${c.last24h} stories in the last 24 hours`}
-            onClick={() => select({ country: c.iso2 })}
+            onClick={() => select({ country: c.iso2, sector })}
           >
             {c.name}
           </Chip>
@@ -101,7 +130,7 @@ export function Home() {
       {country && (places.data?.length ?? 0) > 0 && (
         <label className={styles.cityPicker}>
           <span className="mono muted">City</span>
-          <select value={city ?? ''} onChange={(e) => select({ country, city: e.target.value || undefined })}>
+          <select value={city ?? ''} onChange={(e) => select({ country, city: e.target.value || undefined, sector })}>
             <option value="">All of {countryNames[country] ?? country}</option>
             {places.data?.map((p) => (
               <option key={p.id} value={p.id}>
@@ -112,57 +141,13 @@ export function Home() {
         </label>
       )}
 
-      <section aria-labelledby="latest-title" className={styles.feed}>
-        <h2 id="latest-title" className={`${styles.feedTitle} mono muted`}>
-          Latest{scope ? ` · ${scope}` : ''}
-          {feed.data && ` · ${total} ${total === 1 ? 'story' : 'stories'}`}
-        </h2>
-
-        {feed.isLoading && (
-          <>
-            {slow && <ColdStart />}
-            <FeedSkeleton />
-          </>
-        )}
-
-        {feed.isError && !feed.data && (
-          <ErrorState
-            message="The server did not answer. It may be waking up or temporarily down."
-            onRetry={() => void feed.refetch()}
-          />
-        )}
-
-        {feed.data && items.length === 0 && (
-          <EmptyState
-            title={`Nothing from our sources${scope ? ` for ${scope}` : ''} right now`}
-            action={
-              scope ? (
-                <Button onClick={() => select(city ? { country } : {})}>
-                  {city ? `All of ${countryNames[country ?? ''] ?? country}` : 'All countries'}
-                </Button>
-              ) : undefined
-            }
-          >
-            This reflects our limited list of sources, not an absence of news.
-          </EmptyState>
-        )}
-
-        {items.length > 0 && (
-          <ol className={styles.list}>
-            {items.map((a) => (
-              <li key={a.id}>
-                <StoryCard article={a} countryNames={countryNames} />
-              </li>
-            ))}
-          </ol>
-        )}
-
-        {feed.hasNextPage && (
-          <Button size="lg" loading={feed.isFetchingNextPage} onClick={() => void feed.fetchNextPage()}>
-            Load more
-          </Button>
-        )}
-      </section>
+      <StoryFeed
+        filters={{ country, city, sector }}
+        heading={heading}
+        countryNames={countryNames}
+        emptyTitle={emptyTitle}
+        emptyAction={emptyAction}
+      />
     </div>
   )
 }

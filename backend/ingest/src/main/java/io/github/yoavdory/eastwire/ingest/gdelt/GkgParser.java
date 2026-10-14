@@ -9,6 +9,8 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +25,7 @@ final class GkgParser {
     private static final int COLLECTION = 2;
     private static final int SOURCE_NAME = 3;
     private static final int DOCUMENT_ID = 4;
+    private static final int V1_THEMES = 7;
     private static final int V2_LOCATIONS = 10;
     private static final int EXTRAS = 26;
 
@@ -50,7 +53,19 @@ final class GkgParser {
                 cols[DOCUMENT_ID].strip(),
                 title.find() ? title.group(1) : null,
                 pub.find() ? parseTimeOrNull(pub.group(1)) : null,
-                parseLocations(cols[V2_LOCATIONS])));
+                parseLocations(cols[V2_LOCATIONS]),
+                parseThemes(cols[V1_THEMES])));
+    }
+
+    /** V1THEMES: theme codes separated by ';'. */
+    static Set<String> parseThemes(String field) {
+        Set<String> themes = new TreeSet<>();
+        for (String t : field.split(";")) {
+            if (!t.isBlank()) {
+                themes.add(t.strip());
+            }
+        }
+        return themes;
     }
 
     /** V2ENHANCEDLOCATIONS: "type#name#fips#adm1#adm2#lat#lon#featureId#offset" separated by ';'. */

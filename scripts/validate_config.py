@@ -2,7 +2,8 @@
 
 Checks that the rules in docs/source-matrix.md and docs/domain-review.md are actually
 encoded in config/: excluded or conditional sources are disabled, every allowed domain has
-evidence, excluded publishers are denied everywhere, and the city list is well-formed.
+evidence, excluded publishers are denied everywhere, the city list is well-formed, and the
+sector rules use the six sectors the database allows.
 
 Usage: .venv/bin/python -I scripts/validate_config.py [--config-dir config]
 """
@@ -21,6 +22,9 @@ DECISIONS = {"allow", "deny", "pending"}
 RULE_PREFIX_FOR_DECISION = {"allow": ("A",), "deny": ("D", "Q"), "pending": ("P",)}
 # Publishers excluded in the source matrix must also be denied for GDELT-discovered items.
 MUST_DENY = {"scmp.com", "thehindu.com", "thehindubusinessline.com", "koreatimes.co.kr"}
+# The database's article_sector check constraint allows exactly these.
+SECTOR_SLUGS = {"economy", "geopolitics", "technology", "business", "society", "environment"}
+SECTOR_RULE_KEYS = ("keywords", "negative", "gdelt_themes", "feed_categories")
 
 
 class Report:
@@ -131,6 +135,30 @@ def check_cities(rows, countries, report):
     return {int(i) for i in ids}
 
 
+def check_sectors(rules, report):
+    slugs = [s.get("slug") for s in rules.get("sectors", [])]
+    if sorted(slugs) != sorted(SECTOR_SLUGS):
+        report.error("sectors.yaml", f"sectors must be exactly {sorted(SECTOR_SLUGS)}, got {slugs}")
+    if not (rules.get("threshold", 0) > 0 and rules.get("max_sectors", 0) >= 1):
+        report.error("sectors.yaml", "threshold must be > 0 and max_sectors >= 1")
+    for sector in rules.get("sectors", []):
+        where = f"sectors.yaml[{sector.get('slug')}]"
+        for field in ("label", "definition"):
+            if not sector.get(field):
+                report.error(where, f"missing {field}")
+        for key in SECTOR_RULE_KEYS:
+            for rule, weight in (sector.get(key) or {}).items():
+                if not isinstance(weight, (int, float)) or weight <= 0:
+                    report.error(where, f"{key} {rule!r}: weight must be a positive number")
+                if key in ("keywords", "negative") and str(rule).endswith("*") and len(str(rule).rstrip("*")) < 4:
+                    # "ai*" would also match "aid"; short stems must be listed word by word.
+                    report.error(where, f"{key} {rule!r}: stem too short for a trailing *")
+                if key == "gdelt_themes" and not str(rule).rstrip("*").replace("_", "").isalnum():
+                    report.error(where, f"gdelt_themes {rule!r}: not a GDELT theme code")
+                if key == "gdelt_themes" and str(rule) != str(rule).upper():
+                    report.error(where, f"gdelt_themes {rule!r}: theme codes are upper case")
+
+
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--config-dir", default="config")
@@ -150,6 +178,7 @@ def main(argv):
             report.error("city_curation.yaml", f"requires_country_context name {name!r} is not in cities.csv")
     domains = load_yaml(path("domains.yaml"))["domains"]
     check_domains(domains, report)
+    check_sectors(load_yaml(path("sectors.yaml")), report)
 
     if report.errors:
         print(f"{len(report.errors)} problem(s):")

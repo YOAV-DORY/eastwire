@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { useSources } from '../api/queries'
 import { FeedSkeleton } from '../components/status/Feedback'
 import { formatDate } from '../lib/time'
@@ -83,6 +84,15 @@ export function AboutPage() {
           <strong>datelined</strong>, and where the <strong>publisher</strong> is based. Dashed chips mark low
           confidence; for example, a capital city name often stands for its government. Stories that only name a
           country are never pinned to its capital. <a href={`${REPO}/cities.md`}>How the city list is chosen</a>.
+        </p>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={`${styles.heading} mono muted`}>Sectors</h2>
+        <p>
+          Stories are tagged with up to two of six sectors by published keyword rules, the publisher&apos;s own topic
+          tags and GDELT themes. No AI. Press a sector on any story to see the rules that matched, or read{' '}
+          <Link to="/sectors">every rule and how accurate they are</Link>.
         </p>
       </section>
 

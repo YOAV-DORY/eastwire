@@ -1,4 +1,4 @@
-import type { ArticlePage, ArticleView, CountryView, Status } from '../api/types'
+import type { ArticlePage, ArticleView, CountryView, SectorsView, SectorTag, Status } from '../api/types'
 
 /** Invented test data in the API's shape. */
 export function article(overrides: Partial<ArticleView> = {}): ArticleView {
@@ -57,4 +57,46 @@ export const COUNTRIES: CountryView[] = [
 
 export function status(state: Status['state'], lastSuccessAt: string | null = new Date().toISOString()): Status {
   return { state, lastSuccessAt, sources: [] }
+}
+
+export const ECONOMY_TAG: SectorTag = {
+  slug: 'economy',
+  label: 'Economy',
+  score: 5,
+  rules: [
+    { kind: 'keyword', value: 'inflation', field: 'headline', weight: 3 },
+    { kind: 'gdelt_theme', value: 'ECON_INFLATION', field: null, weight: 1 },
+    { kind: 'gdelt_theme', value: 'ECON_DEBT', field: null, weight: 1 },
+    { kind: 'gdelt_theme', value: 'ECON_TAXATION', field: null, weight: 1 },
+  ],
+}
+
+const NO_RULES = { keywords: [], negative: [], gdeltThemes: [], feedCategories: [] }
+
+export const SECTORS_VIEW: SectorsView = {
+  version: 'abc123def456',
+  threshold: 3,
+  maxSectors: 2,
+  excerptFactor: 0.5,
+  themeCap: 2,
+  untagged7d: 40,
+  sectors: [
+    {
+      slug: 'economy',
+      label: 'Economy',
+      definition: 'The economy as a whole.',
+      last7d: 12,
+      keywords: [{ rule: 'inflation', weight: 3 }, { rule: 'tariff*', weight: 3 }],
+      negative: [{ rule: 'economy class', weight: 3 }],
+      gdeltThemes: [{ rule: 'ECON_INFLATION', weight: 1 }],
+      feedCategories: [{ rule: 'Economics & Business', weight: 1 }],
+    },
+    ...(['geopolitics', 'technology', 'business', 'society', 'environment'] as const).map((slug) => ({
+      slug,
+      label: slug[0].toUpperCase() + slug.slice(1),
+      definition: `About ${slug}.`,
+      last7d: 1,
+      ...NO_RULES,
+    })),
+  ],
 }

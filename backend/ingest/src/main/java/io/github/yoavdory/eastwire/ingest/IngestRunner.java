@@ -4,6 +4,7 @@ import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import io.github.yoavdory.eastwire.core.config.SourceConfig;
 import io.github.yoavdory.eastwire.ingest.http.HttpFetcher;
 import io.github.yoavdory.eastwire.ingest.pipeline.RetentionPurger;
+import io.github.yoavdory.eastwire.ingest.pipeline.SectorTagger;
 import io.github.yoavdory.eastwire.ingest.run.CircuitBreaker;
 import io.github.yoavdory.eastwire.ingest.run.RunOutcome;
 import io.github.yoavdory.eastwire.ingest.run.RunRecorder;
@@ -29,8 +30,9 @@ import org.springframework.stereotype.Component;
 /**
  * One ingestion run:
  * take the advisory lock (so overlapping runs never collide) → sync config/ →
- * run each enabled source's connector unless its circuit is open → purge expired and
- * taken-down items → fail the process only if every attempted connector failed.
+ * run each enabled source's connector unless its circuit is open → re-tag sectors of stored
+ * articles if config/sectors.yaml changed → purge expired and taken-down items → fail the
+ * process only if every attempted connector failed.
  */
 @Component
 @ConditionalOnProperty(name = "eastwire.ingest.run-on-startup", havingValue = "true", matchIfMissing = true)
@@ -44,18 +46,20 @@ class IngestRunner implements ApplicationRunner {
     private final ConfigSync configSync;
     private final RunRecorder recorder;
     private final RetentionPurger purger;
+    private final SectorTagger sectors;
     private final Map<String, Connector> connectors;
     private final DataSource dataSource;
     private final Clock clock;
     private final boolean useLock;
 
     IngestRunner(ComplianceConfig config, ConfigSync configSync, RunRecorder recorder, RetentionPurger purger,
-            List<Connector> connectors, DataSource dataSource, Clock clock,
+            SectorTagger sectors, List<Connector> connectors, DataSource dataSource, Clock clock,
             @Value("${eastwire.ingest.advisory-lock}") boolean useLock) {
         this.config = config;
         this.configSync = configSync;
         this.recorder = recorder;
         this.purger = purger;
+        this.sectors = sectors;
         this.connectors = connectors.stream().collect(Collectors.toMap(Connector::sourceSlug, Function.identity()));
         this.dataSource = dataSource;
         this.clock = clock;
@@ -122,6 +126,11 @@ class IngestRunner implements ApplicationRunner {
                 failed++;
             }
             log.info("{}: {} ({} seen, {} new)", source.slug(), outcome.status(), outcome.itemsSeen(), outcome.itemsNew());
+        }
+
+        int retagged = sectors.retagStale();
+        if (retagged > 0) {
+            log.info("Re-tagged sectors of {} stored articles (rules changed or never tagged)", retagged);
         }
 
         RetentionPurger.Result purged = purger.purge();

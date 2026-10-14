@@ -18,11 +18,10 @@ describe('routes', () => {
     expect(screen.getByRole('link', { name: 'Skip to content' })).toHaveAttribute('href', '#main')
   })
 
-  it('pages planned for later milestones say so plainly', async () => {
+  it('an unknown sector is a not-found page', async () => {
     stubApi(API)
-    renderRoute('/sectors')
-    expect(await screen.findByRole('heading', { name: 'Sectors', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText('Planned for milestone 7 of 9.')).toBeInTheDocument()
+    renderRoute('/sector/sport')
+    expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
   })
 
   it('unknown paths show the not-found page inside the shell', async () => {

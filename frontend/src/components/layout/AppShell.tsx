@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { Compass, Info, Keyboard, LayoutList, Map, Search, Shapes } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
-import { Link, NavLink, Outlet, useNavigate, useSearchParams } from 'react-router'
+import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { useCountries, useStatus } from '../../api/queries'
 import { Flag } from '../graphics/Flag'
 import { Wordmark } from '../graphics/Wordmark'
@@ -10,20 +10,30 @@ import { ShortcutsDialog } from '../search/ShortcutsDialog'
 import { useHotkeys, useShortcutsSetting } from '../../hooks/useShortcuts'
 import { FreshnessIndicator } from '../status/FreshnessIndicator'
 import { ThemeToggle } from '../ui/ThemeToggle'
+import { SECTORS, sectorColor } from '../../sectors'
 import styles from './AppShell.module.css'
 
 const NAV = [
-  { to: '/', label: 'Latest', icon: LayoutList, end: true },
-  { to: '/map', label: 'Map', icon: Map, end: false },
-  { to: '/search', label: 'Search', icon: Search, end: false },
-  { to: '/sectors', label: 'Sectors', icon: Shapes, end: false },
+  { to: '/', label: 'Latest', icon: LayoutList, match: null },
+  { to: '/map', label: 'Map', icon: Map, match: '/map' },
+  { to: '/search', label: 'Search', icon: Search, match: '/search' },
+  // One sector's page (/sector/economy) is part of the Sectors section too.
+  { to: '/sectors', label: 'Sectors', icon: Shapes, match: '/sector' },
 ] as const
+
+type NavItem = (typeof NAV)[number]
+
+/** "Latest" is the home page only; every other item covers its whole section. */
+function isCurrent(item: NavItem, pathname: string) {
+  return item.match === null ? pathname === '/' : pathname.startsWith(item.match)
+}
 
 /**
  * Top bar everywhere; primary navigation lives in exactly one place per width:
  * bottom nav (< 768 px), top bar (768–1023 px), sidebar (≥ 1024 px).
  */
 export function AppShell() {
+  const { pathname } = useLocation()
   const status = useStatus()
   const navigate = useNavigate()
   const shortcuts = useShortcutsSetting()
@@ -53,9 +63,14 @@ export function AppShell() {
         </Link>
         <nav className={styles.topnav} aria-label="Primary">
           {NAV.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={styles.topnavLink}>
+            <Link
+              key={item.to}
+              to={item.to}
+              className={styles.topnavLink}
+              aria-current={isCurrent(item, pathname) ? 'page' : undefined}
+            >
               {item.label}
-            </NavLink>
+            </Link>
           ))}
         </nav>
         <div className={styles.actions}>
@@ -69,10 +84,15 @@ export function AppShell() {
       </main>
       <nav className={styles.bottomnav} aria-label="Primary">
         {NAV.map((item) => (
-          <NavLink key={item.to} to={item.to} end={item.end} className={styles.bottomnavLink}>
+          <Link
+            key={item.to}
+            to={item.to}
+            className={styles.bottomnavLink}
+            aria-current={isCurrent(item, pathname) ? 'page' : undefined}
+          >
             <item.icon size={20} strokeWidth={1.75} aria-hidden="true" />
             <span>{item.label === 'Latest' ? 'Home' : item.label}</span>
-          </NavLink>
+          </Link>
         ))}
       </nav>
       <ShortcutsDialog
@@ -86,6 +106,7 @@ export function AppShell() {
 }
 
 function Sidebar({ onShowShortcuts }: { onShowShortcuts: () => void }) {
+  const { pathname } = useLocation()
   const countries = useCountries()
   const [params] = useSearchParams()
   const active = params.get('country')
@@ -94,10 +115,15 @@ function Sidebar({ onShowShortcuts }: { onShowShortcuts: () => void }) {
       <nav aria-label="Primary">
         <SidebarGroup>
           {NAV.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={styles.sideLink}>
+            <Link
+              key={item.to}
+              to={item.to}
+              className={styles.sideLink}
+              aria-current={isCurrent(item, pathname) ? 'page' : undefined}
+            >
               <item.icon size={16} strokeWidth={1.75} aria-hidden="true" />
               {item.label}
-            </NavLink>
+            </Link>
           ))}
         </SidebarGroup>
       </nav>
@@ -115,6 +141,14 @@ function Sidebar({ onShowShortcuts }: { onShowShortcuts: () => void }) {
               {c.last24h}
             </span>
           </Link>
+        ))}
+      </SidebarGroup>
+      <SidebarGroup title="Sectors">
+        {SECTORS.map((sector) => (
+          <NavLink key={sector.id} to={`/sector/${sector.id}`} className={styles.sideLink}>
+            <span className={styles.sectorDot} style={{ background: sectorColor(sector.id) }} aria-hidden="true" />
+            {sector.label}
+          </NavLink>
         ))}
       </SidebarGroup>
       <SidebarGroup title="About">

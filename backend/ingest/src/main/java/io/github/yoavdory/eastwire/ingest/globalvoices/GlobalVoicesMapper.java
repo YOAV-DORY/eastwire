@@ -12,6 +12,7 @@ import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import io.github.yoavdory.eastwire.core.config.Country;
 import io.github.yoavdory.eastwire.core.geo.DatelineDetector;
 import io.github.yoavdory.eastwire.core.geo.Gazetteer;
+import io.github.yoavdory.eastwire.core.sector.SectorSignals;
 import io.github.yoavdory.eastwire.ingest.pipeline.ArticleCandidate;
 import io.github.yoavdory.eastwire.ingest.pipeline.Text;
 import java.time.Instant;
@@ -20,6 +21,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +36,7 @@ import java.util.stream.Collectors;
  *       government, not the city.</li>
  *   <li>Event location: only from a dateline at the start of the summary.</li>
  *   <li>Publisher location: none. Global Voices is an international network.</li>
+ *   <li>Sector hints: all of the item's Global Voices tags; config/sectors.yaml decides which count.</li>
  * </ul>
  */
 final class GlobalVoicesMapper {
@@ -48,10 +52,12 @@ final class GlobalVoicesMapper {
     }
 
     Optional<ArticleCandidate> map(String sourceSlug, SyndEntry entry, Instant now) {
-        List<Country> countries = entry.getCategories().stream()
+        Set<String> categories = entry.getCategories().stream()
                 .map(SyndCategory::getName)
-                .filter(n -> n != null)
+                .filter(n -> n != null && !n.isBlank())
                 .map(String::strip)
+                .collect(Collectors.toCollection(TreeSet::new));
+        List<Country> countries = categories.stream()
                 .map(countriesByName::get)
                 .filter(c -> c != null)
                 .distinct()
@@ -81,7 +87,7 @@ final class GlobalVoicesMapper {
         String author = entry.getAuthor() == null || entry.getAuthor().isBlank() ? null : entry.getAuthor().strip();
         return Optional.of(new ArticleCandidate(sourceSlug, entry.getLink().strip(), title, summary, author, null,
                 PartnerReprints.isPartnerReprint(content), ArticleCandidate.ExcerptKind.CC_BY_EXCERPT,
-                toInstant(entry.getPublishedDate()), now, "en", locations));
+                toInstant(entry.getPublishedDate()), now, "en", locations, SectorSignals.categories(categories)));
     }
 
     private static Instant toInstant(Date date) {

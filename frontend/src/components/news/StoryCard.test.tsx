@@ -1,6 +1,8 @@
 import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
-import { article } from '../../test/fixtures'
+import { article, ECONOMY_TAG } from '../../test/fixtures'
 import { primaryPlace } from './places'
 import { StoryCard } from './StoryCard'
 
@@ -77,5 +79,28 @@ describe('primaryPlace', () => {
     expect(
       primaryPlace([{ ...article().locations[0], precision: 'country', placeId: null, placeName: null }], NAMES),
     ).toBe('India')
+  })
+
+  it('explains a sector tag with the rules that matched, on request', async () => {
+    render(
+      <MemoryRouter>
+        <StoryCard article={article({ sectors: [ECONOMY_TAG] })} countryNames={NAMES} now={NOW} />
+      </MemoryRouter>,
+    )
+    const tag = screen.getByRole('button', { name: 'Economy: why this sector' })
+    expect(tag).toHaveAttribute('aria-expanded', 'false')
+    await userEvent.click(tag)
+    expect(tag).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('Tagged Economy because of:')).toBeInTheDocument()
+    expect(screen.getByText('“inflation” in the headline')).toBeInTheDocument()
+    expect(screen.getByText('GDELT theme ECON_INFLATION')).toBeInTheDocument()
+    // 3 themes listed at +1 each, but only +2 counted (score 5 = 3 + 2).
+    expect(screen.getByText('GDELT themes count for at most +2 together.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'How we tag Economy' })).toHaveAttribute('href', '/sector/economy')
+  })
+
+  it('shows no sector row for an untagged story', () => {
+    render(<StoryCard article={article()} countryNames={NAMES} now={NOW} />)
+    expect(screen.queryByRole('list', { name: 'Sectors' })).not.toBeInTheDocument()
   })
 })

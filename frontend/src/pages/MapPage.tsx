@@ -10,6 +10,7 @@ import { ColdStart, ErrorState } from '../components/status/Feedback'
 import { Chip } from '../components/ui/Chip'
 import { useSlow } from '../hooks/useSlow'
 import { readMapState, writeMapState, type MapState } from '../lib/map'
+import { SECTORS } from '../sectors'
 import styles from './MapPage.module.css'
 
 const WINDOWS: { value: MapWindow; label: string }[] = [
@@ -31,7 +32,7 @@ export function MapPage() {
   const state = readMapState(params)
   const selectedId = geonamesId ? Number(geonamesId) : undefined
 
-  const map = useMapCities({ window: state.window, roles: state.roles, country: state.country })
+  const map = useMapCities({ window: state.window, roles: state.roles, country: state.country, sector: state.sector })
   const countries = useCountries()
   const places = useAllPlaces(state.population || selectedId !== undefined)
   const slow = useSlow(map.isLoading)
@@ -77,6 +78,17 @@ export function MapPage() {
             {(countries.data ?? []).map((c) => (
               <option key={c.iso2} value={c.iso2}>
                 {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className={styles.select}>
+          <span className="mono muted">Sector</span>
+          <select value={state.sector ?? ''} onChange={(e) => set({ sector: e.target.value || undefined })}>
+            <option value="">All sectors</option>
+            {SECTORS.map((sector) => (
+              <option key={sector.id} value={sector.id}>
+                {sector.label}
               </option>
             ))}
           </select>
@@ -147,6 +159,7 @@ export function MapPage() {
                 place={selectedPlace}
                 pin={selectedPin}
                 countryNames={countryNames}
+                sector={state.sector}
                 onClose={() => navigate(`/map${suffix}`)}
               />
             ) : places.data ? (

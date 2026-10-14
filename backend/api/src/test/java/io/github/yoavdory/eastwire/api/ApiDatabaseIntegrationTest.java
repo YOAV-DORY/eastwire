@@ -74,6 +74,31 @@ class ApiDatabaseIntegrationTest {
                        (2, NULL, 'IN', 'mentioned', 'country', 'high', 'feed_category', 'Filed under India by Global Voices'),
                        (3, NULL, 'IN', 'mentioned', 'country', 'medium', 'gdelt_gkg', 'Mentions India')
                 """).update();
+        jdbc.sql("""
+                INSERT INTO article_sector (article_id, sector, score, matched_rules)
+                VALUES (1, 'economy', 4, '[{"kind": "keyword", "value": "inflation", "field": "headline", "weight": 3.0},
+                                          {"kind": "gdelt_theme", "value": "ECON_INFLATION", "weight": 1.0}]'),
+                       (3, 'economy', 3, '[]')
+                """).update();
+    }
+
+    @Test
+    void sectorFilterAndExplanations() throws Exception {
+        mvc.perform(get("/api/v1/articles").param("sector", "economy"))
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items[0].sectors[0].slug").value("economy"))
+                .andExpect(jsonPath("$.items[0].sectors[0].label").value("Economy"))
+                .andExpect(jsonPath("$.items[0].sectors[0].rules[0].value").value("inflation"))
+                .andExpect(jsonPath("$.items[0].sectors[0].rules[1].kind").value("gdelt_theme"));
+        mvc.perform(get("/api/v1/articles").param("sector", "society")).andExpect(jsonPath("$.total").value(0));
+        mvc.perform(get("/api/v1/map/cities").param("sector", "economy"))
+                .andExpect(jsonPath("$.cities[0].name").value("Tokyo"));
+        mvc.perform(get("/api/v1/map/cities").param("sector", "society")).andExpect(jsonPath("$.cities", hasSize(0)));
+        mvc.perform(get("/api/v1/sectors"))
+                .andExpect(jsonPath("$.sectors", hasSize(6)))
+                .andExpect(jsonPath("$.sectors[0].slug").value("economy"))
+                .andExpect(jsonPath("$.sectors[0].last7d").value(1))   // the expired article does not count
+                .andExpect(jsonPath("$.untagged7d").value(1));
     }
 
     @Test

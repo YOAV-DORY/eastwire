@@ -3,6 +3,7 @@ import type { ArticleView, LocationView } from '../../api/types'
 import { formatUtc, relativeTime } from '../../lib/time'
 import { Sticker } from '../ui/Sticker'
 import { primaryPlace } from './places'
+import { SectorTags } from './SectorTags'
 import styles from './StoryCard.module.css'
 
 const ROLE_LABEL: Record<LocationView['role'], string> = {
@@ -53,6 +54,7 @@ export function StoryCard({ article, countryNames = {}, now }: StoryCardProps) {
         </a>
       </h3>
       {article.excerpt && <p className={`${styles.excerpt} clamp-2`}>{article.excerpt}</p>}
+      <SectorTags sectors={article.sectors} />
       <div className={styles.footer}>
         <span className={`${styles.publisher} mono`}>{article.publisher}</span>
         {article.viaDiscovery && <span className={`${styles.badge} mono`}>via GDELT</span>}

@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The story feed and search:
- * {@code GET /api/v1/articles?country=JP&city=1850147&from=2026-10-01&page=1} and
- * {@code GET /api/v1/search?q=semiconductor exports&country=KR&sort=relevance}.
+ * {@code GET /api/v1/articles?country=JP&city=1850147&sector=economy&from=2026-10-01&page=1} and
+ * {@code GET /api/v1/search?q=semiconductor exports&country=KR&sector=technology&sort=relevance}.
  */
 @RestController
 class ArticlesController {
@@ -28,11 +28,12 @@ class ArticlesController {
     ResponseEntity<ArticleView.Page> articles(
             @RequestParam(required = false) String country,
             @RequestParam(required = false) Long city,
+            @RequestParam(required = false) String sector,
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "" + ArticleQuery.DEFAULT_SIZE) int size) {
-        return cached(service.page(validator.feed(country, city, from, to, page, size)));
+        return cached(service.page(validator.feed(country, city, sector, from, to, page, size)));
     }
 
     /** Full-text search over headlines and permitted excerpts, with the same filters as the feed. */
@@ -41,12 +42,13 @@ class ArticlesController {
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String country,
             @RequestParam(required = false) Long city,
+            @RequestParam(required = false) String sector,
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "" + ArticleQuery.DEFAULT_SIZE) int size,
             @RequestParam(required = false) String sort) {
-        return cached(service.page(validator.search(q, country, city, from, to, page, size, sort)));
+        return cached(service.page(validator.search(q, country, city, sector, from, to, page, size, sort)));
     }
 
     private static ResponseEntity<ArticleView.Page> cached(ArticleView.Page page) {

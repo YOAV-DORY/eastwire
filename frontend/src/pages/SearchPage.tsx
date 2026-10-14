@@ -5,10 +5,11 @@ import { StoryCard } from '../components/news/StoryCard'
 import { SearchBar } from '../components/search/SearchBar'
 import { ColdStart, EmptyState, ErrorState, FeedSkeleton } from '../components/status/Feedback'
 import { useSlow } from '../hooks/useSlow'
+import { SECTORS, isSectorId } from '../sectors'
 import styles from './SearchPage.module.css'
 
 const EXAMPLES = ['semiconductors', '"heat wave"', 'rupee OR inflation', 'election -Delhi']
-const PARAM_KEYS = ['q', 'country', 'city', 'from', 'to', 'sort'] as const
+const PARAM_KEYS = ['q', 'country', 'city', 'sector', 'from', 'to', 'sort'] as const
 
 /** Search with every filter in the URL, so any search can be shared or bookmarked. */
 export function SearchPage() {
@@ -17,6 +18,7 @@ export function SearchPage() {
     q: params.get('q') ?? '',
     country: params.get('country') ?? undefined,
     city: params.get('city') ?? undefined,
+    sector: isSectorId(params.get('sector')) ? (params.get('sector') ?? undefined) : undefined,
     from: params.get('from') ?? undefined,
     to: params.get('to') ?? undefined,
     sort: params.get('sort') === 'date' ? 'date' : 'relevance',
@@ -62,7 +64,14 @@ export function SearchPage() {
         key={filters.q}
         variant="compact"
         initialQuery={filters.q}
-        keep={{ country: filters.country, city: filters.city, from: filters.from, to: filters.to, sort: params.get('sort') ?? undefined }}
+        keep={{
+          country: filters.country,
+          city: filters.city,
+          sector: filters.sector,
+          from: filters.from,
+          to: filters.to,
+          sort: params.get('sort') ?? undefined,
+        }}
         autoFocus={!hasQuery}
       />
 
@@ -91,6 +100,17 @@ export function SearchPage() {
             </select>
           </label>
         )}
+        <label>
+          <span className="mono muted">Sector</span>
+          <select value={filters.sector ?? ''} onChange={(e) => update('sector', e.target.value)}>
+            <option value="">All</option>
+            {SECTORS.map((sector) => (
+              <option key={sector.id} value={sector.id}>
+                {sector.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <label>
           <span className="mono muted">From</span>
           <input type="date" value={filters.from ?? ''} max={filters.to} onChange={(e) => update('from', e.target.value)} />

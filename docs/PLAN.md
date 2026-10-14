@@ -1181,6 +1181,39 @@ frontend/src/
 - **Not done yet:** the bottom-sheet city panel on phones (the panel sits under the map instead), and a role-tabbed panel. Main JS is 126 KB gzipped; the map chunk adds 54 KB on demand.
 - **Known data quirk:** GeoNames lists Delhi and New Delhi as separate cities, so a story can be pinned to either.
 
+**Milestone 7 (sectors):** built on branch `m7-sectors`, stacked on milestone 6.
+- **Rules:** `config/sectors.yaml` holds weighted keywords, negative phrases, Global Voices topic tags and GDELT theme codes for the six sectors.
+  - Threshold 3, at most 2 sectors per story; excerpt keywords count half; GDELT themes add at most +2 together, so they can never tag alone.
+  - Checked by `scripts/validate_config.py` and by `SectorRules` in Java (exact six sectors, no typos, no duplicates, positive weights, no stems shorter than four letters).
+- **Classifier:** `core/sector/SectorClassifier`, deterministic, returns every matched rule.
+- **Ingestion:**
+  - GDELT V1THEMES and Global Voices tags are stored as `article.sector_signals` (V4 migration).
+  - Tags are written with their matched rules.
+  - Each run re-tags live articles whose `sector_rules_version` (a hash of sectors.yaml) is out of date.
+- **API:**
+  - `sector=` filter on `/articles`, `/search` and `/map/cities`.
+  - Every story carries its sector tags with label, score and rules.
+  - `GET /api/v1/sectors` returns the rules plus 7-day counts.
+- **Frontend:**
+  - Sector chips on Home and sector selects on Search and Map, all in the URL.
+  - A "why this sector" disclosure on every story card, including a note when the GDELT theme cap applied.
+  - `/sectors` overview with an honest accuracy note; `/sector/:slug` with feed, country chips, top places this week and a "How we tag" panel listing every rule.
+  - Sidebar sector list.
+- **Evaluation** (`SectorEvaluationTest`, docs/sectors.md):
+
+  | Set | Precision | Recall | Note |
+  |---|---|---|---|
+  | Development, 216 invented | 98% | 88% | tuned on |
+  | Holdout, 60 invented | 100% | 33% | never tuned on |
+  | 66 real items, before tuning | 76% | 69% | |
+  | Same 66, after tuning | 85% | 81% | seen data |
+
+  The holdout result was the important finding: tags are rarely wrong but often missing. The UI says so.
+- **Verified:**
+  - Against fresh real data in PGlite: 63 GDELT and 18 Global Voices items tagged on write; an earlier database's 96 articles were re-tagged after the migration.
+  - Browser at 1280 and 390 px.
+  - Tests: core 101 (+1 opt-in real-sample check), ingest 58 (13 of them Postgres, run in CI), api 44 (7 Postgres, in CI), frontend 93.
+
 **Owner actions to go live:**
 1. Create the Neon project.
 2. Run `backend/db/local-init.sql` with strong passwords.
@@ -1190,4 +1223,4 @@ All in `docs/database.md`.
 
 **Next:**
 1. The owner deploys (docs/deploy.md).
-2. Milestone 7: sectors.
+2. Milestone 8: social (curated Bluesky and YouTube).

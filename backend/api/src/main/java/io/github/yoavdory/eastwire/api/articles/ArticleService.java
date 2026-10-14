@@ -6,12 +6,15 @@ import io.github.yoavdory.eastwire.core.policy.DisplayDecision;
 import io.github.yoavdory.eastwire.core.policy.DisplayPolicy;
 import io.github.yoavdory.eastwire.core.policy.DisplayRequest;
 import io.github.yoavdory.eastwire.core.policy.Excerpts;
+import io.github.yoavdory.eastwire.core.sector.SectorDefinition;
+import io.github.yoavdory.eastwire.core.sector.SectorRules;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Turns stored rows into story cards. Every row passes the display policy again at read time,
@@ -22,16 +25,20 @@ import org.springframework.stereotype.Service;
 public class ArticleService {
 
     static final Duration NEW_FOR = Duration.ofHours(1);
+    private static final JsonMapper JSON = JsonMapper.builder().build();
 
     private final ArticleRepository repository;
     private final DisplayPolicy policy;
     private final ComplianceConfig config;
+    private final SectorRules sectorRules;
     private final Clock clock;
 
-    public ArticleService(ArticleRepository repository, DisplayPolicy policy, ComplianceConfig config, Clock clock) {
+    public ArticleService(ArticleRepository repository, DisplayPolicy policy, ComplianceConfig config, SectorRules sectorRules,
+            Clock clock) {
         this.repository = repository;
         this.policy = policy;
         this.config = config;
+        this.sectorRules = sectorRules;
         this.clock = clock;
     }
 
@@ -62,6 +69,12 @@ public class ArticleService {
                 excerpt, attribution, license,
                 r.locations().stream().map(l -> new ArticleView.LocationView(l.role(), l.precision(), l.confidence(),
                         l.method(), l.countryIso2(), l.placeId(), l.placeName(), l.evidence())).toList(),
-                r.sectors(), Math.max(0, r.clusterSize() - 1));
+                r.sectors().stream().map(this::sectorTag).toList(), Math.max(0, r.clusterSize() - 1));
+    }
+
+    private ArticleView.SectorTag sectorTag(ArticleRow.SectorRow row) {
+        String label = sectorRules.sector(row.sector()).map(SectorDefinition::label).orElse(row.sector());
+        List<ArticleView.Rule> rules = row.rulesJson() == null ? List.of() : List.of(JSON.readValue(row.rulesJson(), ArticleView.Rule[].class));
+        return new ArticleView.SectorTag(row.sector(), label, row.score(), rules);
     }
 }

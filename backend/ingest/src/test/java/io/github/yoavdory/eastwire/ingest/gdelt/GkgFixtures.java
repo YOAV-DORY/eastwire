@@ -31,6 +31,7 @@ final class GkgFixtures {
         cols[2] = "1";
         cols[3] = url.replaceFirst("https?://(www\\.)?", "").replaceFirst("/.*", "");
         cols[4] = url;
+        cols[7] = "TAX_FNCACT;ECON_INFLATION;";
         cols[10] = locations;
         cols[26] = (title == null ? "" : "<PAGE_TITLE>" + title + "</PAGE_TITLE>")
                 + "<PAGE_PRECISEPUBTIMESTAMP>20261013090000</PAGE_PRECISEPUBTIMESTAMP>";

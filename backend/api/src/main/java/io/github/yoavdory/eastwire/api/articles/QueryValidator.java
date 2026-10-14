@@ -2,6 +2,7 @@ package io.github.yoavdory.eastwire.api.articles;
 
 import io.github.yoavdory.eastwire.api.BadRequestException;
 import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
+import io.github.yoavdory.eastwire.core.sector.SectorRules;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Locale;
@@ -20,12 +21,12 @@ public class QueryValidator {
         this.config = config;
     }
 
-    public ArticleQuery feed(String country, Long city, LocalDate from, LocalDate to, int page, int size) {
-        return build(country, city, from, to, page, size, null, ArticleQuery.Sort.DATE);
+    public ArticleQuery feed(String country, Long city, String sector, LocalDate from, LocalDate to, int page, int size) {
+        return build(country, city, sector, from, to, page, size, null, ArticleQuery.Sort.DATE);
     }
 
-    public ArticleQuery search(String q, String country, Long city, LocalDate from, LocalDate to, int page, int size,
-            String sort) {
+    public ArticleQuery search(String q, String country, Long city, String sector, LocalDate from, LocalDate to, int page,
+            int size, String sort) {
         String text = q == null ? "" : q.strip().replaceAll("\\s+", " ");
         if (text.length() < MIN_QUERY_CHARS || text.length() > MAX_QUERY_CHARS) {
             throw new BadRequestException("Search text must be " + MIN_QUERY_CHARS + " to " + MAX_QUERY_CHARS + " characters");
@@ -35,11 +36,19 @@ public class QueryValidator {
             case "date" -> ArticleQuery.Sort.DATE;
             default -> throw new BadRequestException("sort must be 'relevance' or 'date'");
         };
-        return build(country, city, from, to, page, size, text, order);
+        return build(country, city, sector, from, to, page, size, text, order);
     }
 
-    private ArticleQuery build(String country, Long city, LocalDate from, LocalDate to, int page, int size, String text,
-            ArticleQuery.Sort sort) {
+    /** A known sector slug, or null. Shared with the map. */
+    public static String sector(String sector) {
+        if (sector != null && !SectorRules.SLUGS.contains(sector)) {
+            throw new BadRequestException("Unknown sector '" + sector + "'");
+        }
+        return sector;
+    }
+
+    private ArticleQuery build(String country, Long city, String sector, LocalDate from, LocalDate to, int page, int size,
+            String text, ArticleQuery.Sort sort) {
         if (country != null && config.activeCountries().stream().noneMatch(c -> c.iso2().equals(country))) {
             throw new BadRequestException("Unknown country '" + country + "'");
         }
@@ -62,6 +71,6 @@ public class QueryValidator {
         return new ArticleQuery(country, city,
                 from == null ? null : from.atStartOfDay(ZoneOffset.UTC).toInstant(),
                 to == null ? null : to.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant(),   // 'to' is inclusive
-                page, size, text, sort);
+                page, size, text, sort, sector(sector));
     }
 }

@@ -24,6 +24,7 @@ class GkgParsingTest {
         assertThat(r.locations().getFirst().shortName()).isEqualTo("New Delhi");
         assertThat(r.locations().getFirst().fipsCountry()).isEqualTo("IN");
         assertThat(r.locations().getFirst().lat()).isEqualTo(28.6);
+        assertThat(r.themes()).containsExactly("ECON_INFLATION", "TAX_FNCACT");
     }
 
     @Test

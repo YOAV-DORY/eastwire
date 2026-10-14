@@ -2,6 +2,8 @@
 
 PostgreSQL. The schema lives in Flyway migrations under
 `backend/core/src/main/resources/db/migration/`. Only the ingest job runs migrations.
+`V4__sectors.sql` adds `article.sector_signals` and `article.sector_rules_version`, which let
+the hourly run re-tag stored articles when `config/sectors.yaml` changes.
 
 ## Roles
 

@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { article, COUNTRIES, page, status } from '../test/fixtures'
@@ -32,6 +32,24 @@ describe('home feed', () => {
       expect(calls.some((u) => u.pathname === '/api/v1/articles' && u.searchParams.get('country') === 'JP')).toBe(true),
     )
     expect(await screen.findByRole('combobox')).toHaveDisplayValue('All of Japan')
+  })
+
+  it('filters by sector through the URL, keeping the country', async () => {
+    const calls = stubApi({ ...BASE, '/api/v1/articles': page([]) })
+    const router = renderRoute('/?country=JP')
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Economy' }))
+
+    await waitFor(() => expect(router.state.location.search).toBe('?country=JP&sector=economy'))
+    await waitFor(() =>
+      expect(
+        calls.some((u) => u.pathname === '/api/v1/articles' && u.searchParams.get('sector') === 'economy' && u.searchParams.get('country') === 'JP'),
+      ).toBe(true),
+    )
+    expect(await screen.findByText('Nothing from our sources tagged Economy for Japan right now')).toBeInTheDocument()
+    const sectors = screen.getByRole('group', { name: 'Filter by sector' })
+    expect(within(sectors).getByRole('button', { name: 'All sectors' })).toHaveAttribute('aria-pressed', 'false')
+    expect(within(sectors).getByRole('button', { name: 'Economy' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('says honestly when a place has nothing, without placeholder stories', async () => {

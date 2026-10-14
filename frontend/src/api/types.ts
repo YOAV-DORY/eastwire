@@ -30,8 +30,55 @@ export interface ArticleView {
   attribution: string | null
   license: { name: string; url: string } | null
   locations: LocationView[]
-  sectors: string[]
+  sectors: SectorTag[]
   alsoReportedBy: number
+}
+
+export type SectorRuleKind = 'keyword' | 'negative' | 'gdelt_theme' | 'feed_category'
+
+/** One rule that contributed to a sector tag. */
+export interface SectorRule {
+  kind: SectorRuleKind
+  /** The keyword as written in the rules, the GDELT theme code, or the publisher's topic tag. */
+  value: string
+  /** Where a keyword was found. */
+  field: 'headline' | 'excerpt' | null
+  /** What it added to the score (negative for negative phrases). */
+  weight: number
+}
+
+export interface SectorTag {
+  slug: string
+  label: string
+  score: number
+  rules: SectorRule[]
+}
+
+export interface WeightedRule {
+  rule: string
+  weight: number
+}
+
+export interface SectorDefinitionView {
+  slug: string
+  label: string
+  definition: string
+  last7d: number
+  keywords: WeightedRule[]
+  negative: WeightedRule[]
+  gdeltThemes: WeightedRule[]
+  feedCategories: WeightedRule[]
+}
+
+/** GET /api/v1/sectors: the rules from config/sectors.yaml plus 7-day counts. */
+export interface SectorsView {
+  version: string
+  threshold: number
+  maxSectors: number
+  excerptFactor: number
+  themeCap: number
+  untagged7d: number
+  sectors: SectorDefinitionView[]
 }
 
 export interface ArticlePage {

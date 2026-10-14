@@ -1,6 +1,7 @@
 package io.github.yoavdory.eastwire.api.map;
 
 import io.github.yoavdory.eastwire.api.BadRequestException;
+import io.github.yoavdory.eastwire.api.articles.QueryValidator;
 import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import java.time.Duration;
 import java.util.Arrays;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** {@code GET /api/v1/map/cities?window=7d&roles=mentioned,event&country=JP}: pins and country-level counts. */
+/** {@code GET /api/v1/map/cities?window=7d&roles=mentioned,event&country=JP&sector=economy}: pins and country-level counts. */
 @RestController
 class MapController {
 
@@ -31,7 +32,8 @@ class MapController {
     ResponseEntity<MapService.MapData> cities(
             @RequestParam(defaultValue = "7d") String window,
             @RequestParam(defaultValue = "mentioned,event") String roles,
-            @RequestParam(required = false) String country) {
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String sector) {
         MapService.Window w = Arrays.stream(MapService.Window.values())
                 .filter(v -> v.label().equals(window))
                 .findFirst()
@@ -49,6 +51,6 @@ class MapController {
         }
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(Duration.ofSeconds(120)).cachePublic())
-                .body(service.map(w, roleSet, country));
+                .body(service.map(w, roleSet, country, QueryValidator.sector(sector)));
     }
 }
