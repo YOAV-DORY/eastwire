@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { useCountries, usePlaces, useSearch, type SearchFilters } from '../api/queries'
+import { useCountries, usePlaces, useSearch, useSearchSuggestions, type SearchFilters } from '../api/queries'
 import { StoryCard } from '../components/news/StoryCard'
 import { SearchBar } from '../components/search/SearchBar'
 import { ColdStart, EmptyState, ErrorState, FeedSkeleton } from '../components/status/Feedback'
@@ -8,7 +8,6 @@ import { useSlow } from '../hooks/useSlow'
 import { SECTORS, isSectorId } from '../sectors'
 import styles from './SearchPage.module.css'
 
-const EXAMPLES = ['semiconductors', '"heat wave"', 'rupee OR inflation', 'election -Delhi']
 const PARAM_KEYS = ['q', 'country', 'city', 'sector', 'from', 'to', 'sort'] as const
 
 /** Search with every filter in the URL, so any search can be shared or bookmarked. */
@@ -28,6 +27,8 @@ export function SearchPage() {
   const countries = useCountries()
   const places = usePlaces(filters.country)
   const search = useSearch(filters)
+  const suggestions = useSearchSuggestions()
+  const examples = (suggestions.data ?? []).filter((s) => s.q.toLowerCase() !== filters.q.trim().toLowerCase())
   const slow = useSlow(search.isLoading)
   const countryNames = useMemo(
     () => Object.fromEntries((countries.data ?? []).map((c) => [c.iso2, c.name])),
@@ -58,7 +59,7 @@ export function SearchPage() {
   const hasQuery = filters.q.trim().length >= 2
 
   return (
-    <div className={styles.page}>
+    <div className={`container ${styles.page}`}>
       <h1 className={styles.title}>{hasQuery ? <>Results for &ldquo;{filters.q}&rdquo;</> : 'Search'}</h1>
       <SearchBar
         key={filters.q}
@@ -77,7 +78,7 @@ export function SearchPage() {
 
       <div className={styles.filters} role="group" aria-label="Filters">
         <label>
-          <span className="mono muted">Country</span>
+          <span>Country</span>
           <select value={filters.country ?? ''} onChange={(e) => update('country', e.target.value)}>
             <option value="">All</option>
             {(countries.data ?? []).map((c) => (
@@ -89,7 +90,7 @@ export function SearchPage() {
         </label>
         {filters.country && (
           <label>
-            <span className="mono muted">City</span>
+            <span>City</span>
             <select value={filters.city ?? ''} onChange={(e) => update('city', e.target.value)}>
               <option value="">All</option>
               {(places.data ?? []).map((p) => (
@@ -101,7 +102,7 @@ export function SearchPage() {
           </label>
         )}
         <label>
-          <span className="mono muted">Sector</span>
+          <span>Sector</span>
           <select value={filters.sector ?? ''} onChange={(e) => update('sector', e.target.value)}>
             <option value="">All</option>
             {SECTORS.map((sector) => (
@@ -112,15 +113,15 @@ export function SearchPage() {
           </select>
         </label>
         <label>
-          <span className="mono muted">From</span>
+          <span>From</span>
           <input type="date" value={filters.from ?? ''} max={filters.to} onChange={(e) => update('from', e.target.value)} />
         </label>
         <label>
-          <span className="mono muted">To</span>
+          <span>To</span>
           <input type="date" value={filters.to ?? ''} min={filters.from} onChange={(e) => update('to', e.target.value)} />
         </label>
         <label>
-          <span className="mono muted">Order</span>
+          <span>Order</span>
           <select value={filters.sort} onChange={(e) => update('sort', e.target.value === 'date' ? 'date' : '')}>
             <option value="relevance">Best match</option>
             <option value="date">Newest</option>
@@ -129,24 +130,25 @@ export function SearchPage() {
       </div>
 
       {!hasQuery && (
-        <div className={styles.examples}>
-          <p className="muted">Search headlines and permitted excerpts. Try:</p>
-          <ul>
-            {EXAMPLES.map((ex) => (
-              <li key={ex}>
-                <Link to={`/search?q=${encodeURIComponent(ex)}`} className="mono">
-                  {ex}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <p className="muted">Quotes find exact phrases, a minus sign excludes a word, and OR finds either word.</p>
-        </div>
+        <section className={styles.examples} aria-labelledby="try-title">
+          <h2 id="try-title" className="kicker">
+            Try a search
+          </h2>
+          {examples.length > 0 ? (
+            <Suggestions items={examples.slice(0, 8)} />
+          ) : (
+            <p className="muted">Search headlines and the summaries we are allowed to show.</p>
+          )}
+          <p className={styles.syntax}>
+            Use quotes for an exact phrase (<code>&quot;heat wave&quot;</code>), a minus sign to leave a word out (
+            <code>election -Delhi</code>) and OR for either word (<code>rupee OR yen</code>).
+          </p>
+        </section>
       )}
 
       {hasQuery && (
         <section aria-labelledby="results-title" className={styles.results} aria-busy={search.isFetching}>
-          <h2 id="results-title" className={`${styles.count} mono muted`}>
+          <h2 id="results-title" className={`${styles.count} kicker`}>
             {data ? `${data.total} ${data.total === 1 ? 'result' : 'results'}` : 'Searching…'}
             {data && data.total > data.size && ` · page ${data.page}`}
           </h2>
@@ -163,9 +165,12 @@ export function SearchPage() {
           )}
 
           {data && data.items.length === 0 && (
-            <EmptyState title={`No stories in our sources match “${filters.q}”`}>
-              Try fewer or different words, or remove a filter. Our source list is limited, so a missing story may
-              simply not be covered.
+            <EmptyState
+              title={`Nothing in our sources matches “${filters.q}”`}
+              action={examples.length > 0 ? <Suggestions items={examples.slice(0, 3)} label="These return stories now" /> : undefined}
+            >
+              Try fewer or different words, or remove a filter. Our list of sources is short, so a story you know about
+              may simply not be in it.
             </EmptyState>
           )}
 
@@ -173,7 +178,7 @@ export function SearchPage() {
             <ol className={styles.list}>
               {data.items.map((a) => (
                 <li key={a.id}>
-                  <StoryCard article={a} countryNames={countryNames} />
+                  <StoryCard article={a} variant="standard" countryNames={countryNames} />
                 </li>
               ))}
             </ol>
@@ -188,7 +193,7 @@ export function SearchPage() {
               ) : (
                 <span />
               )}
-              <span className="mono muted">Page {data.page}</span>
+              <span className="muted num">Page {data.page}</span>
               {data.hasMore ? (
                 <Link to={pageHref(data.page + 1)} rel="next">
                   Next →
@@ -200,6 +205,25 @@ export function SearchPage() {
           )}
         </section>
       )}
+    </div>
+  )
+}
+
+/** Searches that currently return stories, with how many. */
+function Suggestions({ items, label }: { items: { q: string; count: number }[]; label?: string }) {
+  return (
+    <div className={styles.suggestions}>
+      {label && <p className="muted">{label}:</p>}
+      <ul>
+        {items.map((s) => (
+          <li key={s.q}>
+            <Link to={`/search?q=${encodeURIComponent(s.q)}`}>
+              {s.q}
+              <span className={styles.suggestionCount}>{s.count}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

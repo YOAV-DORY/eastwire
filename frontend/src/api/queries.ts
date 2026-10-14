@@ -169,3 +169,13 @@ export function useSocial(filters: SocialFilters) {
     ...retryPolicy,
   })
 }
+
+/** Example searches that return results right now (the API counts them against live stories). */
+export function useSearchSuggestions() {
+  return useQuery({
+    queryKey: ['search-suggestions'],
+    queryFn: ({ signal }) => apiGet<{ q: string; count: number }[]>('/api/v1/search/suggestions', {}, signal),
+    staleTime: 10 * 60_000,
+    ...retryPolicy,
+  })
+}
