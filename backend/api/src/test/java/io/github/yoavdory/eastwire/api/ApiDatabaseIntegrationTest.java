@@ -100,6 +100,34 @@ class ApiDatabaseIntegrationTest {
     }
 
     @Test
+    void searchMatchesHeadlinesAndExcerptsWithEnglishStemming() throws Exception {
+        mvc.perform(get("/api/v1/search").param("q", "tokyo"))
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items[0].title").value("Tokyo story"));
+        // "excerpts" stems to the same lexeme as "excerpt" in the stored text.
+        mvc.perform(get("/api/v1/search").param("q", "excerpts"))
+                .andExpect(jsonPath("$.items[0].title").value("India story"));
+        mvc.perform(get("/api/v1/search").param("q", "story -tokyo"))
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items[0].title").value("India story"));
+        // Expired articles are never found, and filters still apply.
+        mvc.perform(get("/api/v1/search").param("q", "expired")).andExpect(jsonPath("$.total").value(0));
+        mvc.perform(get("/api/v1/search").param("q", "story").param("country", "JP")).andExpect(jsonPath("$.total").value(1));
+    }
+
+    @Test
+    void mapPinsCitiesAndCountsCountryOnlyStoriesSeparately() throws Exception {
+        mvc.perform(get("/api/v1/map/cities").param("window", "7d"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cities", hasSize(1)))
+                .andExpect(jsonPath("$.cities[0].name").value("Tokyo"))
+                .andExpect(jsonPath("$.cities[0].total").value(1))
+                .andExpect(jsonPath("$.countryOnly[0].country").value("IN"))
+                .andExpect(jsonPath("$.countryOnly[0].count").value(1));
+        mvc.perform(get("/api/v1/map/cities").param("window", "1y")).andExpect(status().isBadRequest());
+    }
+
+    @Test
     void countriesCountOnlyLiveArticles() throws Exception {
         mvc.perform(get("/api/v1/countries"))
                 .andExpect(jsonPath("$[?(@.iso2 == 'IN')].total").value(1))

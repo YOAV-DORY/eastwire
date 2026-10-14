@@ -1,0 +1,140 @@
+.form {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elev-1);
+  transition:
+    border-color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard);
+}
+
+.form:hover {
+  border-color: color-mix(in srgb, var(--text) 30%, transparent);
+}
+
+/* The search focus ring is one of pink's five roles. */
+.form:focus-within {
+  border-color: var(--accent-text);
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+.hero {
+  height: 64px;
+  padding: 0 var(--space-2) 0 var(--space-5);
+  border-radius: var(--radius-xl);
+}
+
+.compact {
+  height: 48px;
+  padding: 0 var(--space-1) 0 var(--space-4);
+  border-radius: var(--radius-lg);
+}
+
+.icon {
+  color: var(--text-muted);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: var(--text-body);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+/* The form shows the focus ring; the input itself needs no second outline. */
+.input:focus-visible {
+  outline: none;
+}
+
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.hint {
+  display: none;
+}
+
+.clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.clear:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+/* Gumroad-style chunky pink button. */
+.submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 48px;
+  min-width: 48px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-standard),
+    transform 100ms var(--ease-standard);
+}
+
+.compact .submit {
+  height: 40px;
+  min-width: 40px;
+  border-radius: var(--radius-md);
+}
+
+.submit:hover {
+  background: var(--accent-hover);
+}
+
+.submit:active {
+  background: var(--accent-press);
+  transform: translateY(1px) scale(0.98);
+}
+
+.submitLabel {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hint {
+    display: inline-flex;
+  }
+
+  .hero .submit {
+    padding: 0 var(--space-6);
+  }
+
+  .hero .submitIcon {
+    display: none;
+  }
+
+  .hero .submitLabel {
+    display: inline;
+  }
+}

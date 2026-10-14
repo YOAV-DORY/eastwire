@@ -1158,6 +1158,29 @@ frontend/src/
 - **Verified locally against real ingested data:** live API, browser at 390 and 1280 px, no console errors, 1 `main`/1 `h1`.
 - **Tests:** api 28 (+4 Postgres in CI), frontend 67.
 
+**CI fix (PR #2):** the Testcontainers database is now a Spring bean. Per-class `@Container` fields were stopped while Spring reused a cached context pointing at them, so every later test class failed. PRs #2 and #3 are green, including the API Docker image smoke test.
+
+**Milestone 5 (search):** built on branch `m5-search`, stacked on milestone 4.
+- **API:** `/api/v1/search` uses Postgres `websearch_to_tsquery` (phrases, `-exclusions`, `OR`) with `ts_rank_cd` relevance or date order, and the same filters and read-time policy as the feed. `QueryValidator` is shared by feed and search.
+- **Frontend:**
+  - Hero search bar on Home; `/search` page with country, city, from/to and order filters, all in the URL.
+  - Real-link pagination, a syntax hint with examples, honest empty results.
+  - `/` focuses search and `?` opens a shortcuts dialog where single-key shortcuts can be turned off (WCAG 2.1.4).
+- **Verified:** real-data queries (`semiconductor`, `rupee OR inflation`, `"South Korea"`, `Tata -steel`); browser at 1280 and 390 px; api 35 tests (+5 Postgres in CI), frontend 75.
+
+**Milestone 6 (map):** built on branch `m6-map`, stacked on milestone 5.
+- **API:** `GET /api/v1/map/cities?window=24h|7d|30d&roles=&country=` returns one pin per city with counts by role, the newest item time and a low-confidence-only flag, plus country-only totals. It aggregates in Java after the same read-time `DisplayPolicy` check as the feed, so the map never counts a story the list would hide.
+- **Frontend:**
+  - Leaflet loads lazily in its own chunk; OSM tiles get a CSS dark filter in dark theme (CARTO still pending its terms check).
+  - Pink teardrop pins sized 1–4 / 5–19 / 20+, dashed when every placement is low confidence, clustered with counts; popups with role counts and an "Open city" link.
+  - `/map` keeps country, window, roles, population layer and view in the URL; `/map/city/:geonamesId` opens a city panel with coordinates, role counts, last item seen, population and stories. On phones the page scrolls to the panel.
+  - A table view lists every pinned city for keyboard and screen-reader use.
+  - The legend states that country-only stories are not mapped, and the optional population layer (gray circles, never pink) says "Population (GeoNames, year varies), not news volume".
+  - The home hero shows the map with dragging off on touch screens and an "Open full map" button.
+- **Verified:** live data in the browser at 1280 and 390 px (15 pinned cities; country-only CN 4, IN 35, JP 2, KR 1), no console errors, no horizontal scroll.
+- **Not done yet:** the bottom-sheet city panel on phones (the panel sits under the map instead), and a role-tabbed panel. Main JS is 126 KB gzipped; the map chunk adds 54 KB on demand.
+- **Known data quirk:** GeoNames lists Delhi and New Delhi as separate cities, so a story can be pinned to either.
+
 **Owner actions to go live:**
 1. Create the Neon project.
 2. Run `backend/db/local-init.sql` with strong passwords.
@@ -1167,4 +1190,4 @@ All in `docs/database.md`.
 
 **Next:**
 1. The owner deploys (docs/deploy.md).
-2. Milestone 5: search.
+2. Milestone 7: sectors.

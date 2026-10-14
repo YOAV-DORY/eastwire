@@ -1,6 +1,6 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { ApiError, apiGet } from './client'
-import type { ArticlePage, CountryView, PlaceView, SourceView, Status } from './types'
+import type { ArticlePage, CountryView, LocationRole, MapData, MapWindow, PlaceView, SourceView, Status } from './types'
 
 /**
  * Retry patiently: the free-tier API sleeps after 15 minutes and takes about a minute to
@@ -61,6 +61,58 @@ export function useSources() {
     queryKey: ['sources'],
     queryFn: ({ signal }) => apiGet<SourceView[]>('/api/v1/sources', {}, signal),
     staleTime: 60 * 60_000,
+    ...retryPolicy,
+  })
+}
+
+export interface SearchFilters {
+  q: string
+  country?: string
+  city?: string
+  from?: string
+  to?: string
+  sort?: 'relevance' | 'date'
+  page: number
+}
+
+/** Full-text search; the previous page stays visible while the next one loads. */
+export function useSearch(filters: SearchFilters) {
+  return useQuery({
+    queryKey: ['search', filters],
+    queryFn: ({ signal }) => apiGet<ArticlePage>('/api/v1/search', { ...filters }, signal),
+    enabled: filters.q.trim().length >= 2,
+    placeholderData: keepPreviousData,
+    ...retryPolicy,
+  })
+}
+
+export interface MapFilters {
+  window: MapWindow
+  roles: LocationRole[]
+  country?: string
+}
+
+export function useMapCities(filters: MapFilters) {
+  return useQuery({
+    queryKey: ['map', filters],
+    queryFn: ({ signal }) =>
+      apiGet<MapData>(
+        '/api/v1/map/cities',
+        { window: filters.window, roles: filters.roles.join(','), country: filters.country },
+        signal,
+      ),
+    placeholderData: keepPreviousData,
+    ...retryPolicy,
+  })
+}
+
+/** The whole city list (with populations) for the optional population layer. */
+export function useAllPlaces(enabled: boolean) {
+  return useQuery({
+    queryKey: ['places', 'all'],
+    queryFn: ({ signal }) => apiGet<PlaceView[]>('/api/v1/places', {}, signal),
+    enabled,
+    staleTime: 24 * 60 * 60_000,
     ...retryPolicy,
   })
 }

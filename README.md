@@ -6,13 +6,15 @@ placed on a map, with every source shown. Asia-wide expansion comes later.
 It shows what its listed sources published. It does not claim to measure what any audience
 has or hasn't seen.
 
-**Status:** milestone 4 of 9: read API and homepage.
+**Status:** milestone 6 of 9: map.
 - The hourly job collects GDELT-discovered headlines from reviewed publishers and Global Voices articles ([`docs/ingestion.md`](docs/ingestion.md)).
 - The read-only API serves them with a display-policy check on every read.
 - The homepage shows them with country and city filters, freshness and honest empty states.
+- Full-text search (`/search?q=…`) supports quoted phrases, `-exclusions` and `OR`, with every filter kept in a shareable URL. Press `/` to search; single-key shortcuts can be turned off.
+- The map (`/map`) pins stories placed in a city, split into mentioned, dateline and publisher roles. Stories that only name a country are counted beside the map, never pinned to a capital. Each city has a panel (`/map/city/{geonamesId}`), there is a table view for screen readers and keyboards, and an optional GeoNames population layer with its own legend.
 
 Deployment steps (Neon, Render, Cloudflare Pages, all free) are in [`docs/deploy.md`](docs/deploy.md).
-Map, search and sectors come in milestones 5–7.
+Sectors come in milestone 7, social posts in milestone 8.
 The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Ground rules
@@ -39,7 +41,7 @@ The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PL
 | [`config/city_curation.yaml`](config/city_curation.yaml) | Hand-curated city aliases and exclusions |
 | [`scripts/`](scripts/) | City list builder and config validator |
 | [`backend/`](backend/) | Java 21 / Spring Boot 4: `core` (config, `DisplayPolicy`, Flyway schema), `ingest`, `api` |
-| [`frontend/`](frontend/) | React + TypeScript: design tokens, UI primitives, placeholder home page |
+| [`frontend/`](frontend/) | React + TypeScript: design tokens, UI primitives, home, search, map (Leaflet), status and about pages |
 | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Config validation, backend build with integration tests, frontend lint/test/build |
 | [`.github/workflows/ingest.yml`](.github/workflows/ingest.yml) | Hourly ingestion (minute 17), off until `INGEST_ENABLED=true` |
 | [`docs/ingestion.md`](docs/ingestion.md) | How a run works, connectors, failure handling, measured volumes |
@@ -69,4 +71,4 @@ Database setup (local and Neon) is in [`docs/database.md`](docs/database.md).
 
 - Discovery data: [The GDELT Project](https://www.gdeltproject.org/).
 - City data: [GeoNames](https://www.geonames.org/), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-- Map tiles (planned): © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
+- Map tiles: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, drawn with [Leaflet](https://leafletjs.com/).

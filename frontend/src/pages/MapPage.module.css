@@ -1,0 +1,102 @@
+.page {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.intro {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--measure);
+}
+
+.title {
+  font-size: var(--text-h1);
+  line-height: var(--lh-h1);
+  letter-spacing: var(--track-h1);
+  font-weight: var(--weight-h1);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-4);
+}
+
+.select {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.select select {
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-elev-1);
+  color: var(--text);
+  font-size: var(--text-small);
+}
+
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: var(--text-small);
+}
+
+.roles legend {
+  float: left;
+  margin-right: var(--space-1);
+}
+
+.roles label,
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  font-size: var(--text-small);
+}
+
+.roles input,
+.toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.body {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.mapColumn,
+.panelColumn {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .withPanel {
+    grid-template-columns: minmax(0, 1fr) 380px;
+  }
+
+  .panelColumn {
+    position: sticky;
+    top: calc(var(--topbar-h) + var(--space-4));
+    max-height: calc(100dvh - var(--topbar-h) - var(--space-8));
+    overflow-y: auto;
+  }
+}

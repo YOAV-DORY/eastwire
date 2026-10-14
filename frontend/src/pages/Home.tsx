@@ -1,17 +1,20 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router'
-import { useArticleFeed, useCountries, usePlaces, useStatus } from '../api/queries'
+import { useCallback, useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router'
+import { useArticleFeed, useCountries, useMapCities, usePlaces, useStatus } from '../api/queries'
+import type { CityPin } from '../api/types'
+import { LazyNewsMap } from '../components/map/LazyNewsMap'
+import { ButtonLink } from '../components/ui/Button'
 import { Flag } from '../components/graphics/Flag'
 import { HeroMark } from '../components/graphics/HeroMark'
 import { StoryCard } from '../components/news/StoryCard'
 import { ColdStart, EmptyState, ErrorState, FeedSkeleton, StaleBanner } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
 import { Chip } from '../components/ui/Chip'
+import { SearchBar } from '../components/search/SearchBar'
+import { useSlow } from '../hooks/useSlow'
+import { DEFAULT_ROLES } from '../lib/map'
 import { relativeTime } from '../lib/time'
 import styles from './Home.module.css'
-
-/** Show the cold-start note if the first load takes longer than this (free tier waking up). */
-const COLD_START_AFTER_MS = 3_000
 
 export function Home() {
   const [params, setParams] = useSearchParams()
@@ -22,6 +25,9 @@ export function Home() {
   const places = usePlaces(country)
   const status = useStatus()
   const feed = useArticleFeed({ country, city })
+  const map = useMapCities({ window: '7d', roles: DEFAULT_ROLES, country })
+  const navigate = useNavigate()
+  const openCity = useCallback((pin: CityPin) => navigate(`/map/city/${pin.id}`), [navigate])
 
   const countryNames = useMemo(
     () => Object.fromEntries((countries.data ?? []).map((c) => [c.iso2, c.name])),
@@ -51,6 +57,21 @@ export function Home() {
         </h1>
         <HeroMark className={styles.mark} />
       </section>
+
+      <div className={styles.mapHero}>
+        <LazyNewsMap
+          height="clamp(320px, 52vh, 440px)"
+          label="Map of this week's stories by city"
+          pins={map.data?.cities ?? []}
+          onSelect={openCity}
+          staticOnTouch
+        />
+        <ButtonLink href="/map" className={styles.openMap}>
+          Open full map
+        </ButtonLink>
+      </div>
+
+      <SearchBar variant="hero" keep={{ country }} />
 
       {(status.data?.state === 'stale' || status.data?.state === 'outage') && status.data.lastSuccessAt && (
         <StaleBanner
@@ -144,18 +165,4 @@ export function Home() {
       </section>
     </div>
   )
-}
-
-/** True once a load has taken longer than COLD_START_AFTER_MS. */
-function useSlow(loading: boolean): boolean {
-  const [slow, setSlow] = useState(false)
-  useEffect(() => {
-    if (!loading) return
-    const timer = setTimeout(() => setSlow(true), COLD_START_AFTER_MS)
-    return () => {
-      clearTimeout(timer)
-      setSlow(false)
-    }
-  }, [loading])
-  return loading && slow
 }

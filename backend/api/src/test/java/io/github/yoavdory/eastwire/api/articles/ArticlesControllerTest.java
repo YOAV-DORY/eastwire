@@ -17,10 +17,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ArticlesController.class)
+@Import(QueryValidator.class)
 class ArticlesControllerTest {
 
     @Autowired
@@ -64,5 +66,42 @@ class ArticlesControllerTest {
         mvc.perform(get("/api/v1/articles?" + query))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value(message));
+    }
+
+    @Test
+    void searchPassesNormalizedTextAndSortThrough() throws Exception {
+        mvc.perform(get("/api/v1/search").param("q", "  chip   exports ").param("country", "KR").param("sort", "date"))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<ArticleQuery> query = ArgumentCaptor.forClass(ArticleQuery.class);
+        verify(service).page(query.capture());
+        org.assertj.core.api.Assertions.assertThat(query.getValue())
+                .isEqualTo(new ArticleQuery("KR", null, null, null, 1, 20, "chip exports", ArticleQuery.Sort.DATE));
+    }
+
+    @Test
+    void searchDefaultsToRelevance() throws Exception {
+        mvc.perform(get("/api/v1/search").param("q", "\"heat wave\" -Delhi")).andExpect(status().isOk());
+        ArgumentCaptor<ArticleQuery> query = ArgumentCaptor.forClass(ArticleQuery.class);
+        verify(service).page(query.capture());
+        org.assertj.core.api.Assertions.assertThat(query.getValue().sort()).isEqualTo(ArticleQuery.Sort.RELEVANCE);
+        org.assertj.core.api.Assertions.assertThat(query.getValue().text()).isEqualTo("\"heat wave\" -Delhi");
+    }
+
+    @ParameterizedTest(name = "{0} -> {1}")
+    @CsvSource(delimiter = '|', quoteCharacter = '"', value = {
+            "|Search text must be 2 to 200 characters",
+            "q=a|Search text must be 2 to 200 characters",
+            "q=tokyo&sort=popular|sort must be 'relevance' or 'date'",
+            "q=tokyo&country=US|Unknown country 'US'"})
+    void searchRejectsBadInput(String query, String message) throws Exception {
+        mvc.perform(get("/api/v1/search?" + (query == null ? "" : query)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value(message));
+    }
+
+    @Test
+    void searchRejectsVeryLongText() throws Exception {
+        mvc.perform(get("/api/v1/search").param("q", "x".repeat(201))).andExpect(status().isBadRequest());
     }
 }

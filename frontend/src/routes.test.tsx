@@ -20,9 +20,9 @@ describe('routes', () => {
 
   it('pages planned for later milestones say so plainly', async () => {
     stubApi(API)
-    renderRoute('/map')
-    expect(await screen.findByRole('heading', { name: 'Map', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText('Planned for milestone 6 of 9.')).toBeInTheDocument()
+    renderRoute('/sectors')
+    expect(await screen.findByRole('heading', { name: 'Sectors', level: 1 })).toBeInTheDocument()
+    expect(screen.getByText('Planned for milestone 7 of 9.')).toBeInTheDocument()
   })
 
   it('unknown paths show the not-found page inside the shell', async () => {

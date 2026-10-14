@@ -138,6 +138,14 @@
   flex: 1;
 }
 
+.sideButton {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
 @media (min-width: 768px) {
   .topbar {
     padding: 0 var(--space-6);
