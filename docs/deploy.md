@@ -32,7 +32,7 @@ Dockerfile shows up before Render tries to deploy it.
 
 ## 3. Frontend (Cloudflare Pages)
 
-1. In Cloudflare: **Workers & Pages → Create → Pages → Connect to Git**, pick this repository.
+1. In Cloudflare: **Workers & Pages → Create application**, then choose **Pages**. Look for the link "Looking to deploy Pages? Get started" at the bottom; "Import a repository" makes a **Worker** instead. Then **Import an existing Git repository** and pick this repository. A Worker fails with `ENOENT … package.json` (wrong root) and would not apply `_headers` and `_redirects` without extra config. The address must end in `.pages.dev`.
 2. Build settings:
    - Root directory: `frontend`
    - Build command: `npm run build`
@@ -40,10 +40,19 @@ Dockerfile shows up before Render tries to deploy it.
    - Environment variables: `VITE_API_BASE_URL` = the Render URL from step 2 (no trailing slash), and `NODE_VERSION` = `24`.
      The build also writes this origin into the Content-Security-Policy (`connect-src`), so if
      it is missing or wrong the site loads but every API call is blocked. Rebuild after changing it.
-3. Deploy. `public/_redirects` makes every route serve the app; `public/_headers` sets basic security headers. The full Content-Security-Policy comes in milestone 9.
+3. Deploy. `public/_redirects` makes every route serve the app. `public/_headers` sets the Content-Security-Policy and the other security headers ([`security.md`](security.md)).
 4. Put the Pages address into Render's `EASTWIRE_CORS_ORIGINS` (step 2) and redeploy the API.
 
 ## 4. Smoke test
+
+Live addresses (2026-10-14):
+- Site: https://eastwire.pages.dev
+- API: https://eastwire-api.onrender.com, with `/api/v1/health` and `/api/v1/status`
+- Render's `EASTWIRE_CORS_ORIGINS` is `https://eastwire.pages.dev`
+
+Check:
+- `curl -sI https://eastwire.pages.dev/` shows a `content-security-policy` whose `connect-src` names the Render host.
+- `/api/v1/status` reports every enabled source `fresh` and the database size.
 
 - The home page loads. The first visit after a quiet spell shows "Waking the free-tier server…" for up to a minute, then stories.
 - The freshness pill shows "Updated … ago" and links to `/status`.

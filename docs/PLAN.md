@@ -1269,7 +1269,18 @@ frontend/src/
 
 All in `docs/database.md`.
 
+**Deployed 2026-10-14:**
+- Site: https://eastwire.pages.dev (Cloudflare Pages)
+- API: https://eastwire-api.onrender.com (Render Free)
+- Database: Neon `eastwire` on branch `production`
+- Hourly ingestion: GitHub Actions with `INGEST_ENABLED=true`
+
+The first run applied V1–V5 and stored 21 stories and 95 social posts. All three sources were fresh, and the database held 9 MB.
+Snags on the way, now in docs/database.md and docs/deploy.md:
+- Neon rejected a weak role password, so the rest of the setup script never ran.
+- Two password mismatches, fixed by setting the secret and the role from one generated value.
+- Cloudflare's "Create application" made a Worker instead of a Pages project.
+
 **Next:**
-1. Merge PRs #1 → #8 in order.
-2. The owner deploys (docs/deploy.md): set `EASTWIRE_CORS_ORIGINS` on Render to the Pages origin and `VITE_API_BASE_URL` on Pages to the Render URL. Optionally set `YOUTUBE_API_KEY` (docs/social.md).
-3. The "Later" list (section 3): Japan Times and NHK once their checks clear, journalists, more countries.
+1. UX/UI changes (owner's list).
+2. The "Later" list (section 3): Japan Times and NHK once their checks clear, journalists, more countries. Optional `YOUTUBE_API_KEY`.

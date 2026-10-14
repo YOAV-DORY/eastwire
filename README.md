@@ -6,7 +6,10 @@ placed on a map, with every source shown. Asia-wide expansion comes later.
 It shows what its listed sources published. It does not claim to measure what any audience
 has or hasn't seen.
 
-**Status:** all 9 milestones built; waiting for deployment ([`docs/deploy.md`](docs/deploy.md)).
+**Live:** [eastwire.pages.dev](https://eastwire.pages.dev) · [status](https://eastwire.pages.dev/status) · API [eastwire-api.onrender.com/api/v1/status](https://eastwire-api.onrender.com/api/v1/status)
+(free tier: the first visit after a quiet spell can take about a minute while the API wakes up).
+
+**Status:** all 9 milestones built and deployed on 2026-10-14. New stories arrive every hour.
 - The hourly job collects GDELT-discovered headlines from reviewed publishers and Global Voices articles ([`docs/ingestion.md`](docs/ingestion.md)).
 - The read-only API serves them with a display-policy check on every read.
 - The homepage shows them with country and city filters, freshness and honest empty states.
@@ -19,7 +22,7 @@ has or hasn't seen.
   - a per-IP rate limit and a database-size warning on `/status`;
   - Playwright end-to-end tests against the production build, with axe accessibility checks in both themes at phone and desktop widths ([`docs/security.md`](docs/security.md)).
 
-Deployment steps (Neon, Render, Cloudflare Pages, all free) are in [`docs/deploy.md`](docs/deploy.md).
+Deployment steps (Neon, Render, Cloudflare Pages, all free), including the snags hit on the first deploy, are in [`docs/deploy.md`](docs/deploy.md).
 The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Ground rules
@@ -81,6 +84,7 @@ Database setup (local and Neon) is in [`docs/database.md`](docs/database.md).
 
 **The question.** Could one person build a credible, free-to-run news discovery site for
 Asia that never shows anything it has no right to show, and says so when it knows little?
+It runs at [eastwire.pages.dev](https://eastwire.pages.dev) for $0 a month.
 
 **Constraints I set:**
 - $0 hosting: Cloudflare Pages, Render Free, Neon Free and GitHub Actions.
@@ -118,7 +122,6 @@ Asia that never shows anything it has no right to show, and says so when it know
 - 131 KB of JavaScript (gzipped) before the map loads.
 
 **Next:**
-- Deploy.
 - Finish the Japan Times and NHK checks.
 - Add reviewed journalists.
 - Grow beyond four countries one reviewed publisher at a time.
