@@ -5,6 +5,7 @@ import io.github.yoavdory.eastwire.core.geo.Gazetteer;
 import io.github.yoavdory.eastwire.core.policy.DisplayPolicy;
 import io.github.yoavdory.eastwire.core.sector.SectorClassifier;
 import io.github.yoavdory.eastwire.core.sector.SectorRules;
+import io.github.yoavdory.eastwire.core.social.SocialAccounts;
 import io.github.yoavdory.eastwire.ingest.http.HttpFetcher;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -38,6 +39,11 @@ public class IngestApplication {
     @Bean
     SectorClassifier sectorClassifier(@Value("${eastwire.config-dir}") Path configDir) {
         return new SectorClassifier(SectorRules.load(configDir));
+    }
+
+    @Bean
+    SocialAccounts socialAccounts(@Value("${eastwire.config-dir}") Path configDir, ComplianceConfig config) {
+        return SocialAccounts.load(configDir, config);
     }
 
     @Bean

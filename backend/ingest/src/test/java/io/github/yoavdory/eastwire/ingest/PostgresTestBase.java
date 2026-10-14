@@ -1,6 +1,7 @@
 package io.github.yoavdory.eastwire.ingest;
 
 import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
+import io.github.yoavdory.eastwire.core.social.SocialAccounts;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,11 +46,15 @@ public abstract class PostgresTestBase {
     @Autowired
     protected ConfigSync configSync;
 
+    @Autowired
+    protected SocialAccounts socialAccounts;
+
     @BeforeEach
     void resetDatabase() {
         jdbc.sql("TRUNCATE article, article_location, article_sector, story_cluster, suppression, ingestion_run, "
-                + "source_status, fetch_state RESTART IDENTITY CASCADE").update();
+                + "source_status, fetch_state, social_link, social_item RESTART IDENTITY CASCADE").update();
         configSync.sync(config);
+        configSync.syncSocial(socialAccounts);
     }
 
     protected long count(String sql) {

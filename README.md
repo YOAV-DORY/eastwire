@@ -6,16 +6,17 @@ placed on a map, with every source shown. Asia-wide expansion comes later.
 It shows what its listed sources published. It does not claim to measure what any audience
 has or hasn't seen.
 
-**Status:** milestone 7 of 9: sectors.
+**Status:** milestone 8 of 9: social.
 - The hourly job collects GDELT-discovered headlines from reviewed publishers and Global Voices articles ([`docs/ingestion.md`](docs/ingestion.md)).
 - The read-only API serves them with a display-policy check on every read.
 - The homepage shows them with country and city filters, freshness and honest empty states.
 - Full-text search (`/search?q=…`) supports quoted phrases, `-exclusions` and `OR`, with every filter kept in a shareable URL. Press `/` to search; single-key shortcuts can be turned off.
 - The map (`/map`) pins stories placed in a city, split into mentioned, dateline and publisher roles. Stories that only name a country are counted beside the map, never pinned to a capital. Each city has a panel (`/map/city/{geonamesId}`), there is a table view for screen readers and keyboards, and an optional GeoNames population layer with its own legend.
 - Six rule-based sectors (economy, geopolitics, technology, business, society, environment) from [`config/sectors.yaml`](config/sectors.yaml). Every tag on a story shows the rules that matched; `/sector/{slug}` lists every rule. Measured on a holdout set the rules were never tuned on: 100% precision, 33% recall. Tags are rarely wrong but often missing ([`docs/sectors.md`](docs/sectors.md)).
+- A separate social section (`/social`) with posts from five domain-verified Bluesky newsroom accounts (YouTube channels are ready once an API key is set). Each post is labelled "not verified reporting", shows why its account is listed, and loads the official embed only on click. Posts deleted or labelled upstream disappear within an hour ([`docs/social.md`](docs/social.md)).
 
 Deployment steps (Neon, Render, Cloudflare Pages, all free) are in [`docs/deploy.md`](docs/deploy.md).
-Social posts come in milestone 8.
+Hardening (security headers, end-to-end tests, accessibility audit) comes in milestone 9.
 The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Ground rules
@@ -42,11 +43,12 @@ The full build plan, including the design system, is in [`docs/PLAN.md`](docs/PL
 | [`config/city_curation.yaml`](config/city_curation.yaml) | Hand-curated city aliases and exclusions |
 | [`scripts/`](scripts/) | City list builder and config validator |
 | [`backend/`](backend/) | Java 21 / Spring Boot 4: `core` (config, `DisplayPolicy`, Flyway schema), `ingest`, `api` |
-| [`frontend/`](frontend/) | React + TypeScript: design tokens, UI primitives, home, search, map (Leaflet), sectors, status and about pages |
+| [`frontend/`](frontend/) | React + TypeScript: design tokens, UI primitives, home, search, map (Leaflet), sectors, social, status and about pages |
 | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) | Config validation, backend build with integration tests, frontend lint/test/build |
 | [`.github/workflows/ingest.yml`](.github/workflows/ingest.yml) | Hourly ingestion (minute 17), off until `INGEST_ENABLED=true` |
 | [`docs/ingestion.md`](docs/ingestion.md) | How a run works, connectors, failure handling, measured volumes |
 | [`config/sectors.yaml`](config/sectors.yaml), [`docs/sectors.md`](docs/sectors.md) | Sector rules, scoring, and how accurate they are |
+| [`config/social_accounts.yaml`](config/social_accounts.yaml), [`docs/social.md`](docs/social.md) | Curated social accounts, why each is listed, retention and embeds |
 | [`docs/deploy.md`](docs/deploy.md) | Going live on Neon + Render + Cloudflare Pages ($0) |
 | [`render.yaml`](render.yaml), [`backend/api/Dockerfile`](backend/api/Dockerfile) | API deployment (Render Blueprint, Docker image) |
 

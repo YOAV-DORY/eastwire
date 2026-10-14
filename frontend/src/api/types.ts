@@ -164,3 +164,35 @@ export interface MapData {
   /** Stories that name a country but no city on the list there; never pinned to a capital. */
   countryOnly: { country: string; count: number }[]
 }
+
+export type SocialPlatform = 'bluesky' | 'youtube'
+
+/** A curated post or video (GET /api/v1/social). Never mixed into news results. */
+export interface SocialItemView {
+  id: number
+  platform: SocialPlatform
+  url: string
+  /** Bluesky at:// URI or YouTube video id. */
+  externalId: string
+  /** Bluesky record version, needed by the official embed. */
+  cid: string | null
+  /** Bluesky post text: the plain fallback shown until the embed is loaded. */
+  text: string | null
+  /** YouTube video title. */
+  title: string | null
+  thumbnailUrl: string | null
+  createdAt: string
+  account: { handle: string; name: string; kind: 'newsroom' | 'journalist' | 'official'; reason: string; evidenceUrl: string }
+  countries: string[]
+  related: { articleId: number; title: string; url: string; publisher: string; linkType: 'shares_url' | 'text_overlap' }[]
+  /** e.g. "Social post · not verified reporting" */
+  label: string
+}
+
+export interface SocialPage {
+  items: SocialItemView[]
+  page: number
+  size: number
+  total: number
+  hasMore: boolean
+}

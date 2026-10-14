@@ -36,3 +36,10 @@ eastwire:
     max-lookback: 6h
     # First run ever: start this far back.
     bootstrap: 1h
+  bluesky:
+    # Public, unauthenticated AppView (the docs ask public web apps to use this cached host).
+    base-url: https://public.api.bsky.app/xrpc/
+  youtube:
+    base-url: https://www.googleapis.com/youtube/v3/
+    # GitHub Actions secret YOUTUBE_API_KEY; the connector fails visibly if enabled without it.
+    api-key: ${YOUTUBE_API_KEY:}

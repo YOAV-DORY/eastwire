@@ -7,6 +7,7 @@ import { HeroMark } from '../components/graphics/HeroMark'
 import { LazyNewsMap } from '../components/map/LazyNewsMap'
 import { StoryFeed } from '../components/news/StoryFeed'
 import { SearchBar } from '../components/search/SearchBar'
+import { SocialStrip } from '../components/social/SocialStrip'
 import { StaleBanner } from '../components/status/Feedback'
 import { Button, ButtonLink } from '../components/ui/Button'
 import { Chip } from '../components/ui/Chip'
@@ -148,6 +149,8 @@ export function Home() {
         emptyTitle={emptyTitle}
         emptyAction={emptyAction}
       />
+
+      <SocialStrip country={country} />
     </div>
   )
 }

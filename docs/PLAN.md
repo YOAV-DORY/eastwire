@@ -1214,6 +1214,31 @@ frontend/src/
   - Browser at 1280 and 390 px.
   - Tests: core 101 (+1 opt-in real-sample check), ingest 58 (13 of them Postgres, run in CI), api 44 (7 Postgres, in CI), frontend 93.
 
+**Milestone 8 (social):** built on branch `m8-social`, stacked on milestone 7.
+- **Curation:** `config/social_accounts.yaml` lists 5 Bluesky newsroom accounts (Scroll, Global Voices, The Diplomat, China Digital Times, Rest of World) and 4 YouTube channels.
+  - Each entry has a reason, evidence and date.
+  - Rules are enforced in Java and the Python validator: domain-verified Bluesky handles, no publisher we deny, English only.
+  - Rejected candidates and why are listed in `docs/social.md`.
+- **Ingestion:**
+  - `BlueskyConnector`: public `getAuthorFeed`, original posts only, blocking labels skipped. Every stored post is re-checked each run with `getPosts`; deleted or newly labelled posts are deleted.
+  - `YouTubeConnector`: uploads playlist plus `videos.list`, key in a header only, daily re-check, quota-exceeded handling. It stays off until the owner sets `YOUTUBE_API_KEY`.
+  - Places come only from the post's own words.
+  - `SocialLinker` links posts to stories by shared URL or a quoted headline.
+  - 30-day retention and takedowns via `suppression`; V5 migration.
+- **API:** `GET /api/v1/social?platform=&country=&page=`.
+  - Shown only while the platform's source is enabled and verified.
+  - Related stories pass the display policy.
+- **Frontend:**
+  - `SocialCard`: dashed border, permanent "not verified reporting" label, account reason, click-to-load official Bluesky embed or youtube-nocookie player, "Related reporting: N" or "No matching report in our sources yet".
+  - `/social` with platform and country filters in the URL.
+  - A strip under the home feed; Social in the sidebar and top nav. Phones keep 4 bottom tabs.
+  - About explains embeds, cookies and the YouTube API Services terms.
+- **Verified against live Bluesky:** 250 posts read, 95 kept (50 Scroll; the world-wide outlets only when a covered place is named), 9 linked to stories by URL.
+  - Zero third-party requests before pressing load; the official embed rendered after it.
+  - No horizontal scroll at 390 px.
+  - Found and fixed a NULL-handling bug in the linker on the live run.
+- **Tests:** core 105, ingest 71 (18 Postgres, in CI), api 48 (8 Postgres, in CI), frontend 100. Main JS is 131 KB gzipped.
+
 **Owner actions to go live:**
 1. Create the Neon project.
 2. Run `backend/db/local-init.sql` with strong passwords.
@@ -1222,5 +1247,5 @@ frontend/src/
 All in `docs/database.md`.
 
 **Next:**
-1. The owner deploys (docs/deploy.md).
-2. Milestone 8: social (curated Bluesky and YouTube).
+1. The owner deploys (docs/deploy.md), and optionally sets `YOUTUBE_API_KEY` (docs/social.md).
+2. Milestone 9: hardening (CSP and security headers, rate limiting, Playwright E2E, accessibility, screenshot checklist, DB-size warning, case study).

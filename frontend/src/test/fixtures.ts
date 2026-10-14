@@ -1,4 +1,4 @@
-import type { ArticlePage, ArticleView, CountryView, SectorsView, SectorTag, Status } from '../api/types'
+import type { ArticlePage, ArticleView, CountryView, SectorsView, SectorTag, SocialItemView, Status } from '../api/types'
 
 /** Invented test data in the API's shape. */
 export function article(overrides: Partial<ArticleView> = {}): ArticleView {
@@ -100,3 +100,42 @@ export const SECTORS_VIEW: SectorsView = {
     })),
   ],
 }
+
+/** Invented posts in the API's shape. */
+export function socialItem(overrides: Partial<SocialItemView> = {}): SocialItemView {
+  return {
+    id: 1,
+    platform: 'bluesky',
+    url: 'https://bsky.app/profile/desk.example/post/abc',
+    externalId: 'at://did:plc:desk/app.bsky.feed.post/abc',
+    cid: 'bafyabc',
+    text: 'Metro line opens in Bengaluru today',
+    title: null,
+    thumbnailUrl: null,
+    createdAt: '2026-10-14T11:00:00Z',
+    account: {
+      handle: 'desk.example',
+      name: 'Example Desk',
+      kind: 'newsroom',
+      reason: 'Invented newsroom for tests.',
+      evidenceUrl: 'https://bsky.app/profile/desk.example',
+    },
+    countries: ['IN'],
+    related: [],
+    label: 'Social post · not verified reporting',
+    ...overrides,
+  }
+}
+
+export const VIDEO = socialItem({
+  id: 2,
+  platform: 'youtube',
+  url: 'https://www.youtube.com/watch?v=vid123',
+  externalId: 'vid123',
+  cid: null,
+  text: 'Inside the new metro',
+  title: 'Inside the new metro',
+  thumbnailUrl: 'https://i.ytimg.com/vi/vid123/mqdefault.jpg',
+  account: { ...socialItem().account, handle: '@desk', name: 'Desk Video' },
+  label: 'Video · not verified reporting',
+})

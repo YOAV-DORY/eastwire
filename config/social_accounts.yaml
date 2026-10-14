@@ -1,0 +1,117 @@
+# Curated social accounts. Their posts appear only in the separate, labelled social section,
+# through the platform's official embed, and never mix with news cards.
+#
+# Rules for adding an account (docs/social.md):
+#   - kind: newsroom | journalist | official. No commentators, no anonymous accounts.
+#   - Bluesky: a domain-verified handle (the handle is the outlet's own domain), so the
+#     account cannot be an impersonator. YouTube: the outlet's official channel.
+#   - Posts in English (EastWire shows no translations).
+#   - The publisher's domain must not be `deny` in domains.yaml, and its source must not be
+#     excluded or awaiting a check in sources.yaml (Japan Times, NHK).
+#   - reason and evidence_url say why the account is here; checked_on is when.
+#   - scope: all = every original post; mentions = only posts whose text names a covered
+#     country or city (for outlets that cover the whole world).
+# Location is never inferred from the account: only places named in a post count.
+
+accounts:
+  # ---------------------------------------------------------------- Bluesky
+  - platform: bluesky
+    id: did:plc:ibwdymi2pdjcfscefihqcaj6
+    handle: scroll.in
+    name: Scroll
+    kind: newsroom
+    domain: scroll.in
+    scope: all
+    reason: Indian digital newsroom; its site is on our reviewed allowlist.
+    evidence_url: https://bsky.app/profile/scroll.in
+    checked_on: 2026-10-14
+
+  - platform: bluesky
+    id: did:plc:5x3a6jke5p3ni7mnpd57ijhw
+    handle: globalvoices.org
+    name: Global Voices
+    kind: newsroom
+    domain: globalvoices.org
+    scope: mentions
+    reason: International citizen-media newsroom; already a licensed source (CC BY).
+    evidence_url: https://bsky.app/profile/globalvoices.org
+    checked_on: 2026-10-14
+
+  - platform: bluesky
+    id: did:plc:xta63iqnrhi7tzp7y7b2mppi
+    handle: thediplomat.com
+    name: The Diplomat
+    kind: newsroom
+    domain: thediplomat.com
+    scope: mentions
+    reason: Asia-Pacific current-affairs magazine.
+    evidence_url: https://bsky.app/profile/thediplomat.com
+    checked_on: 2026-10-14
+
+  - platform: bluesky
+    id: did:plc:ppd3ypfty6f2rlonrydgsjgj
+    handle: chinadigitaltimes.net
+    name: China Digital Times
+    kind: newsroom
+    domain: chinadigitaltimes.net
+    scope: mentions
+    reason: Bilingual site that tracks Chinese news and censorship; English posts.
+    evidence_url: https://bsky.app/profile/chinadigitaltimes.net
+    checked_on: 2026-10-14
+
+  - platform: bluesky
+    id: did:plc:hbdc3q6k5lforao5vyuarvsp
+    handle: restofworld.org
+    name: Rest of World
+    kind: newsroom
+    domain: restofworld.org
+    scope: mentions
+    reason: Nonprofit newsroom covering technology outside the West, often in Asia.
+    evidence_url: https://bsky.app/profile/restofworld.org
+    checked_on: 2026-10-14
+
+  # ---------------------------------------------------------------- YouTube
+  # Fetched only when the YOUTUBE_API_KEY secret is set (docs/social.md).
+  - platform: youtube
+    id: UCl8zB2LZOiLLV0jYUMpTEgA
+    handle: "@ScrollIn"
+    name: Scroll.in
+    kind: newsroom
+    domain: scroll.in
+    scope: all
+    reason: Indian digital newsroom; its site is on our reviewed allowlist.
+    evidence_url: https://www.youtube.com/@ScrollIn
+    checked_on: 2026-10-14
+
+  - platform: youtube
+    id: UCOiRcH03t2d_312l1H1wv2A
+    handle: "@SixthTone"
+    name: Sixth Tone
+    kind: newsroom
+    domain: sixthtone.com
+    scope: all
+    reason: Shanghai-based English newsroom on Chinese society; its site is on our allowlist.
+    evidence_url: https://www.youtube.com/@SixthTone
+    checked_on: 2026-10-14
+
+  - platform: youtube
+    id: UCQceVC65hO4tDkvYC9NoBPQ
+    handle: "@CaixinGlobal"
+    name: Caixin Global
+    kind: newsroom
+    domain: caixinglobal.com
+    scope: all
+    reason: English edition of the Beijing business newsroom Caixin; its site is on our allowlist.
+    evidence_url: https://www.youtube.com/@CaixinGlobal
+    checked_on: 2026-10-14
+
+  - platform: youtube
+    id: UCmksR2jAphI96PPCwvPO02g
+    handle: "@TheDiplomatMagazine"
+    name: The Diplomat
+    kind: newsroom
+    domain: thediplomat.com
+    scope: mentions
+    reason: Asia-Pacific current-affairs magazine.
+    evidence_url: https://www.youtube.com/@TheDiplomatMagazine
+    checked_on: 2026-10-14

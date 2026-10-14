@@ -159,6 +159,31 @@ def check_sectors(rules, report):
                     report.error(where, f"gdelt_themes {rule!r}: theme codes are upper case")
 
 
+def check_social(accounts, domains, report):
+    denied = {d["domain"] for d in domains if d["decision"] == "deny"}
+    seen = set()
+    for a in accounts:
+        where = f"social_accounts.yaml[{a.get('handle')}]"
+        for field in ("platform", "id", "handle", "name", "kind", "domain", "reason", "evidence_url", "checked_on"):
+            if not a.get(field):
+                report.error(where, f"missing {field}")
+        key = (a.get("platform"), a.get("id"))
+        if key in seen:
+            report.error(where, "listed twice")
+        seen.add(key)
+        if a.get("platform") not in ("bluesky", "youtube"):
+            report.error(where, "platform must be bluesky or youtube")
+        if a.get("kind") not in ("newsroom", "journalist", "official"):
+            report.error(where, "kind must be newsroom, journalist or official")
+        domain = str(a.get("domain", "")).lower()
+        if any(domain == d or domain.endswith("." + d) for d in denied):
+            report.error(where, f"{domain} is denied in domains.yaml")
+        if a.get("platform") == "bluesky":
+            handle = str(a.get("handle", "")).lower()
+            if not (handle == domain or handle.endswith("." + domain)):
+                report.error(where, "Bluesky handle must be the outlet's own domain")
+
+
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--config-dir", default="config")
@@ -179,6 +204,7 @@ def main(argv):
     domains = load_yaml(path("domains.yaml"))["domains"]
     check_domains(domains, report)
     check_sectors(load_yaml(path("sectors.yaml")), report)
+    check_social(load_yaml(path("social_accounts.yaml"))["accounts"], domains, report)
 
     if report.errors:
         print(f"{len(report.errors)} problem(s):")

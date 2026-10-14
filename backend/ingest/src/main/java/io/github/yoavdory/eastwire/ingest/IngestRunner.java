@@ -2,9 +2,11 @@ package io.github.yoavdory.eastwire.ingest;
 
 import io.github.yoavdory.eastwire.core.config.ComplianceConfig;
 import io.github.yoavdory.eastwire.core.config.SourceConfig;
+import io.github.yoavdory.eastwire.core.social.SocialAccounts;
 import io.github.yoavdory.eastwire.ingest.http.HttpFetcher;
 import io.github.yoavdory.eastwire.ingest.pipeline.RetentionPurger;
 import io.github.yoavdory.eastwire.ingest.pipeline.SectorTagger;
+import io.github.yoavdory.eastwire.ingest.social.SocialLinker;
 import io.github.yoavdory.eastwire.ingest.run.CircuitBreaker;
 import io.github.yoavdory.eastwire.ingest.run.RunOutcome;
 import io.github.yoavdory.eastwire.ingest.run.RunRecorder;
@@ -31,8 +33,8 @@ import org.springframework.stereotype.Component;
  * One ingestion run:
  * take the advisory lock (so overlapping runs never collide) → sync config/ →
  * run each enabled source's connector unless its circuit is open → re-tag sectors of stored
- * articles if config/sectors.yaml changed → purge expired and taken-down items → fail the
- * process only if every attempted connector failed.
+ * articles if config/sectors.yaml changed → link social posts to stories → purge expired and
+ * taken-down items → fail the process only if every attempted connector failed.
  */
 @Component
 @ConditionalOnProperty(name = "eastwire.ingest.run-on-startup", havingValue = "true", matchIfMissing = true)
@@ -47,19 +49,23 @@ class IngestRunner implements ApplicationRunner {
     private final RunRecorder recorder;
     private final RetentionPurger purger;
     private final SectorTagger sectors;
+    private final SocialAccounts socialAccounts;
+    private final SocialLinker socialLinker;
     private final Map<String, Connector> connectors;
     private final DataSource dataSource;
     private final Clock clock;
     private final boolean useLock;
 
     IngestRunner(ComplianceConfig config, ConfigSync configSync, RunRecorder recorder, RetentionPurger purger,
-            SectorTagger sectors, List<Connector> connectors, DataSource dataSource, Clock clock,
+            SectorTagger sectors, SocialAccounts socialAccounts, SocialLinker socialLinker, List<Connector> connectors, DataSource dataSource, Clock clock,
             @Value("${eastwire.ingest.advisory-lock}") boolean useLock) {
         this.config = config;
         this.configSync = configSync;
         this.recorder = recorder;
         this.purger = purger;
         this.sectors = sectors;
+        this.socialAccounts = socialAccounts;
+        this.socialLinker = socialLinker;
         this.connectors = connectors.stream().collect(Collectors.toMap(Connector::sourceSlug, Function.identity()));
         this.dataSource = dataSource;
         this.clock = clock;
@@ -89,6 +95,7 @@ class IngestRunner implements ApplicationRunner {
         ConfigSync.Result synced = configSync.sync(config);
         log.info("Config synced: {} countries, {} places, {} sources, {} domain policies",
                 synced.countries(), synced.places(), synced.sources(), synced.domains());
+        log.info("Social accounts synced: {}", configSync.syncSocial(socialAccounts));
 
         int attempted = 0;
         int failed = 0;
@@ -133,8 +140,14 @@ class IngestRunner implements ApplicationRunner {
             log.info("Re-tagged sectors of {} stored articles (rules changed or never tagged)", retagged);
         }
 
+        SocialLinker.Result links = socialLinker.link();
+        if (links.sharedUrl() + links.textOverlap() > 0) {
+            log.info("Linked social posts to stories: {} by shared URL, {} by headline", links.sharedUrl(), links.textOverlap());
+        }
+
         RetentionPurger.Result purged = purger.purge();
-        log.info("Purged {} expired and {} taken-down articles", purged.expired(), purged.suppressed());
+        log.info("Purged {} expired and {} taken-down articles, {} social items", purged.expired(), purged.suppressed(),
+                purged.socialExpired());
 
         if (attempted > 0 && failed == attempted) {
             throw new IllegalStateException("All " + attempted + " connector(s) failed");

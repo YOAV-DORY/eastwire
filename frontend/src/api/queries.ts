@@ -8,6 +8,8 @@ import type {
   MapWindow,
   PlaceView,
   SectorsView,
+  SocialPage,
+  SocialPlatform,
   SourceView,
   Status,
 } from './types'
@@ -140,6 +142,28 @@ export function useSectors() {
     queryKey: ['sectors'],
     queryFn: ({ signal }) => apiGet<SectorsView>('/api/v1/sectors', {}, signal),
     staleTime: 5 * 60_000,
+    ...retryPolicy,
+  })
+}
+
+export interface SocialFilters {
+  platform?: SocialPlatform
+  country?: string
+  size?: number
+}
+
+/** Curated social posts and videos, newest first. */
+export function useSocial(filters: SocialFilters) {
+  return useInfiniteQuery({
+    queryKey: ['social', filters],
+    queryFn: ({ pageParam, signal }) =>
+      apiGet<SocialPage>(
+        '/api/v1/social',
+        { platform: filters.platform, country: filters.country, size: filters.size, page: pageParam },
+        signal,
+      ),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.hasMore ? last.page + 1 : undefined),
     ...retryPolicy,
   })
 }

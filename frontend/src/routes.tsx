@@ -8,6 +8,7 @@ import { NotFound } from './pages/NotFound'
 import { SearchPage } from './pages/SearchPage'
 import { SectorPage } from './pages/SectorPage'
 import { SectorsPage } from './pages/SectorsPage'
+import { SocialPage } from './pages/SocialPage'
 import { StatusPage } from './pages/StatusPage'
 
 // The component gallery exists only in development builds; production drops it entirely.
@@ -25,6 +26,7 @@ export const routes: RouteObject[] = [
       { path: '/search', element: <SearchPage /> },
       { path: '/sectors', element: <SectorsPage /> },
       { path: '/sector/:slug', element: <SectorPage /> },
+      { path: '/social', element: <SocialPage /> },
       { path: '*', element: <NotFound /> },
     ],
   },

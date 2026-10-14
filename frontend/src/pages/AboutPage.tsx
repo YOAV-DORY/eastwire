@@ -105,6 +105,14 @@ export function AboutPage() {
           <a href="https://leafletjs.com/">Leaflet</a>. Global Voices text: CC BY 3.0, credited on each story.
         </p>
         <p className="muted">
+          The social section shows posts and videos only through Bluesky&apos;s and YouTube&apos;s official embeds, and
+          only after you press load; until then nothing is requested from them. Loading a post or video lets that
+          platform see your visit and, for YouTube, set cookies. Video data comes from the YouTube API Services, under
+          the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a> and the{' '}
+          <a href="https://policies.google.com/privacy">Google Privacy Policy</a>. EastWire stores post and video data
+          for at most 30 days and deletes it when the platform removes it.
+        </p>
+        <p className="muted">
           EastWire sets no cookies and uses no trackers. Your theme and shortcut settings are stored only in your
           browser. Map images load from the OpenStreetMap tile servers, which see your IP address like any website. To
           ask for a correction or removal, open an issue on{' '}

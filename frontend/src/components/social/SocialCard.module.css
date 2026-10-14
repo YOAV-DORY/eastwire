@@ -1,0 +1,121 @@
+/* Visibly different from news cards: social background and a dashed border. */
+.card {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-social);
+}
+
+.label {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.header {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-small);
+}
+
+.account {
+  overflow-wrap: anywhere;
+}
+
+.quote {
+  margin: 0;
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--border-strong);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.facade {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.thumb {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  background: var(--bg-elev-2);
+  object-fit: cover;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: var(--radius-md);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.original {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--accent-text);
+  font-size: var(--text-small);
+}
+
+.related,
+.relatedButton {
+  font-size: var(--text-small);
+}
+
+.relatedWrap {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.relatedButton {
+  justify-self: start;
+  padding: 1px var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.relatedList {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-4);
+  font-size: var(--text-small);
+}
+
+.relatedList a {
+  color: var(--accent-text);
+}
+
+.why {
+  font-size: var(--text-small);
+  line-height: var(--lh-small);
+}

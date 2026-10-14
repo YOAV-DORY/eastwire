@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Compass, Info, Keyboard, LayoutList, Map, Search, Shapes } from 'lucide-react'
+import { Compass, Info, Keyboard, LayoutList, Map, MessagesSquare, Search, Shapes } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { useCountries, useStatus } from '../../api/queries'
@@ -14,11 +14,13 @@ import { SECTORS, sectorColor } from '../../sectors'
 import styles from './AppShell.module.css'
 
 const NAV = [
-  { to: '/', label: 'Latest', icon: LayoutList, match: null },
-  { to: '/map', label: 'Map', icon: Map, match: '/map' },
-  { to: '/search', label: 'Search', icon: Search, match: '/search' },
+  { to: '/', label: 'Latest', icon: LayoutList, match: null, bottom: true },
+  { to: '/map', label: 'Map', icon: Map, match: '/map', bottom: true },
+  { to: '/search', label: 'Search', icon: Search, match: '/search', bottom: true },
   // One sector's page (/sector/economy) is part of the Sectors section too.
-  { to: '/sectors', label: 'Sectors', icon: Shapes, match: '/sector' },
+  { to: '/sectors', label: 'Sectors', icon: Shapes, match: '/sector', bottom: true },
+  // Phones keep four tabs; the home page links to the social section instead.
+  { to: '/social', label: 'Social', icon: MessagesSquare, match: '/social', bottom: false },
 ] as const
 
 type NavItem = (typeof NAV)[number]
@@ -83,7 +85,7 @@ export function AppShell() {
         <Outlet />
       </main>
       <nav className={styles.bottomnav} aria-label="Primary">
-        {NAV.map((item) => (
+        {NAV.filter((item) => item.bottom).map((item) => (
           <Link
             key={item.to}
             to={item.to}
