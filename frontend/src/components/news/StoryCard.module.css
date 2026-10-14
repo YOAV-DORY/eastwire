@@ -51,7 +51,6 @@
   color: var(--text-muted);
   font-size: var(--text-small);
   line-height: var(--lh-small);
-  font-variant-numeric: tabular-nums;
 }
 
 .item + .item::before {
@@ -62,6 +61,12 @@
 
 .sticker {
   margin-left: var(--space-3);
+}
+
+/* Outside the lead, "New" is a word in the line, so a list of fresh stories stays calm. */
+.new {
+  color: var(--text);
+  font-weight: 600;
 }
 
 .publisher {

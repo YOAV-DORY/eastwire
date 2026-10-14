@@ -4,7 +4,8 @@
 }
 
 .rules a {
-  color: var(--accent-text);
+  color: var(--text);
+  text-decoration-color: var(--text-faint);
 }
 
 .group {
@@ -13,10 +14,11 @@
 }
 
 .groupTitle {
-  font-size: var(--text-small);
-  font-weight: 500;
+  color: var(--text-muted);
+  font-size: var(--text-micro);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--track-kicker);
 }
 
 .list {

@@ -83,7 +83,7 @@ export function StoryCard({
         <span className={clsx(styles.item, styles.publisher)}>{article.publisher}</span>
         {place && <span className={styles.item}>{place}</span>}
         <time
-          className={styles.item}
+          className={clsx(styles.item, 'num')}
           dateTime={time}
           title={
             article.publishedAt
@@ -93,11 +93,14 @@ export function StoryCard({
         >
           {when}
         </time>
-        {article.isNew && (
-          <span className={styles.sticker}>
-            <Sticker>New</Sticker>
-          </span>
-        )}
+        {article.isNew &&
+          (variant === 'lead' ? (
+            <span className={styles.sticker}>
+              <Sticker>New</Sticker>
+            </span>
+          ) : (
+            <span className={clsx(styles.item, styles.new)}>New</span>
+          ))}
       </p>
 
       {article.excerpt && variant !== 'compact' && (

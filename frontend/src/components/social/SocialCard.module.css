@@ -1,34 +1,45 @@
-/* Visibly different from news cards: social background and a dashed border. */
+/* Visibly not news: its own surface and a dashed edge, and the label is always on top. */
 .card {
   display: grid;
   gap: var(--space-3);
   min-width: 0;
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-4) var(--space-5) var(--space-5);
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius-lg);
   background: var(--bg-social);
 }
 
 .label {
-  color: var(--text-muted);
-  font-size: var(--text-small);
+  color: var(--text-faint);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: var(--track-kicker);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 
 .header {
   display: grid;
-  gap: var(--space-1);
-  font-size: var(--text-small);
+  gap: 2px;
 }
 
 .account {
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
+.byline {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.handle {
+  overflow-wrap: anywhere;
+}
+
+/* The post's own words: sans, not the serif of headlines, behind a quiet rule. */
 .quote {
   margin: 0;
-  padding-left: var(--space-3);
+  padding-left: var(--space-4);
   border-left: 2px solid var(--border-strong);
   white-space: pre-line;
   overflow-wrap: anywhere;
@@ -72,19 +83,26 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2) var(--space-4);
 }
 
 .original {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  color: var(--accent-text);
+  min-height: var(--tap);
+  color: var(--text-muted);
   font-size: var(--text-small);
+  font-weight: 500;
+  text-decoration: none;
 }
 
-.related,
-.relatedButton {
+.original:hover {
+  color: var(--accent-text);
+}
+
+.related {
+  color: var(--text-faint);
   font-size: var(--text-small);
 }
 
@@ -95,27 +113,56 @@
 
 .relatedButton {
   justify-self: start;
-  padding: 1px var(--space-2);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  background: transparent;
+  min-height: var(--tap);
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--text);
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--text-faint);
+  text-underline-offset: 3px;
   cursor: pointer;
 }
 
 .relatedList {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
   margin: 0;
   padding-left: var(--space-4);
   font-size: var(--text-small);
 }
 
 .relatedList a {
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.relatedButton:hover {
+  text-decoration-color: var(--accent);
+}
+
+.relatedList a:hover {
   color: var(--accent-text);
 }
 
+.relatedMeta {
+  display: block;
+  color: var(--text-muted);
+}
+
 .why {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--rule);
+  color: var(--text-muted);
   font-size: var(--text-small);
   line-height: var(--lh-small);
+}
+
+.why span {
+  color: var(--text-faint);
+  font-weight: 600;
 }

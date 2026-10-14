@@ -1,11 +1,13 @@
-import { useMemo } from 'react'
+import clsx from 'clsx'
+import { useMemo, type CSSProperties } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { useCountries, useMapCities, useSectors } from '../api/queries'
 import { Flag } from '../components/graphics/Flag'
+import { PageHeader } from '../components/layout/PageHeader'
 import { SectorRules } from '../components/news/SectorRules'
 import { StoryFeed } from '../components/news/StoryFeed'
 import { Button } from '../components/ui/Button'
-import { Chip } from '../components/ui/Chip'
+import { FilterTabs } from '../components/ui/FilterTabs'
 import { DEFAULT_ROLES } from '../lib/map'
 import { isSectorId, sectorColor, sectorLabel, type SectorId } from '../sectors'
 import { NotFound } from './NotFound'
@@ -36,62 +38,69 @@ function Sector({ slug }: { slug: SectorId }) {
   const select = (next?: string) => setParams(next ? { country: next } : {})
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <span className={styles.dot} style={{ background: sectorColor(slug) }} aria-hidden="true" />
-        <div className={styles.intro}>
-          <h1 className={styles.title}>{label}</h1>
-          <p className="muted">{definition?.definition ?? ' '}</p>
-        </div>
-      </header>
+    <div className={clsx('container', styles.page)} style={{ '--sector': sectorColor(slug) } as CSSProperties}>
+      <PageHeader
+        kicker="Sector"
+        title={
+          <>
+            <span className={styles.dot} aria-hidden="true" />
+            {label}
+          </>
+        }
+        lede={definition?.definition ?? ' '}
+      />
 
-      <details className={styles.how}>
-        <summary>How we tag {label}</summary>
-        {sectors.data && definition ? (
-          <SectorRules rules={sectors.data} sector={definition} />
-        ) : (
-          <p className="muted">{sectors.isError ? 'The rules could not be loaded right now.' : 'Loading the rules…'}</p>
-        )}
-      </details>
-
-      <div className={styles.filters} role="group" aria-label="Filter by country">
-        <Chip selected={!country} onClick={() => select()}>
-          All
-        </Chip>
-        {(countries.data ?? []).map((c) => (
-          <Chip key={c.iso2} selected={country === c.iso2} leading={<Flag country={c.iso2} />} onClick={() => select(c.iso2)}>
-            {c.name}
-          </Chip>
-        ))}
-      </div>
+      <FilterTabs
+        label="Filter by country"
+        value={country}
+        onChange={select}
+        options={[
+          { value: undefined, label: 'All countries' },
+          ...(countries.data ?? []).map((c) => ({ value: c.iso2, label: c.name, leading: <Flag country={c.iso2} /> })),
+        ]}
+      />
 
       <div className={styles.columns}>
         <StoryFeed
+          layout="front"
           filters={{ country, sector: slug }}
           heading={[label, scope].filter(Boolean).join(' · ')}
           countryNames={countryNames}
-          emptyTitle={`Nothing tagged ${label}${scope ? ` for ${scope}` : ''} right now`}
+          emptyTitle={`Nothing tagged ${label}${scope ? ` about ${scope}` : ''} right now`}
           emptyAction={scope ? <Button onClick={() => select()}>All countries</Button> : undefined}
         />
-        <aside className={styles.rail} aria-labelledby="top-places">
-          <h2 id="top-places" className={`${styles.railTitle} mono muted`}>
-            Top places this week
-          </h2>
-          {topPlaces.length > 0 ? (
-            <ol className={styles.places}>
-              {topPlaces.map((p) => (
-                <li key={p.id}>
-                  <Link to={`/map/city/${p.id}?sector=${slug}`}>{p.name}</Link>
-                  <span className="mono muted">{p.total}</span>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p className="muted">{map.data ? `No ${label} story is placed in a city this week.` : ' '}</p>
-          )}
-          <Link to={`/map?sector=${slug}`} className={styles.mapLink}>
-            Open the {label} map
-          </Link>
+        <aside className={styles.rail} aria-label={`${label}: places and rules`}>
+          <section aria-labelledby="top-places" className={styles.block}>
+            <h2 id="top-places" className="kicker">
+              Top places this week
+            </h2>
+            {topPlaces.length > 0 ? (
+              <ol className={styles.places}>
+                {topPlaces.map((p) => (
+                  <li key={p.id}>
+                    <Link to={`/map/city/${p.id}?sector=${slug}`}>{p.name}</Link>
+                    <span className="num">{p.total}</span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className={styles.note}>{map.data ? `No ${label} story is about one city this week.` : ' '}</p>
+            )}
+            <Link to={`/map?sector=${slug}`} className={styles.mapLink}>
+              Open the {label} map →
+            </Link>
+          </section>
+
+          <details className={styles.how}>
+            <summary>How a story gets this tag</summary>
+            {sectors.data && definition ? (
+              <SectorRules rules={sectors.data} sector={definition} />
+            ) : (
+              <p className={styles.note}>
+                {sectors.isError ? 'The rules could not be loaded right now.' : 'Loading the rules…'}
+              </p>
+            )}
+          </details>
         </aside>
       </div>
     </div>

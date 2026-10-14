@@ -1,11 +1,13 @@
+import clsx from 'clsx'
 import { useSearchParams } from 'react-router'
 import { useCountries, useSocial } from '../api/queries'
 import type { SocialPlatform } from '../api/types'
 import { Flag } from '../components/graphics/Flag'
+import { PageHeader } from '../components/layout/PageHeader'
 import { SocialCard } from '../components/social/SocialCard'
 import { ColdStart, EmptyState, ErrorState, FeedSkeleton } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
-import { Chip } from '../components/ui/Chip'
+import { FilterTabs } from '../components/ui/FilterTabs'
 import { useSlow } from '../hooks/useSlow'
 import styles from './SocialPage.module.css'
 
@@ -36,45 +38,54 @@ export function SocialPage() {
   }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.intro}>
-        <h1 className={styles.title}>Social posts &amp; videos</h1>
-        <p className={styles.notice}>Not verified reporting. Shown from curated accounts.</p>
-        <p className="muted">
-          Posts and videos from newsrooms we chose by hand, each with the reason it is listed. A place tag means the post
-          itself names that place. Nothing loads from Bluesky or YouTube until you press load.{' '}
-          <a href={DOCS}>How accounts are chosen</a>
-        </p>
+    <div className={clsx('container', styles.page)}>
+      <div className={styles.top}>
+        <PageHeader
+          kicker="Social"
+          title="Posts & videos"
+          lede="What newsrooms in and about the region are posting, from accounts we chose by hand. It sits apart from the news because it is not verified reporting."
+        />
+        <ul className={styles.rules} aria-label="How this section works">
+          <li>
+            <p>
+              <strong>Not verified reporting.</strong> A post is what an account said, nothing more.
+            </p>
+          </li>
+          <li>
+            <p>
+              <strong>Curated accounts only.</strong> Each card says why its account is listed.{' '}
+              <a href={DOCS}>How accounts are chosen</a>
+            </p>
+          </li>
+          <li>
+            <p>
+              <strong>Nothing loads until you ask.</strong> Bluesky and YouTube see your visit only after you press load.
+            </p>
+          </li>
+        </ul>
       </div>
 
-      <div className={styles.filters} role="group" aria-label="Filter by platform">
-        <Chip selected={!platform} onClick={() => select({ country })}>
-          All
-        </Chip>
-        {PLATFORMS.map((p) => (
-          <Chip key={p.value} selected={platform === p.value} onClick={() => select({ platform: p.value, country })}>
-            {p.label}
-          </Chip>
-        ))}
-      </div>
-      <div className={styles.filters} role="group" aria-label="Filter by country">
-        <Chip selected={!country} onClick={() => select({ platform })}>
-          All countries
-        </Chip>
-        {(countries.data ?? []).map((c) => (
-          <Chip
-            key={c.iso2}
-            selected={country === c.iso2}
-            leading={<Flag country={c.iso2} />}
-            onClick={() => select({ platform, country: c.iso2 })}
-          >
-            {c.name}
-          </Chip>
-        ))}
+      <div className={styles.filters}>
+        <FilterTabs
+          label="Filter by platform"
+          value={platform}
+          onChange={(p) => select({ platform: p, country })}
+          options={[{ value: undefined, label: 'All platforms' }, ...PLATFORMS]}
+        />
+        <FilterTabs
+          quiet
+          label="Filter by country"
+          value={country}
+          onChange={(c) => select({ platform, country: c })}
+          options={[
+            { value: undefined, label: 'All countries' },
+            ...(countries.data ?? []).map((c) => ({ value: c.iso2, label: c.name, leading: <Flag country={c.iso2} /> })),
+          ]}
+        />
       </div>
 
       <section aria-labelledby="social-count" className={styles.list}>
-        <h2 id="social-count" className={`${styles.count} mono muted`}>
+        <h2 id="social-count" className="kicker">
           {social.data ? `${total} ${total === 1 ? 'item' : 'items'} · last 30 days` : 'Loading…'}
         </h2>
         {social.isLoading && (
@@ -93,16 +104,18 @@ export function SocialPage() {
               : 'Our list of accounts is short on purpose; an empty filter is not an absence of news.'}
           </EmptyState>
         )}
-        <ol className={styles.grid}>
-          {items.map((item) => (
-            <li key={item.id}>
-              <SocialCard item={item} />
-            </li>
-          ))}
-        </ol>
+        {items.length > 0 && (
+          <ol className={styles.grid}>
+            {items.map((item) => (
+              <li key={item.id}>
+                <SocialCard item={item} />
+              </li>
+            ))}
+          </ol>
+        )}
         {social.hasNextPage && (
           <Button size="lg" loading={social.isFetchingNextPage} onClick={() => void social.fetchNextPage()}>
-            Load more
+            Load more posts
           </Button>
         )}
       </section>

@@ -21,17 +21,15 @@ export function SocialCard({ item, now }: { item: SocialItemView; now?: Date }) 
   const [loaded, setLoaded] = useState(false)
   return (
     <article className={styles.card}>
-      <p className={`${styles.label} mono`}>{item.label}</p>
+      <p className={styles.label}>{item.label}</p>
       <header className={styles.header}>
-        <span className={styles.account}>
-          <strong>{item.account.name}</strong>{' '}
-          <span className="mono muted">
-            {item.platform === 'bluesky' ? `@${item.account.handle}` : item.account.handle}
-          </span>
-        </span>
-        <span className="mono muted">
-          {PLATFORM[item.platform]} · {KIND[item.account.kind]} ·{' '}
-          <time dateTime={item.createdAt} title={formatUtc(item.createdAt)}>
+        <strong className={styles.account}>{item.account.name}</strong>
+        <span className={styles.byline}>
+          <span className={styles.handle}>{item.platform === 'bluesky' ? `@${item.account.handle}` : item.account.handle}</span>
+          <span aria-hidden="true"> · </span>
+          {KIND[item.account.kind]}
+          <span aria-hidden="true"> · </span>
+          <time className="num" dateTime={item.createdAt} title={formatUtc(item.createdAt)}>
             {relativeTime(item.createdAt, now)}
           </time>
         </span>
@@ -76,8 +74,8 @@ export function SocialCard({ item, now }: { item: SocialItemView; now?: Date }) 
       </div>
 
       <Related item={item} />
-      <p className={`${styles.why} muted`}>
-        Why this account: {item.account.reason}
+      <p className={styles.why}>
+        <span>Why this account</span> {item.account.reason}
       </p>
     </article>
   )
@@ -105,13 +103,13 @@ function Related({ item }: { item: SocialItemView }) {
   const [open, setOpen] = useState(false)
   const id = useId()
   if (item.related.length === 0) {
-    return <p className={`${styles.related} mono muted`}>No matching report in our sources yet</p>
+    return <p className={styles.related}>No matching report in our sources yet</p>
   }
   return (
     <div className={styles.relatedWrap}>
       <button
         type="button"
-        className={`${styles.relatedButton} mono`}
+        className={styles.relatedButton}
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen(!open)}
@@ -126,7 +124,7 @@ function Related({ item }: { item: SocialItemView }) {
                 {r.title}
                 <span className="visually-hidden"> (opens in a new tab)</span>
               </a>{' '}
-              <span className="mono muted">
+              <span className={styles.relatedMeta}>
                 {r.publisher} · {r.linkType === 'shares_url' ? 'the post links to it' : 'same headline'}
               </span>
             </li>

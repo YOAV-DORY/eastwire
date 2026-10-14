@@ -1,15 +1,6 @@
-.main {
+.page {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-6);
   justify-items: start;
-  max-width: var(--content-max);
-  margin: 0 auto;
-  padding: var(--space-8) 0;
-}
-
-.title {
-  font-size: var(--text-h1);
-  line-height: var(--lh-h1);
-  letter-spacing: var(--track-h1);
-  font-weight: var(--weight-h1);
+  padding-block: var(--space-8);
 }

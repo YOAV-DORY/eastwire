@@ -1,0 +1,132 @@
+.page {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.sources {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+
+.row {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.name h3 {
+  font-size: var(--text-headline-sm);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.state {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  transform: translateY(-1px);
+}
+
+.dot[data-state='fresh'] {
+  background: var(--accent);
+}
+
+.dot[data-state='stale'] {
+  background: var(--accent-2);
+}
+
+.dot[data-state='outage'] {
+  background: var(--danger);
+}
+
+/* Facts: three short columns on phones too; they are only a few words each. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding-left: calc(10px + var(--space-3));
+}
+
+.facts dt {
+  color: var(--text-faint);
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+}
+
+.facts dd {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-small);
+}
+
+@media (max-width: 379px) {
+  .facts {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: baseline;
+    gap: var(--space-8);
+  }
+
+  .facts {
+    padding-left: 0;
+  }
+}
+
+.db {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 34rem;
+}
+
+.db p {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.meter {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elev-2);
+  overflow: hidden;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--text-muted);
+}
+
+.db[data-state='warn'] .meter span {
+  background: var(--accent-2);
+}

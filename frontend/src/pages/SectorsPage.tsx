@@ -1,5 +1,8 @@
+import clsx from 'clsx'
+import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router'
 import { useSectors } from '../api/queries'
+import { PageHeader } from '../components/layout/PageHeader'
 import { RULES_FILE } from '../components/news/SectorRules'
 import { ErrorState } from '../components/status/Feedback'
 import { Skeleton } from '../components/ui/Skeleton'
@@ -8,58 +11,65 @@ import styles from './SectorsPage.module.css'
 
 const DOCS = 'https://github.com/YOAV-DORY/eastwire/blob/main/docs/sectors.md'
 
-/** /sectors — the six sectors, what each means, and how many recent stories carry it. */
+/** /sectors — the six sectors as an index: what each means and how many recent stories carry it. */
 export function SectorsPage() {
   const sectors = useSectors()
   const byId = new Map((sectors.data?.sectors ?? []).map((s) => [s.slug, s]))
   return (
-    <div className={styles.page}>
-      <div className={styles.intro}>
-        <h1 className={styles.title}>Sectors</h1>
-        <p className="muted">
-          Stories are tagged by published rules, not AI: keywords in the headline or excerpt, the publisher&apos;s own
-          topic tags and GDELT themes. Every tag on a story can show the exact rules that matched. A story gets at most
-          two sectors, and many get none.
-        </p>
-      </div>
+    <div className={clsx('container', styles.page)}>
+      <PageHeader
+        kicker="Sectors"
+        title="Six ways into the news"
+        lede="Every story can carry up to two sectors, tagged by published rules rather than AI. Many stories get none."
+      />
 
       {sectors.isError && !sectors.data && (
         <ErrorState message="Sector counts are unavailable right now." onRetry={() => void sectors.refetch()} />
       )}
 
-      <ul className={styles.grid}>
+      <ol className={styles.index}>
         {SECTORS.map((s) => {
           const d = byId.get(s.id)
           return (
             <li key={s.id}>
-              <Link to={`/sector/${s.id}`} className={styles.card}>
+              <Link to={`/sector/${s.id}`} className={styles.row}>
                 <span className={styles.name}>
                   <span className={styles.dot} style={{ background: sectorColor(s.id) }} aria-hidden="true" />
                   {s.label}
                 </span>
-                {d ? <span className="muted">{d.definition}</span> : <Skeleton height="2.8em" />}
-                <span className="mono muted">{d ? `${d.last7d} ${d.last7d === 1 ? 'story' : 'stories'} · 7 days` : ' '}</span>
+                <span className={styles.definition}>{d ? d.definition : <Skeleton height="1.4em" />}</span>
+                <span className={clsx(styles.count, 'num')}>
+                  {d ? (
+                    <>
+                      <strong>{d.last7d}</strong> {d.last7d === 1 ? 'story' : 'stories'} this week
+                    </>
+                  ) : (
+                    ' '
+                  )}
+                </span>
+                <ArrowRight className={styles.arrow} size={20} strokeWidth={1.5} aria-hidden="true" />
               </Link>
             </li>
           )
         })}
-      </ul>
+      </ol>
 
       {sectors.data && (
-        <p className="mono muted">
-          {sectors.data.untagged7d} {sectors.data.untagged7d === 1 ? 'story' : 'stories'} from the last 7 days matched no
-          sector and show no tag.
+        <p className={styles.untagged}>
+          <span className="num">{sectors.data.untagged7d}</span>{' '}
+          {sectors.data.untagged7d === 1 ? 'story' : 'stories'} from the last 7 days matched no sector and show no tag.
         </p>
       )}
 
-      <section className={styles.section} aria-labelledby="accuracy">
-        <h2 id="accuracy" className={`${styles.heading} mono muted`}>
-          How accurate is it?
-        </h2>
+      <section className={styles.accuracy} aria-labelledby="accuracy">
+        <h2 id="accuracy">How accurate is it?</h2>
         <p>
-          When a tag is given it is usually right, but keyword rules miss many stories, so the absence of a tag means
-          little. We measured this on hand-labelled headlines, including a set the rules were never adjusted for.{' '}
-          <a href={DOCS}>Numbers and method</a> · <a href={RULES_FILE}>The rules file</a>
+          When a tag is given it is usually right, but keyword rules miss many stories, so a missing tag means little.
+          We measured this on hand-labelled headlines, including a set the rules were never adjusted for.
+        </p>
+        <p className={styles.links}>
+          <a href={DOCS}>Numbers and method</a>
+          <a href={RULES_FILE}>The rules file</a>
         </p>
       </section>
     </div>

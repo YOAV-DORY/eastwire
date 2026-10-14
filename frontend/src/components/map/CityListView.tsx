@@ -36,14 +36,14 @@ export function CityListView({
             <tr key={p.id}>
               <th scope="row">
                 <Link to={cityHref(p.id)}>{p.name}</Link>
-                {p.lowConfidenceOnly && <span className="mono muted"> · low confidence</span>}
+                {p.lowConfidenceOnly && <span className="muted"> · low confidence</span>}
               </th>
               <td>{countryNames[p.country] ?? p.country}</td>
-              <td className="mono">{p.total}</td>
-              <td className="mono">{p.mentioned}</td>
-              <td className="mono">{p.event}</td>
-              <td className="mono">{p.publisher}</td>
-              <td className="mono" title={formatUtc(p.lastItemAt)}>
+              <td className="num">{p.total}</td>
+              <td className="num">{p.mentioned}</td>
+              <td className="num">{p.event}</td>
+              <td className="num">{p.publisher}</td>
+              <td className="num" title={formatUtc(p.lastItemAt)}>
                 {relativeTime(p.lastItemAt)}
               </td>
             </tr>
