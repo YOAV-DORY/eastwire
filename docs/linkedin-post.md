@@ -1,11 +1,11 @@
 # LinkedIn post (draft)
 
-A draft for the launch post. Edit freely; numbers are from the repo as of 2026-10-14.
+A draft for the launch post. Edit freely; numbers are from the repo as of 2026-10-14, the day it went live.
 
 ---
 
 I built EastWire, a free site that puts news from China, India, South Korea and Japan on a
-map, with every source shown. [link]
+map, with every source shown: https://eastwire.pages.dev
 
 The hardest part wasn't code. It was permission. Before showing a single headline I read
 the terms of 54 news publishers. Only 6 allow it. Every South Korean outlet I checked said
@@ -22,6 +22,6 @@ A few things I'm proud of:
   load nothing from the platform until you ask.
 • It runs for $0: Java/Spring Boot, Postgres, React, an hourly GitHub Actions job.
 
-Code and the full method: [GitHub link]
+Code and the full method: https://github.com/YOAV-DORY/eastwire
 
 #Java #SpringBoot #React #OpenData #Journalism
