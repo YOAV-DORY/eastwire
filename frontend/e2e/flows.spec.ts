@@ -22,28 +22,81 @@ test('a shared search link opens the same results and filters', async ({ page })
   await expect(page.getByLabel('Order')).toHaveValue('date')
 })
 
-test('sector chips filter the feed and every tag explains itself', async ({ page }) => {
+test('sector tabs filter the feed and every tag explains itself', async ({ page }) => {
   await mockApi(page)
   await page.goto('/')
   await page.getByRole('group', { name: 'Filter by sector' }).getByRole('button', { name: 'Economy' }).click()
   await expect(page).toHaveURL(/sector=economy/)
+  await page.getByRole('button', { name: 'Details' }).first().click()
   const tag = page.getByRole('button', { name: 'Economy: why this sector' }).first()
   await tag.click()
   await expect(page.getByText('“inflation” in the headline').first()).toBeVisible()
 })
 
-test('clicking a city pin opens its panel; the population layer has its own legend', async ({ page }) => {
+test('clicking a city pin narrows the story list; the population layer has its own legend', async ({ page }, info) => {
+  const phone = info.project.name === 'phone'
   await mockApi(page)
   await page.goto('/map')
   await page.getByRole('button', { name: 'Osaka: 1 story' }).click()
   await expect(page).toHaveURL(/\/map\/city\/1853909/)
-  await expect(page.getByRole('heading', { name: 'Osaka', level: 2 })).toBeVisible()
+  if (phone) await page.getByRole('button', { name: 'Show stories' }).click()
+  await expect(page.getByRole('heading', { name: 'Osaka', exact: true, level: 2 })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Port expansion approved in Osaka/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Rupee steadies/ })).toHaveCount(0)
 
-  // The checkbox reflects the URL, which updates right after the click.
-  await page.getByLabel('Population layer').click()
-  await expect(page.getByLabel('Population layer')).toBeChecked()
-  await expect(page.getByText(/Population \(GeoNames, year varies\), not news volume/)).toBeVisible()
+  // Filters sit inline on wide screens and in a sheet on phones; the population layer is under More options.
+  const filters = phone ? page.getByRole('dialog', { name: 'Map filters' }) : page.getByRole('group', { name: 'Map settings' })
+  if (phone) await page.getByRole('button', { name: 'Filters' }).click()
+  await filters.getByText('More options').click()
+  const population = filters.getByLabel('Population layer')
+  await expect(population).not.toBeChecked()
+  await population.click()
+  await expect(population).toBeChecked()
   await expect(page).toHaveURL(/pop=1/)
+  if (phone) {
+    await page.getByRole('button', { name: 'Show results' }).click()
+    await page.getByRole('group', { name: 'View' }).getByRole('button', { name: 'Map' }).click()
+  }
+  await expect(page.getByText(/Population \(GeoNames, year varies\), not news volume/)).toBeVisible()
+})
+
+test('pointing at a story lights its pin on the map', async ({ page }, info) => {
+  test.skip(info.project.name === 'phone', 'Phones show the map or the list, one at a time.')
+  await mockApi(page)
+  await page.goto('/map')
+  const pin = page.getByRole('button', { name: 'Osaka: 1 story' })
+  await expect(pin).toBeVisible()
+  await expect(pin).not.toHaveClass(/ew-hot/)
+  await page.getByRole('link', { name: /Port expansion approved in Osaka/ }).hover()
+  await expect(pin).toHaveClass(/ew-hot/)
+  await page.mouse.move(0, 0)
+  await expect(pin).not.toHaveClass(/ew-hot/)
+})
+
+test('on phones the map keeps at least half the screen, with a Map/List switch', async ({ page }, info) => {
+  test.skip(info.project.name !== 'phone', 'Phone layout only.')
+  await mockApi(page)
+  await page.goto('/map')
+  const map = page.locator('.leaflet-container')
+  await expect(map).toBeVisible()
+  const box = (await map.boundingBox())!
+  expect(box.height).toBeGreaterThanOrEqual(844 / 2)
+  await page.getByRole('group', { name: 'View' }).getByRole('button', { name: 'List' }).click()
+  await expect(map).toBeHidden()
+  await expect(page.getByRole('link', { name: /Port expansion approved in Osaka/ })).toBeVisible()
+})
+
+test('search suggestions all return stories, and a dead end offers three', async ({ page }) => {
+  await mockApi(page)
+  await page.goto('/search')
+  const tries = page.getByRole('region', { name: 'Try a search' })
+  await expect(tries.getByRole('link')).toHaveCount(3)
+  await tries.getByRole('link', { name: /Osaka/ }).click()
+  await expect(page.getByRole('link', { name: /Port expansion approved in Osaka/ })).toBeVisible()
+
+  await page.goto('/search?q=zzzxq')
+  await expect(page.getByText('Nothing in our sources matches “zzzxq”')).toBeVisible()
+  await expect(page.getByText('These return stories now:').locator('..').getByRole('link')).toHaveCount(3)
 })
 
 test('social embeds request nothing from Bluesky or YouTube until the reader asks', async ({ page }) => {
@@ -53,7 +106,7 @@ test('social embeds request nothing from Bluesky or YouTube until the reader ask
     if (/bsky\.app|youtube|ytimg/.test(r.url()) && !r.url().includes('i.ytimg.com')) thirdParty.push(r.url())
   })
   await page.goto('/social')
-  await expect(page.getByText('Not verified reporting. Shown from curated accounts.')).toBeVisible()
+  await expect(page.getByText('Not verified reporting.', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Load post from Bluesky' })).toBeVisible()
   expect(thirdParty).toEqual([])
 })
@@ -61,7 +114,7 @@ test('social embeds request nothing from Bluesky or YouTube until the reader ask
 test('no page breaks the Content-Security-Policy', async ({ page }) => {
   const violations = watchCsp(page)
   await mockApi(page)
-  for (const path of ['/', '/map', '/search?q=metro', '/sectors', '/sector/economy', '/social', '/about', '/status']) {
+  for (const path of ['/', '/map', '/search?q=metro', '/search?q=zzzxq', '/sectors', '/sector/economy', '/social', '/about', '/status']) {
     await page.goto(path)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   }

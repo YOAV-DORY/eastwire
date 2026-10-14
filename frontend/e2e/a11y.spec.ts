@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 import { mockApi } from './api'
 
-const PAGES = ['/', '/map', '/map?view=list', '/search?q=metro', '/sectors', '/sector/economy', '/social', '/about', '/status']
+const PAGES = ['/', '/map', '/map?view=table', '/map/city/1853909', '/search?q=metro', '/search?q=zzzxq', '/sectors', '/sector/economy', '/social', '/about', '/status']
 
 for (const theme of ['dark', 'light'] as const) {
   for (const path of PAGES) {

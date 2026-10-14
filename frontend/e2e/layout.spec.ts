@@ -5,7 +5,7 @@ import { mockApi } from './api'
  * The screenshot checklist from docs/PLAN.md section 17.6, automated where a rule can be
  * measured. Screenshots for the human pass land in test-results/screens/ (not committed).
  */
-const PAGES = ['/', '/map', '/search?q=metro', '/sectors', '/sector/economy', '/social', '/about', '/status']
+const PAGES = ['/', '/?country=JP', '/map', '/map/city/1853909', '/search?q=metro', '/search?q=zzzxq', '/sectors', '/sector/economy', '/social', '/about', '/status']
 
 for (const theme of ['dark', 'light'] as const) {
   test(`every page fits the width and is screenshotted (${theme})`, async ({ page }, info) => {
@@ -26,30 +26,70 @@ for (const theme of ['dark', 'light'] as const) {
   })
 }
 
-test('navigation lives in one place per width', async ({ page }, info) => {
+test('navigation lives in one place per width, with no sidebar', async ({ page }, info) => {
   await mockApi(page)
   await page.goto('/')
+  const top = page.locator('nav[aria-label="Primary"]').first()
   const bottom = page.locator('nav[aria-label="Primary"]').last()
-  const sidebar = page.getByRole('complementary', { name: 'Sections' })
+  await expect(page.getByRole('complementary', { name: 'Sections' })).toHaveCount(0)
   if (info.project.name === 'phone') {
+    await expect(top).toBeHidden()
     await expect(bottom.getByRole('link')).toHaveCount(4)
-    await expect(sidebar).toBeHidden()
+    await expect(bottom.getByRole('button', { name: 'More' })).toBeVisible()
   } else {
-    await expect(sidebar).toBeVisible()
+    await expect(top.getByRole('link')).toHaveCount(6)
     await expect(bottom).toBeHidden()
   }
 })
 
-test('the hero headline stays within three lines and the graphic does not cover it', async ({ page }) => {
+test('every main page is reachable from the phone navigation', async ({ page }, info) => {
+  test.skip(info.project.name !== 'phone', 'Phone layout only.')
   await mockApi(page)
   await page.goto('/')
-  const title = page.locator('#hero-title')
-  const lines = await title.evaluate((el) => Math.round(el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight)))
-  expect(lines).toBeLessThanOrEqual(3)
-  const a = (await title.boundingBox())!
-  const b = (await page.locator('section[aria-labelledby="hero-title"] svg').first().boundingBox())!
-  const overlap = a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height
-  expect(overlap).toBe(false)
+  const bottom = page.locator('nav[aria-label="Primary"]').last()
+  for (const [name, path] of [['Map', '/map'], ['Search', '/search'], ['Sectors', '/sectors'], ['Home', '/']] as const) {
+    await bottom.getByRole('link', { name }).click()
+    await expect(page).toHaveURL(new RegExp(`${path}$`))
+  }
+  for (const [name, path] of [['Social', '/social'], ['Sources & method', '/about'], ['Status', '/status']] as const) {
+    await bottom.getByRole('button', { name: 'More' }).click()
+    await page.getByRole('dialog', { name: 'More' }).getByRole('link', { name }).click()
+    await expect(page).toHaveURL(new RegExp(`${path}$`))
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  }
+})
+
+test('real news is visible on the first screen', async ({ page }) => {
+  await mockApi(page)
+  await page.goto('/')
+  const lead = page.getByRole('heading', { level: 2, name: /Metro line opens in Bengaluru/ })
+  await expect(lead).toBeInViewport({ ratio: 1 })
+  // The lead and at least one more headline, not just a header and filters.
+  await expect(page.getByRole('heading', { level: 3 }).first()).toBeInViewport()
+})
+
+test('controls on phones are at least 44px tall', async ({ page }, info) => {
+  test.skip(info.project.name !== 'phone', 'Phone layout only.')
+  await mockApi(page)
+  for (const path of ['/', '/map', '/search?q=metro', '/social', '/status']) {
+    await page.goto(path)
+    await expect(page.getByRole('heading', { level: 1 })).toBeAttached()
+    await page.waitForLoadState('networkidle')
+    const small = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('a, button, input, select, summary')]
+        .filter((el) => {
+          const r = el.getBoundingClientRect()
+          const s = getComputedStyle(el)
+          return r.width > 0 && r.height > 0 && s.visibility !== 'hidden'
+        })
+        // Links in running text are exempt (WCAG 2.5.8); Leaflet's attribution is third-party; pins get a CSS hit area.
+        .filter((el) => !(el.tagName === 'A' && el.closest('p, h1, h2, h3, h4, dd, blockquote')))
+        .filter((el) => !el.closest('.leaflet-control-attribution') && !el.matches('.leaflet-marker-icon'))
+        .filter((el) => el.getBoundingClientRect().height < 44)
+        .map((el) => `${el.tagName} "${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 30)}"`),
+    )
+    expect(small, path).toEqual([])
+  }
 })
 
 test('with reduced motion, transitions are effectively off', async ({ page }) => {
@@ -62,7 +102,7 @@ test('with reduced motion, transitions are effectively off', async ({ page }) =>
 
 test('the search bar shows the pink focus ring', async ({ page }) => {
   await mockApi(page)
-  await page.goto('/')
+  await page.goto('/search')
   const input = page.getByRole('searchbox').first()
   await input.focus()
   const shadow = await input.evaluate((el) => {
