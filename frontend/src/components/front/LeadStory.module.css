@@ -1,103 +1,76 @@
-/*
- * The one dark-ink surface on the page: the lead story. Full width of the main column, with
- * a photo beside the text on wide screens and above it on phones.
- */
 .lead {
-  display: grid;
-  gap: var(--space-4);
-  padding: var(--space-5) var(--space-5) var(--space-6);
-  border: 1px solid var(--ink-border);
-  border-radius: var(--radius-lg);
-  background: var(--ink);
-  color: var(--on-ink);
-  box-shadow: 0 1px 0 var(--ink-border), 0 12px 32px -18px rgba(0, 0, 0, 0.35);
-}
-
-/* Phones: headline first, so it is on the first screen; then the photo; then why it leads. */
-.head,
-.body {
+  --lead-ratio: 16 / 10;
+  position: relative;
   display: grid;
   align-content: start;
-  gap: var(--space-3);
+  gap: var(--space-4);
   min-width: 0;
 }
 
-.figure :global(div) {
-  aspect-ratio: 16 / 9;
-}
-
-.kicker {
-  color: var(--on-ink-muted);
-  font-size: var(--text-micro);
-  font-weight: 700;
-  letter-spacing: var(--track-kicker);
-  text-transform: uppercase;
+.body {
+  display: grid;
+  gap: var(--space-3);
 }
 
 .headline {
   font-size: var(--text-lead);
   line-height: var(--lh-lead);
-  font-weight: 600;
-  letter-spacing: -0.018em;
+  letter-spacing: var(--track-display);
   overflow-wrap: anywhere;
 }
 
 .headline a {
-  color: var(--on-ink);
+  color: var(--text);
   text-decoration: none;
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0 4px;
+  transition: background-size var(--dur-base) var(--ease-standard);
 }
 
-.headline a:hover {
-  text-decoration: underline;
-  text-decoration-color: var(--accent);
-  text-decoration-thickness: 2px;
+/* The whole lead opens the story. */
+.headline a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.lead:hover .headline a,
+.lead:has(.headline a:focus-visible) .headline a {
+  background-size: 100% 4px;
+}
+
+.lead:has(.headline a:focus-visible) {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 6px;
 }
 
 .headline a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  outline: none;
 }
 
-.arrow {
-  display: inline;
-  margin-left: 0.15em;
-  vertical-align: -0.1em;
-  color: var(--on-ink-muted);
+.lead:hover img {
+  transform: scale(1.02);
 }
 
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-3);
-  color: var(--on-ink-muted);
-  font-size: var(--text-small);
-}
-
-.publisher {
-  color: var(--on-ink);
-  font-weight: 600;
-}
-
-.new {
-  padding: 0 6px;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: var(--text-on-accent);
-  font-size: var(--text-micro);
-  font-weight: 700;
-  letter-spacing: var(--track-kicker);
-  text-transform: uppercase;
+.media figcaption,
+.details,
+.license a {
+  position: relative;
+  z-index: 1;
 }
 
 .summary {
   max-width: 60ch;
-  color: var(--on-ink);
-  opacity: 0.9;
+  color: var(--text-muted);
+  font-size: 1.1875rem;
+  line-height: 1.5;
 }
 
 .license {
-  color: var(--on-ink-muted);
+  color: var(--text-faint);
+  font-family: var(--font-secondary);
   font-size: var(--text-micro);
 }
 
@@ -105,53 +78,101 @@
   color: inherit;
 }
 
-.why {
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--ink-rule);
-  color: var(--on-ink-muted);
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+  color: var(--text-muted);
+  font-family: var(--font-secondary);
   font-size: var(--text-small);
 }
 
+.meta strong {
+  color: var(--text);
+}
+
+.meta strong::after {
+  content: "·";
+  margin-left: var(--space-2);
+  color: var(--text-faint);
+  font-weight: var(--weight-regular);
+}
+
+.read {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-family: var(--font-secondary);
+  font-size: var(--text-small);
+  font-weight: var(--weight-semibold);
+}
+
+.lead:hover .read {
+  background: var(--accent-hover);
+}
+
+.details {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-secondary);
+  font-size: var(--text-small);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+.details:hover {
+  border-color: var(--text);
+}
+
+.why {
+  color: var(--text-faint);
+  font-family: var(--font-secondary);
+  font-size: var(--text-micro);
+}
+
 .why span {
-  margin-right: 0.4em;
-  color: var(--on-ink);
-  font-weight: 600;
+  margin-right: var(--space-1);
+  color: var(--text-muted);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
 }
 
-/* The photo's credit sits on the ink, in the ink's muted text colour. */
-.lead :global(figcaption) {
-  color: var(--on-ink-muted);
+@media (pointer: coarse) {
+  .read,
+  .details {
+    min-height: var(--tap);
+  }
 }
 
-/* Wide: text on the left (headline above why), the photo on the right. */
-@media (min-width: 720px) {
+@media (max-width: 399px) {
   .lead {
-    padding: var(--space-8);
-    gap: var(--space-5);
+    --lead-ratio: 2 / 1;
   }
+}
 
-  .withImage {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    grid-template-areas:
-      "head figure"
-      "body figure";
-    grid-template-rows: auto 1fr;
-    column-gap: var(--space-8);
-  }
-
-  .withImage .head {
-    grid-area: head;
-  }
-
-  .withImage .body {
-    grid-area: body;
-  }
-
-  .withImage .figure {
-    grid-area: figure;
-  }
-
-  .figure :global(div) {
-    aspect-ratio: 3 / 2;
+/* Wide screens: a wider frame, so the headline is on the first screen with the picture. */
+@media (min-width: 1024px) {
+  .lead {
+    --lead-ratio: 11 / 5;
   }
 }

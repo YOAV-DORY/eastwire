@@ -19,7 +19,7 @@ const STORIES = [
 const ESSAY = article({ id: 9, title: 'An essay on village life', storyType: 'feature', publishedAt: '2026-10-09T08:00:00Z' })
 
 describe('home front page', () => {
-  it('leads on the ink panel with why it leads, then two more, then Latest with its window', async () => {
+  it('leads with a big picture and why it leads, then two more, then Latest with its window', async () => {
     stubApi({ ...BASE, '/api/v1/front': front(STORIES) })
     renderRoute('/')
 
@@ -28,7 +28,8 @@ describe('home front page', () => {
     expect(within(lead).getByText('Why it leads')).toBeInTheDocument()
     expect(within(lead).getByText(/Published 12 min ago · Geopolitics/)).toBeInTheDocument()
     expect(screen.getByRole('list', { name: 'Also leading' }).children).toHaveLength(2)
-    expect(screen.getByRole('heading', { level: 2, name: /^Latest/ })).toHaveTextContent('Latest · 4 stories from the last 48 hours')
+    expect(screen.getByRole('heading', { level: 2, name: 'Latest' })).toBeInTheDocument()
+    expect(screen.getByText(/4 stories from the last 48 hours/)).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 3, name: /Fourth story/ })).toBeInTheDocument()
   })
 
@@ -49,14 +50,19 @@ describe('home front page', () => {
     )
   })
 
-  it('never shows an image whose credit is incomplete: the lead stays text only', async () => {
+  it('never shows an image whose credit is incomplete, and every picture shown carries its credit', async () => {
     const page = front(STORIES)
     page.lead!.image = { ...page.lead!.image!, creator: '', attribution: '' }
     stubApi({ ...BASE, '/api/v1/front': page })
     renderRoute('/')
 
     await screen.findByRole('article', { name: /Japan and the US agree/ })
-    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: 'An invented street in Tokyo' })).not.toBeInTheDocument()
+    for (const img of screen.queryAllByRole('img')) {
+      const caption = img.closest('figure')?.querySelector('figcaption')
+      expect(caption).toHaveTextContent(/Illustrative image|Historical map/)
+      expect(within(caption!).getAllByRole('link').length).toBeGreaterThan(0)
+    }
   })
 
   it('keeps features and older reports in a dated Reading section, not in Latest', async () => {
@@ -75,8 +81,7 @@ describe('home front page', () => {
     renderRoute('/')
     const tabs = within(await screen.findByRole('group', { name: 'Filter by country' }))
     expect(await tabs.findByRole('button', { name: 'India 78' })).toHaveAttribute('title', '78 news stories about India in the last 24 hours')
-    expect(screen.getByText('Numbers: news stories about each country in the last 24 hours.')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'News in the last 24 hours, by country' })).toBeInTheDocument()
+    expect(screen.getByText(/Numbers: stories our sources published in the last 24 hours/)).toBeInTheDocument()
   })
 
   it('filters by country through the URL and asks the API for that country', async () => {
@@ -90,13 +95,14 @@ describe('home front page', () => {
     await waitFor(() =>
       expect(calls.some((u) => u.pathname === '/api/v1/front' && u.searchParams.get('country') === 'JP')).toBe(true),
     )
-    expect(await screen.findByDisplayValue('All of Japan')).toBeInTheDocument()
+    // One city picker for wide screens, one placed after the top stories on phones (CSS shows one).
+    expect(await screen.findAllByDisplayValue('All of Japan')).toHaveLength(2)
   })
 
-  it('filter chips keep their counts and colour dots, and a sector chip narrows the page', async () => {
+  it('a sector chip, with its icon and full name, narrows the page', async () => {
     const calls = stubApi({ ...BASE, '/api/v1/front': front(STORIES) })
     const router = renderRoute('/?country=JP')
-    const sectors = within(await screen.findByRole('group', { name: 'Filter by sector' }))
+    const sectors = within((await screen.findAllByRole('group', { name: 'Filter by sector' }))[0])
     await userEvent.click(sectors.getByRole('button', { name: 'Economy' }))
     await waitFor(() => expect(router.state.location.search).toBe('?country=JP&sector=economy'))
     await waitFor(() => expect(calls.some((u) => u.searchParams.get('sector') === 'economy')).toBe(true))

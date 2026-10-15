@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import styles from './Chip.module.css'
 
 export interface ChipProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Selected chips are filled pink; exposed to assistive tech as aria-pressed. */
+  /** Selected chips are filled brand red; exposed to assistive tech as aria-pressed. */
   selected?: boolean
   /** CSS color for the small leading dot, e.g. a sector color. */
   dotColor?: string

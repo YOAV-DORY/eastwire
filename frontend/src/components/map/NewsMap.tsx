@@ -9,7 +9,7 @@ import { PIN_PIXELS, pinLabel, pinSize, pinSvg, popupHtml, populationRadius } fr
 import './NewsMap.css'
 
 /**
- * Interactive Leaflet map: pink city pins (clustered when zoomed out), optional population
+ * Interactive Leaflet map: red city pins (clustered when zoomed out), optional population
  * circles. Loaded lazily (see LazyNewsMap) so Leaflet stays out of the main bundle.
  *
  * Tiles: OpenStreetMap's standard tiles (usage policy checked; attribution always shown), only

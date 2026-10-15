@@ -72,7 +72,7 @@
 .facts dt {
   color: var(--text-faint);
   font-size: var(--text-micro);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: var(--track-kicker);
   text-transform: uppercase;
 }

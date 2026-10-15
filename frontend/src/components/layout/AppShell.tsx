@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { Activity, BookOpen, Ellipsis, Keyboard, LayoutList, Map, MessagesSquare, Search, Shapes, X } from 'lucide-react'
+import { Activity, BookOpen, Ellipsis, Keyboard, LayoutList, Map, MessagesSquare, Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router'
 import { useStatus } from '../../api/queries'
@@ -11,30 +11,35 @@ import { FreshnessIndicator } from '../status/FreshnessIndicator'
 import { ThemeToggle } from '../ui/ThemeToggle'
 import styles from './AppShell.module.css'
 
-/** Every main page. Phones show the first four in the bottom bar and the rest under "More". */
+/**
+ * The main navigation, the same four places on every width: Home, Map, Search, Social.
+ * Sectors are entered from the home page (chips and tiles); About and Status live in the
+ * footer and, on phones, under "More".
+ */
 const NAV = [
-  { to: '/', label: 'Latest', short: 'Home', icon: LayoutList, match: null },
+  // A sector's page belongs to Home: it is reached from the home page's sector tiles.
+  { to: '/', label: 'Home', short: 'Home', icon: LayoutList, match: null },
   { to: '/map', label: 'Map', short: 'Map', icon: Map, match: '/map' },
   { to: '/search', label: 'Search', short: 'Search', icon: Search, match: '/search' },
-  // One sector's page (/sector/economy) is part of the Sectors section too.
-  { to: '/sectors', label: 'Sectors', short: 'Sectors', icon: Shapes, match: '/sector' },
   { to: '/social', label: 'Social', short: 'Social', icon: MessagesSquare, match: '/social' },
-  { to: '/about', label: 'How it works', short: 'How it works', icon: BookOpen, match: '/about' },
 ] as const
 
-const BOTTOM = NAV.slice(0, 4)
-const MORE = [...NAV.slice(4), { to: '/status', label: 'Status', short: 'Status', icon: Activity, match: '/status' }] as const
+const BOTTOM = NAV
+const MORE = [
+  { to: '/about', label: 'About & sources', short: 'About', icon: BookOpen, match: '/about' },
+  { to: '/status', label: 'Status', short: 'Status', icon: Activity, match: '/status' },
+] as const
 
 type NavItem = (typeof NAV)[number] | (typeof MORE)[number]
 
-/** "Latest" is the home page only; every other item covers its whole section. */
+/** Home covers the front page and the sector pages; every other item covers its whole section. */
 function isCurrent(item: NavItem, pathname: string) {
-  return item.match === null ? pathname === '/' : pathname.startsWith(item.match)
+  return item.match === null ? pathname === '/' || pathname.startsWith('/sector') : pathname.startsWith(item.match)
 }
 
 /**
- * Masthead with the full navigation on wide screens; on phones a bottom bar with four
- * sections and "More" for the rest. One scroll for the whole page: no sidebar.
+ * Masthead with the four sections on wide screens; on phones the same four in a bottom
+ * bar, plus "More" for About and Status. One scroll for the whole page: no sidebar.
  */
 export function AppShell() {
   const { pathname } = useLocation()
@@ -101,7 +106,7 @@ export function AppShell() {
             </p>
           </div>
           <nav aria-label="Footer" className={styles.footerLinks}>
-            <Link to="/about">How it works</Link>
+            <Link to="/about">About &amp; sources</Link>
             <Link to="/status">Status</Link>
             <a href="https://github.com/YOAV-DORY/eastwire">Code on GitHub</a>
             <button type="button" className={styles.linkButton} onClick={() => setHelpOpen(true)}>

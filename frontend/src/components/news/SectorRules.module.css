@@ -16,7 +16,7 @@
 .groupTitle {
   color: var(--text-muted);
   font-size: var(--text-micro);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
   letter-spacing: var(--track-kicker);
 }

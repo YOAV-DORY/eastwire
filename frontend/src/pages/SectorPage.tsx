@@ -1,17 +1,19 @@
 import clsx from 'clsx'
-import { useMemo, type CSSProperties } from 'react'
+import { useMemo } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { useCountries, useMapCities, useSectors } from '../api/queries'
 import { Flag } from '../components/graphics/Flag'
-import { PageHeader } from '../components/layout/PageHeader'
+import { SectorIcon } from '../components/graphics/SectorIcon'
+import { Hero } from '../components/media/Hero'
 import { FrontPage } from '../components/front/FrontPage'
 import { SectorRules } from '../components/news/SectorRules'
 import { Button } from '../components/ui/Button'
 import { FilterTabs } from '../components/ui/FilterTabs'
 import { DEFAULT_ROLES } from '../lib/map'
 import { usePageTitle } from '../hooks/usePageTitle'
-import { isSectorId, sectorColor, sectorLabel, type SectorId } from '../sectors'
+import { isSectorId, sectorLabel, type SectorId } from '../sectors'
 import { NotFound } from './NotFound'
+import { fromLibrary } from '../lib/imagery'
 import { PAGE_IMAGES } from '../lib/pageImages'
 import styles from './SectorPage.module.css'
 
@@ -40,19 +42,21 @@ function Sector({ slug }: { slug: SectorId }) {
   const select = (next?: string) => setParams(next ? { country: next } : {})
   usePageTitle([label, scope].filter(Boolean).join(' · '))
 
+  const heroImage = PAGE_IMAGES[`sector-${slug}`]
   return (
-    <div className={clsx('container', styles.page)} style={{ '--sector': sectorColor(slug) } as CSSProperties}>
-      <PageHeader
-        image={PAGE_IMAGES[`sector-${slug}`]}
-        kicker="Sector"
-        title={
-          <>
-            <span className={styles.dot} aria-hidden="true" />
-            {label}
-          </>
-        }
-        lede={definition?.definition ?? ' '}
-      />
+    <>
+    <Hero
+      image={heroImage ? fromLibrary(heroImage) : null}
+      sector={slug}
+      kicker={
+        <>
+          <SectorIcon sector={slug} size={14} /> Sector
+        </>
+      }
+      title={label}
+      lede={definition?.definition ?? ' '}
+    />
+    <div className={clsx('container', styles.page)}>
 
       <div className={styles.filtersWide}>
         <FilterTabs
@@ -69,6 +73,7 @@ function Sector({ slug }: { slug: SectorId }) {
       {/* The stories come first: a lead, two more and Latest; how the tag works sits in the rail (below on phones). */}
       <FrontPage
         filters={{ country, sector: slug }}
+        reservedImages={heroImage ? [heroImage.id] : []}
         countryNames={countryNames}
         emptyTitle={`Nothing new tagged ${label}${scope ? ` about ${scope}` : ''}`}
         emptyAction={scope ? <Button onClick={() => select()}>All countries</Button> : undefined}
@@ -109,5 +114,6 @@ function Sector({ slug }: { slug: SectorId }) {
         }
       />
     </div>
+    </>
   )
 }

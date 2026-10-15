@@ -1,15 +1,22 @@
-import { ArrowRight, ArrowUpRight } from 'lucide-react'
-import { useCallback } from 'react'
-import { Link, useNavigate } from 'react-router'
-import { useSocial } from '../../api/queries'
-import type { CityPin, CountryView, MapData } from '../../api/types'
+import { ArrowRight, ArrowUpRight, X } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { Link } from 'react-router'
+import { useArticleFeed, useSocial } from '../../api/queries'
+import type { CityPin, MapData, Status } from '../../api/types'
+import { cityImage } from '../../lib/imagery'
 import { cleanPostText, initials } from '../../lib/postText'
+import { postTopic, TOPIC_LABEL } from '../../lib/postTopic'
 import { relativeTime } from '../../lib/time'
-import { Flag } from '../graphics/Flag'
 import { LazyNewsMap } from '../map/LazyNewsMap'
+import { ImageSlot } from '../media/ImageSlot'
+import { StoryKicker, StoryTime } from '../news/StoryCard'
+import { CountUp } from '../ui/CountUp'
 import styles from './Companion.module.css'
 
-/** The map beside the news: where this week's stories are, and a way into the full map. */
+/**
+ * The map beside the news. Choosing a pin opens a preview card under the map: the city's
+ * picture (or EastWire's tile), its newest story and a way into the city on the full map.
+ */
 export function MapCompanion({
   data,
   countryNames,
@@ -21,24 +28,30 @@ export function MapCompanion({
   country?: string
   highlightedId?: number | null
 }) {
-  const navigate = useNavigate()
-  const openCity = useCallback((pin: CityPin) => navigate(`/map/city/${pin.id}`), [navigate])
+  const [pin, setPin] = useState<CityPin | null>(null)
+  const choose = useCallback((p: CityPin) => setPin(p), [])
   const countryOnly = (data?.countryOnly ?? []).filter((c) => c.count > 0)
   return (
     <section className={styles.panel} aria-labelledby="companion-map">
-      <div className={styles.head}>
-        <h2 id="companion-map" className="kicker">
-          Where this week&apos;s stories are
-        </h2>
-      </div>
+      <h2 id="companion-map" className={styles.panelTitle}>
+        Where this week&apos;s stories are
+      </h2>
       <LazyNewsMap
-        height="260px"
+        height="280px"
         label="Map of this week's stories by city"
         pins={data?.cities ?? []}
-        onSelect={openCity}
+        onSelect={choose}
+        selectedId={pin?.id}
         highlightedId={highlightedId}
         staticOnTouch
       />
+      <div aria-live="polite">
+        {pin ? (
+          <CityPreview pin={pin} countryNames={countryNames} onClose={() => setPin(null)} />
+        ) : (
+          <p className={styles.note}>Choose a pin to preview its newest story.</p>
+        )}
+      </div>
       {countryOnly.length > 0 && (
         <p className={styles.note}>
           Not tied to one city:{' '}
@@ -57,45 +70,81 @@ export function MapCompanion({
   )
 }
 
-/** Stories per country in the last 24 hours; each row filters the front page. */
-export function CountryCounts({
-  countries,
-  selected,
-  onSelect,
-}: {
-  countries: CountryView[]
-  selected?: string
-  onSelect: (iso2: string | undefined) => void
-}) {
+/** One city's newest story as a small card with a picture. */
+function CityPreview({ pin, countryNames, onClose }: { pin: CityPin; countryNames: Record<string, string>; onClose: () => void }) {
+  const [from] = useState(() => new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10))
+  const feed = useArticleFeed({ city: String(pin.id), country: pin.country, from })
+  const story = feed.data?.pages[0]?.items[0]
   return (
-    <section className={styles.panel} aria-labelledby="companion-countries">
-      <h2 id="companion-countries" className="kicker">
-        News in the last 24 hours, by country
+    <article className={styles.preview} aria-labelledby={`preview-${pin.id}`}>
+      <div className={styles.previewMedia}>
+        <ImageSlot image={cityImage(pin.id)} country={pin.country} seed={pin.id} ratio="16 / 9" sizes="340px" credit="short" />
+      </div>
+      <div className={styles.previewBody}>
+        <p className={styles.previewCity}>
+          <strong id={`preview-${pin.id}`}>{pin.name}</strong>
+          <span className="num">
+            {pin.total} {pin.total === 1 ? 'story' : 'stories'} this week
+          </span>
+        </p>
+        {story ? (
+          <>
+            <StoryKicker article={story} countryNames={countryNames} />
+            <h3 className={styles.previewHeadline}>
+              <a href={story.url} target="_blank" rel="noopener noreferrer">
+                {story.title}
+                <span className="visually-hidden"> (read at {story.publisher}, opens in a new tab)</span>
+              </a>
+            </h3>
+            <p className={styles.previewMeta}>
+              {story.publisher} · <StoryTime article={story} />
+            </p>
+          </>
+        ) : (
+          <p className={styles.note}>{feed.isPending ? 'Loading its newest story…' : 'No story about it in the last 7 days.'}</p>
+        )}
+        <Link to={`/map/city/${pin.id}`} className={styles.more}>
+          All {pin.name} stories <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+        </Link>
+      </div>
+      <button type="button" className={styles.previewClose} onClick={onClose} aria-label={`Close the ${pin.name} preview`}>
+        <X size={16} strokeWidth={2.25} />
+      </button>
+    </article>
+  )
+}
+
+/** Three live figures from the API, counted up when they come into view. */
+export function LiveStats({ stories, cities, status }: { stories?: number; cities?: number; status?: Status }) {
+  const fresh = status?.sources.filter((s) => s.state === 'fresh').length
+  const stats = [
+    { value: stories, label: 'stories in the last 24 hours' },
+    { value: cities, label: 'cities on the map this week' },
+    { value: fresh, label: `of ${status?.sources.length ?? '…'} sources checked in the last 2 hours` },
+  ]
+  return (
+    <section className={styles.panel} aria-labelledby="live-stats">
+      <h2 id="live-stats" className={styles.panelTitle}>
+        Live
       </h2>
-      <ul className={styles.countries}>
-        {countries.map((c) => (
-          <li key={c.iso2}>
-            <button
-              type="button"
-              className={styles.countryRow}
-              aria-pressed={selected === c.iso2}
-              onClick={() => onSelect(selected === c.iso2 ? undefined : c.iso2)}
-            >
-              <Flag country={c.iso2} size={18} />
-              <span className={styles.countryName}>{c.name}</span>
-              <span className={styles.countryCount}>{c.last24h}</span>
-            </button>
-          </li>
+      <dl className={styles.stats}>
+        {stats.map((s) => (
+          <div key={s.label} className={styles.stat}>
+            <dt className={styles.statLabel}>{s.label}</dt>
+            <dd className={styles.statValue}>{s.value === undefined ? '–' : <CountUp value={s.value} />}</dd>
+          </div>
         ))}
-      </ul>
-      <p className={styles.note}>Counts are what our sources published, not how much happened.</p>
+      </dl>
+      <Link to="/status" className={styles.more}>
+        Source status <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+      </Link>
     </section>
   )
 }
 
-/** Three recent posts from the curated newsrooms, kept visibly apart from the news. */
+/** Four recent posts from the curated newsrooms, visibly apart from the news, each with its topic accent. */
 export function SocialPreview({ country }: { country?: string }) {
-  const social = useSocial({ country, size: 3 })
+  const social = useSocial({ country, size: 4 })
   const items = social.data?.pages[0]?.items ?? []
   if (items.length === 0) return null
   return (
@@ -110,26 +159,31 @@ export function SocialPreview({ country }: { country?: string }) {
         </Link>
       </div>
       <ul className={styles.posts}>
-        {items.map((item) => (
-          <li key={item.id} className={styles.post}>
-            <p className={styles.postSource}>
-              <span className={styles.badge} aria-hidden="true">
-                {initials(item.account.name)}
-              </span>
-              <span>
-                <strong>{item.account.name}</strong>
-                <span className={styles.postWhen}>
-                  {item.platform === 'bluesky' ? 'Bluesky' : 'YouTube'} · {relativeTime(item.createdAt)}
+        {items.map((item) => {
+          const text = cleanPostText(item.title ?? item.text)
+          const topic = postTopic(text)
+          return (
+            <li key={item.id} className={styles.post} data-topic={topic ?? undefined}>
+              {topic && <p className={styles.topic}>{TOPIC_LABEL[topic]}</p>}
+              <p className={styles.postText}>{text}</p>
+              <p className={styles.postSource}>
+                <span className={styles.badge} aria-hidden="true">
+                  {initials(item.account.name)}
                 </span>
-              </span>
-            </p>
-            <p className={styles.postText}>{cleanPostText(item.title ?? item.text)}</p>
-            <a href={item.url} target="_blank" rel="noopener noreferrer" className={styles.postLink}>
-              Open the post <ArrowUpRight size={14} strokeWidth={2} aria-hidden="true" />
-              <span className="visually-hidden"> by {item.account.name} (opens in a new tab)</span>
-            </a>
-          </li>
-        ))}
+                <span>
+                  <strong>{item.account.name}</strong>
+                  <span className={styles.postWhen}>
+                    {item.platform === 'bluesky' ? 'Bluesky' : 'YouTube'} · {relativeTime(item.createdAt)}
+                  </span>
+                </span>
+              </p>
+              <a href={item.url} target="_blank" rel="noopener noreferrer" className={styles.postLink}>
+                Open post <ArrowUpRight size={14} strokeWidth={2} aria-hidden="true" />
+                <span className="visually-hidden"> by {item.account.name} (opens in a new tab)</span>
+              </a>
+            </li>
+          )
+        })}
       </ul>
     </section>
   )

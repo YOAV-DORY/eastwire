@@ -3,42 +3,14 @@
   min-width: 0;
 }
 
-/* The scroll cue: a round arrow over the row's faded right edge. */
-.more {
-  position: absolute;
-  top: 50%;
-  right: calc(-1 * var(--space-2));
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--tap);
-  height: var(--tap);
-  transform: translateY(-50%);
-  border: 1px solid var(--border-strong);
-  border-radius: 50%;
-  background: var(--bg-elev-1);
-  color: var(--text);
-  box-shadow: var(--shadow-hover);
-  cursor: pointer;
-}
-
+/* Chips wrap onto more lines rather than scrolling, so every label and count is whole. */
 .row {
   display: flex;
-  gap: var(--space-1);
-  margin-inline: calc(-1 * var(--gutter));
-  padding-inline: var(--gutter);
-  overflow-x: auto;
-  scrollbar-width: none;
-  border-bottom: 1px solid var(--rule);
-  /* Edges fade where the row continues off screen. */
-  mask-image: linear-gradient(to right, transparent, #000 var(--gutter), #000 calc(100% - 64px), transparent);
-  padding-right: 56px;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
-.row::-webkit-scrollbar {
-  display: none;
-}
-
+/* Pill chips: outlined at rest; the chosen one solid brand red with white text. */
 .tab {
   position: relative;
   display: inline-flex;
@@ -46,59 +18,57 @@
   align-items: center;
   gap: var(--space-2);
   min-height: var(--tap);
-  padding: 0 var(--space-3);
-  border: 0;
-  background: none;
-  color: var(--text-muted);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elev-1);
+  color: var(--text);
+  font-family: var(--font-secondary);
   font-size: 0.9375rem;
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
   white-space: nowrap;
   cursor: pointer;
-  transition: color var(--dur-fast) var(--ease-standard);
+  transition: border-color var(--dur-fast) var(--ease-standard), background-color var(--dur-fast) var(--ease-standard);
 }
 
 .tab:hover {
-  color: var(--text);
+  border-color: var(--text);
 }
 
 .tab[aria-pressed='true'] {
-  color: var(--text);
-  background: var(--select);
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-}
-
-.tab[aria-pressed='true']::after {
-  content: "";
-  position: absolute;
-  left: var(--space-3);
-  right: var(--space-3);
-  bottom: -1px;
-  height: 2px;
-  border-radius: 2px 2px 0 0;
+  border-color: var(--accent);
   background: var(--accent);
+  color: var(--text-on-accent);
 }
 
 .count {
-  color: var(--text-faint);
+  color: var(--text-muted);
   font-size: var(--text-small);
   font-variant-numeric: tabular-nums;
 }
 
+.tab[aria-pressed='true'] .count {
+  color: inherit;
+}
+
 .quiet .tab {
+  min-height: 40px;
   font-size: var(--text-small);
 }
 
-@media (min-width: 768px) {
+@media (pointer: coarse) {
+  .quiet .tab {
+    min-height: var(--tap);
+  }
+}
+
+@media (max-width: 599px) {
   .row {
-    flex-wrap: wrap;
-    margin-inline: 0;
-    padding-inline: 0;
-    overflow: visible;
-    mask-image: none;
+    gap: 6px;
   }
 
-  .more {
-    display: none;
+  .tab {
+    padding: 0 var(--space-3);
+    font-size: var(--text-small);
   }
-
 }

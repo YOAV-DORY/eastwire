@@ -177,3 +177,8 @@ export const PAGE_IMAGES: Record<string, PageImage> = {
       "position": "50% 40%"
   },
 }
+
+/** The Commons files the home page's sector tiles use, so the stories there do not repeat them. */
+export const SECTOR_TILE_IMAGES = Object.entries(PAGE_IMAGES)
+  .filter(([key]) => key.startsWith('sector-'))
+  .map(([, image]) => image.id)

@@ -3,7 +3,7 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'reac
 import styles from './Button.module.css'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** primary = the chunky pink call to action; use at most one per view. */
+  /** primary = the brand-red call to action; use at most one per view. */
   variant?: 'primary' | 'secondary' | 'ghost'
   size?: 'md' | 'lg'
   /** Shows a spinner, keeps the button's width, and blocks clicks. */

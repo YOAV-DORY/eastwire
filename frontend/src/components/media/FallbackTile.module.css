@@ -1,0 +1,76 @@
+/* Brand tiles: deep red, near-black ink, or a darker red; white marks; the sun disc is tonal. */
+.tile {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  color: #fff;
+  container-type: size;
+}
+
+.red {
+  background: linear-gradient(135deg, #c8102e 0%, #8f0b20 100%);
+  --disc: rgba(255, 255, 255, 0.14);
+}
+
+.ink {
+  background: linear-gradient(135deg, #1b1c20 0%, #0a0a0b 100%);
+  --disc: #c8102e;
+}
+
+.deep {
+  background: linear-gradient(135deg, #5c0714 0%, #2a0309 100%);
+  --disc: rgba(255, 107, 107, 0.4);
+}
+
+.disc {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.disc circle {
+  fill: var(--disc);
+}
+
+.disc line {
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 1;
+}
+
+.icon {
+  position: absolute;
+  left: 8%;
+  top: 12%;
+  width: clamp(20px, 26cqmin, 72px);
+  height: clamp(20px, 26cqmin, 72px);
+  opacity: 0.95;
+}
+
+.code {
+  position: absolute;
+  left: 8%;
+  bottom: 9%;
+  font-family: var(--font-headline);
+  font-stretch: var(--headline-stretch);
+  font-size: clamp(1rem, 22cqmin, 4rem);
+  font-weight: var(--weight-black);
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+}
+
+.label {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-family: var(--font-secondary);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: 1.5;
+}

@@ -2,12 +2,14 @@ import clsx from 'clsx'
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router'
 import { useSectors } from '../api/queries'
-import { PageHeader } from '../components/layout/PageHeader'
+import { Hero } from '../components/media/Hero'
+import { fromLibrary } from '../lib/imagery'
 import { RULES_FILE } from '../components/news/SectorRules'
 import { ErrorState } from '../components/status/Feedback'
 import { Skeleton } from '../components/ui/Skeleton'
 import { usePageTitle } from '../hooks/usePageTitle'
-import { SECTORS, sectorColor } from '../sectors'
+import { SECTORS } from '../sectors'
+import { SectorIcon } from '../components/graphics/SectorIcon'
 import { PAGE_IMAGES } from '../lib/pageImages'
 import styles from './SectorsPage.module.css'
 
@@ -19,13 +21,15 @@ export function SectorsPage() {
   const sectors = useSectors()
   const byId = new Map((sectors.data?.sectors ?? []).map((s) => [s.slug, s]))
   return (
+    <>
+    <Hero
+      size="compact"
+      image={fromLibrary(PAGE_IMAGES.sectors)}
+      kicker="Sectors"
+      title="Six ways into the news"
+      lede="Every story can carry up to two sectors, tagged by published rules rather than AI. Many stories get none."
+    />
     <div className={clsx('container', styles.page)}>
-      <PageHeader
-        image={PAGE_IMAGES.sectors}
-        kicker="Sectors"
-        title="Six ways into the news"
-        lede="Every story can carry up to two sectors, tagged by published rules rather than AI. Many stories get none."
-      />
 
       {sectors.isError && !sectors.data && (
         <ErrorState message="Sector counts are unavailable right now." onRetry={() => void sectors.refetch()} />
@@ -38,7 +42,9 @@ export function SectorsPage() {
             <li key={s.id}>
               <Link to={`/sector/${s.id}`} className={styles.row}>
                 <span className={styles.name}>
-                  <span className={styles.dot} style={{ background: sectorColor(s.id) }} aria-hidden="true" />
+                  <span className={styles.icon}>
+                    <SectorIcon sector={s.id} size={18} />
+                  </span>
                   {s.label}
                 </span>
                 <span className={styles.definition}>{d ? d.definition : <Skeleton height="1.4em" />}</span>
@@ -76,5 +82,6 @@ export function SectorsPage() {
         </p>
       </section>
     </div>
+    </>
   )
 }

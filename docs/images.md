@@ -24,13 +24,20 @@ photograph of the city or institution the story is about, from Wikimedia Commons
 - **Changes:** resized by Wikimedia's thumbnailer (500, 960 or 1920 px wide) and cropped to the
   layout's aspect ratio by CSS. No other edits. Share-alike licenses apply to the photo, which is
   shown unmodified apart from that; EastWire's pages are not adaptations of it.
-- **Relevance:** a city image only when the story's main subject is that city and the headline
-  or dateline names it; a topic image (e.g. Japan + geopolitics: the National Diet) only when the
-  headline also contains one of its `headline_words`. Never for a story about a country we do
-  not cover, never the same image twice on a page, at most the lead and two secondary stories.
-  With no cleared match the story runs without a picture.
+- **Relevance, API (`ImageMatcher`, lead and two secondaries):** a city image only when the
+  story's main subject is that city and the headline or dateline names it; a topic image (e.g.
+  Japan + geopolitics: the National Diet) only when the headline also contains one of its
+  `headline_words`. Never for a story about a country we do not cover.
+- **Relevance, page layout (`frontend/src/lib/imagery.ts`, design round 4):** so most stories
+  carry a picture, the frontend also picks from the same checked files, in this order: the
+  API's cleared image; the photo of the story's main city; a topic photo for its country and
+  sector; and, for the large slots only (lead, secondaries, In focus and Reading cards), any photo from the
+  story's own country. The caption always names the place shown ("India Gate, New Delhi") and
+  the label says "Illustrative image", so a picture is never presented as the event. Each file
+  appears at most once per page. Rows in lists show a picture only for a city or topic match.
+  With no match a card shows EastWire's own tile (below), never a blank frame.
 - **Hosting:** loaded from Wikimedia's image servers (`thumb.wikimedia.org`), named in the CSP
-  and in the privacy note on Sources & method.
+  and in the privacy note on About & sources.
 
 ## Accepted (file pages read 2026-10-15)
 
@@ -60,11 +67,14 @@ photograph of the city or institution the story is about, from Wikimedia Commons
 Ripon Building: the author asks for the credit "CC-by-sa PlaneMad/Wikimedia" and a link to the
 file page; that is the credit shown.
 
-## Page and sector headers (frontend/src/lib/pageImages.ts)
+## Page heroes (frontend/src/lib/pageImages.ts)
 
-Every page has a header photo, chosen from the files above plus two more whose pages were read
-on 2026-10-15. Each is labelled ("Illustrative image" or "Historical map") and credited with
-links to its file page and license.
+Every page opens on a full-width hero photo, chosen from the files above plus two more whose
+pages were read on 2026-10-15. Each is labelled ("Illustrative image" or "Historical map") and
+credited on the photo's bottom edge (under it on phones) with links to its file page and
+license. The map's hero follows the selection: a city's own photo, else its country's capital
+(or another photo of that country), else the 1864 map. The home page's sector tiles use the
+sector photos below, and stories on the home page never repeat them.
 
 | Page | File | Creator | License |
 |---|---|---|---|
@@ -74,15 +84,17 @@ links to its file page and license.
 | Sectors | Gamcheon Culture Village, Busan | Bernard Gagnon | CC0 |
 | Social | Char Kaman, Hyderabad | Bernard Gagnon | CC BY-SA 3.0 |
 | Status | Howrah Bridge, foggy | Dey.sandip | CC BY-SA 3.0 |
-| How it works | Qianmen Street in snow, Beijing | Zheng sun | CC BY-SA 4.0 |
+| About & sources | Qianmen Street in snow, Beijing | Zheng sun | CC BY-SA 4.0 |
 | Economy sector | Bombay Stock Exchange | Niyantha Shekhar | CC BY 2.0 |
 | Geopolitics sector | National Assembly, Seoul | Cjb8293 | CC BY-SA 4.0 |
 | Technology sector | Marunouchi and Tokyo Station | Basile Morin | CC BY-SA 4.0 |
 | Business sector | Tokyo Stock Exchange | Kakidai | CC BY-SA 4.0 |
 | Society sector | Gyedong-gil, Seoul | Basile Morin | CC BY-SA 4.0 |
 
-Story cards without a cleared photo use EastWire's own artwork (a country motif and a sector
-icon, drawn in code, `StoryArt`), always labelled "Illustration".
+Story cards without a matching photo use EastWire's own tile (`FallbackTile`: brand red or
+ink, the rising disc from the wordmark, the country code and the sector icon, drawn in code),
+always labelled "Illustration". `frontend/src/lib/imageLibrary.ts` is generated from
+`config/images.yaml` by `frontend/scripts/build_image_library.py`; rerun it after adding an image.
 
 ## Rejected candidates (2026-10-15)
 
@@ -112,5 +124,6 @@ icon, drawn in code, `StoryArt`), always labelled "Illustration".
 3. Add an entry to `config/images.yaml` with every field (creator, file page, license and URL,
    attribution as requested, permitted use, changes, alt text, caption, cities or country +
    sectors + headline_words) and `checked_on`.
-4. Run `.venv/bin/python -I scripts/validate_config.py` and `./gradlew :core:test`.
+4. Run `.venv/bin/python -I scripts/validate_config.py` and `./gradlew :core:test`, then
+   `python3 frontend/scripts/build_image_library.py` so the page layout can use it too.
 5. Open a PR. A rejected candidate goes in the table above with the reason.

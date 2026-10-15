@@ -17,8 +17,8 @@ export const isSectorId = (value: string | null | undefined): value is SectorId 
 
 export const sectorLabel = (id: SectorId) => SECTORS.find((s) => s.id === id)!.label
 
-/** The sector's dot color from tokens.css; adapts to the current theme. */
-export const sectorColor = (id: string) => `var(--sector-${id})`
+/** Sectors share the brand colour; they are told apart by icon (SectorIcon) and name. */
+export const sectorColor = (_id: string) => 'var(--accent-text)'
 
 /** "+3", "+1.5", "−3": what a rule added to the score. */
 export function formatWeight(weight: number): string {

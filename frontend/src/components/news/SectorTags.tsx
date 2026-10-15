@@ -1,11 +1,12 @@
 import { useId, useState } from 'react'
 import { Link } from 'react-router'
 import type { SectorTag } from '../../api/types'
-import { describeRule, formatWeight, sectorColor } from '../../sectors'
+import { describeRule, formatWeight } from '../../sectors'
+import { SectorIcon } from '../graphics/SectorIcon'
 import styles from './SectorTags.module.css'
 
 /**
- * A story's sectors as small dot + label buttons. Pressing one shows exactly which rules
+ * A story's sectors as small icon + label buttons. Pressing one shows exactly which rules
  * tagged the story, so a tag is never a black box. Click or keyboard, never hover-only.
  */
 export function SectorTags({ sectors }: { sectors: SectorTag[] }) {
@@ -27,7 +28,7 @@ export function SectorTags({ sectors }: { sectors: SectorTag[] }) {
               aria-controls={`${baseId}-${s.slug}`}
               onClick={() => setOpen(open === s.slug ? null : s.slug)}
             >
-              <span className={styles.dot} style={{ background: sectorColor(s.slug) }} aria-hidden="true" />
+              <SectorIcon sector={s.slug} size={14} />
               {s.label}
             </button>
           </li>

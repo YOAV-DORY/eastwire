@@ -11,7 +11,8 @@ test('a filter lives in the URL: reloading shows the same stories', async ({ pag
 
   await page.reload()
   await expect(lead).toBeVisible()
-  await expect(page.getByRole('heading', { name: /^Latest · 1 story from the last 48 hours/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Latest', exact: true })).toBeVisible()
+  await expect(page.getByText('1 story from the last 48 hours')).toBeVisible()
 })
 
 test('a shared search link opens the same results and filters', async ({ page }) => {
@@ -26,9 +27,9 @@ test('a shared search link opens the same results and filters', async ({ page })
 test('sector filters narrow the front page and every tag explains itself', async ({ page }) => {
   await mockApi(page)
   await page.goto('/')
-  await page.getByRole('group', { name: 'Filter by sector' }).getByRole('button', { name: 'Economy' }).click()
+  await page.getByRole('group', { name: 'Filter by sector' }).locator('visible=true').getByRole('button', { name: 'Economy' }).click()
   await expect(page).toHaveURL(/sector=economy/)
-  await page.getByRole('button', { name: 'Details' }).first().click()
+  await page.getByRole('button', { name: /^Details/ }).first().click()
   const tag = page.getByRole('button', { name: 'Economy: why this sector' }).first()
   await tag.click()
   await expect(page.getByText('“inflation” in the headline').first()).toBeVisible()
@@ -122,7 +123,7 @@ test('social embeds request nothing from Bluesky or YouTube until the reader ask
     if (/bsky\.app|youtube|ytimg/.test(r.url()) && !r.url().includes('i.ytimg.com')) thirdParty.push(r.url())
   })
   await page.goto('/social')
-  await expect(page.getByText(/Not verified reporting, so it is kept apart from the news/)).toBeVisible()
+  await expect(page.getByText(/Kept apart from the news/)).toBeVisible()
   await expect(page.getByRole('button', { name: 'Load post from Bluesky' })).toBeVisible()
   expect(thirdParty).toEqual([])
 })

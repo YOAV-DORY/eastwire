@@ -1,10 +1,14 @@
 import { useMemo } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router'
-import { useCountries, usePlaces, useSearch, useSearchSuggestions, type SearchFilters } from '../api/queries'
+import { useCountries, usePlaces, useSearch, useSearchSuggestions, useSectors, type SearchFilters } from '../api/queries'
+import { Flag } from '../components/graphics/Flag'
+import { SectorIcon } from '../components/graphics/SectorIcon'
 import { StoryCard } from '../components/news/StoryCard'
-import { HeaderImage } from '../components/layout/PageHeader'
+import { Hero } from '../components/media/Hero'
 import { SearchBar } from '../components/search/SearchBar'
+import { fromLibrary, storyImage } from '../lib/imagery'
 import { PAGE_IMAGES } from '../lib/pageImages'
+import { mainCountry } from '../components/front/storyCountry'
 import { ColdStart, EmptyState, ErrorState, FeedSkeleton } from '../components/status/Feedback'
 import { useSlow } from '../hooks/useSlow'
 import { usePageTitle } from '../hooks/usePageTitle'
@@ -84,11 +88,22 @@ export function SearchPage() {
   const hasQuery = filters.q.trim().length >= 2
   usePageTitle(hasQuery ? `Search: ${filters.q.trim()}` : 'Search')
 
+  const images = (() => {
+    const used = new Set<string>([PAGE_IMAGES.search.id])
+    return new Map((data?.items ?? []).map((a) => [a.id, storyImage(a, mainCountry(a), used) ?? undefined]))
+  })()
+
   return (
-    <div className={`container ${styles.page}`}>
-      <div className={styles.main}>
-      <h1 className={styles.title}>{hasQuery ? <>Results for &ldquo;{filters.q}&rdquo;</> : 'Search'}</h1>
-      <SearchBar
+    <>
+      <Hero
+        size="compact"
+        image={fromLibrary(PAGE_IMAGES.search)}
+        kicker="Search"
+        title={hasQuery ? <>Results for &ldquo;{filters.q}&rdquo;</> : 'Search the wire'}
+        lede="Headlines from China, India, South Korea and Japan, and the summaries our sources allow."
+      >
+        <div className={styles.heroSearch}>
+          <SearchBar
         key={filters.q}
         variant="compact"
         initialQuery={filters.q}
@@ -101,7 +116,11 @@ export function SearchPage() {
           sort: params.get('sort') ?? undefined,
         }}
         autoFocus={Boolean((location.state as { focusSearch?: boolean } | null)?.focusSearch)}
-      />
+          />
+        </div>
+      </Hero>
+    <div className={`container ${styles.page}`}>
+      <div className={styles.main}>
 
       <div className={styles.when} role="group" aria-label="Published">
         {RANGES.map((r) => {
@@ -196,7 +215,7 @@ export function SearchPage() {
             <ol className={styles.list}>
               {data.items.map((a) => (
                 <li key={a.id}>
-                  <StoryCard article={a} variant="standard" countryNames={countryNames} />
+                  <StoryCard article={a} variant="row" image={images.get(a.id)} countryNames={countryNames} />
                 </li>
               ))}
             </ol>
@@ -225,7 +244,6 @@ export function SearchPage() {
       )}
       </div>
       <aside className={styles.side} aria-label="Search help">
-        <HeaderImage image={PAGE_IMAGES.search} />
         <section className={styles.examples} aria-labelledby="try-title">
           <h2 id="try-title" className="kicker">
             {hasQuery ? 'Other searches' : 'Try a search'}
@@ -240,8 +258,10 @@ export function SearchPage() {
             <code>election -Delhi</code>) and OR for either word (<code>rupee OR yen</code>).
           </p>
         </section>
+        <Browse countries={countries.data ?? []} />
       </aside>
     </div>
+    </>
   )
 }
 
@@ -260,5 +280,46 @@ function Suggestions({ items, label }: { items: { q: string; count: number }[]; 
         ))}
       </ul>
     </div>
+  )
+}
+
+/** The sidebar's second half: every sector and country with its live count, one tap away. */
+function Browse({ countries }: { countries: { iso2: string; name: string; last24h: number }[] }) {
+  const sectors = useSectors()
+  return (
+    <>
+      <section className={styles.browse} aria-labelledby="browse-sectors">
+        <h2 id="browse-sectors" className="kicker">
+          Sectors this week
+        </h2>
+        <ul>
+          {(sectors.data?.sectors ?? []).map((s) => (
+            <li key={s.slug}>
+              <Link to={`/sector/${s.slug}`}>
+                <SectorIcon sector={s.slug} size={16} />
+                {s.label}
+                <span className="num">{s.last7d}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className={styles.browse} aria-labelledby="browse-countries">
+        <h2 id="browse-countries" className="kicker">
+          Countries, last 24 hours
+        </h2>
+        <ul>
+          {countries.map((c) => (
+            <li key={c.iso2}>
+              <Link to={`/?country=${c.iso2}`}>
+                <Flag country={c.iso2} size={20} />
+                {c.name}
+                <span className="num">{c.last24h}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </>
   )
 }

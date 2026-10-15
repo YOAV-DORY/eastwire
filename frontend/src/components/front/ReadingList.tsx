@@ -1,19 +1,22 @@
 import type { ArticleView } from '../../api/types'
+import type { SlotImage } from '../../lib/imagery'
 import { formatDate } from '../../lib/time'
-import { FeatureCard } from './FeatureCard'
+import { StoryCard } from '../news/StoryCard'
 import styles from './ReadingList.module.css'
 
 /**
  * Features and earlier reports, each with its own date: depth material kept out of Latest so
- * an essay from last week never sits among today's news looking new. Cards, like In focus.
+ * an essay from last week never sits among today's news looking new.
  */
 export function ReadingList({
   items,
+  images,
   from,
   to,
   countryNames,
 }: {
   items: ArticleView[]
+  images?: Map<number, SlotImage | null | undefined>
   from: string | null
   to: string | null
   countryNames: Record<string, string>
@@ -32,12 +35,15 @@ export function ReadingList({
       </header>
       <ol className={styles.grid}>
         {items.map((a, i) => (
-          <li key={a.id}>
-            <FeatureCard
+          <li key={a.id} className="reveal">
+            <StoryCard
               article={a}
-              index={i}
+              variant="feature"
+              image={images?.get(a.id) ?? null}
               countryNames={countryNames}
-              kicker={`${a.storyType === 'feature' ? 'Feature' : 'Earlier report'} · ${a.publishedAt ? formatDate(a.publishedAt) : `found ${formatDate(a.discoveredAt)}`}`}
+              index={i}
+              sizes="(min-width: 1024px) 300px, (min-width: 560px) 50vw, 100vw"
+              label={`${a.storyType === 'feature' ? 'Feature' : 'Earlier report'} · ${a.publishedAt ? formatDate(a.publishedAt) : `found ${formatDate(a.discoveredAt)}`}`}
             />
           </li>
         ))}

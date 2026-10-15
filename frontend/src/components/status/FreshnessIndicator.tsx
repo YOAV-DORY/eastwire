@@ -19,7 +19,7 @@ const ICON = {
 
 /**
  * "Sources checked 12 min ago": when EastWire last checked its sources successfully, in a
- * health colour with an icon and words (never the action pink). Not how old any story is:
+ * health colour with an icon and words (never the brand red). Not how old any story is:
  * each story shows its own date. Links to /status, which separates checks from story times.
  */
 export function FreshnessIndicator({

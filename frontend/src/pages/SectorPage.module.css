@@ -4,16 +4,6 @@
   gap: var(--space-5);
 }
 
-.dot {
-  display: inline-block;
-  width: 0.42em;
-  height: 0.42em;
-  margin-right: 0.3em;
-  border-radius: 50%;
-  background: var(--sector);
-  vertical-align: 0.14em;
-}
-
 .filtersWide {
   display: grid;
 }
@@ -51,7 +41,7 @@
   flex: 1;
   min-height: var(--tap);
   color: var(--text);
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
 }
 
@@ -75,7 +65,7 @@
   min-height: var(--tap);
   color: var(--text);
   font-size: var(--text-small);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
 }
 
@@ -92,7 +82,7 @@
   display: flex;
   align-items: center;
   min-height: var(--tap);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 

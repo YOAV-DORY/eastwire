@@ -34,8 +34,6 @@ function contrast(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05)
 }
 
-const SECTORS = ['economy', 'geopolitics', 'technology', 'business', 'society', 'environment']
-
 describe.each([
   ['dark', dark],
   ['light', light],
@@ -49,7 +47,10 @@ describe.each([
     ['--accent-text', '--bg'],
     ['--accent-text', '--bg-elev-1'],
     ['--text-on-accent', '--accent'],
-    ['--text-on-accent', '--accent-2'],
+    ['--text-on-accent', '--accent-hover'],
+    ['--text-on-accent', '--accent-press'],
+    ['--accent-text', '--bg-elev-2'],
+    ['--on-ink-muted', '--ink'],
     ['--danger', '--bg'],
     ['--on-ink', '--ink'],
     ['--on-ink-muted', '--ink'],
@@ -61,18 +62,19 @@ describe.each([
     expect(contrast(t[fg], t[bg])).toBeGreaterThanOrEqual(4.5)
   })
 
-  it.each(SECTORS)('sector %s dot stands out from cards (3:1)', (sector) => {
-    expect(contrast(t[`--sector-${sector}`], t['--bg-elev-1'])).toBeGreaterThanOrEqual(3)
+  it('the brand red stands out as a fill (pins, chosen chips) on the page (3:1)', () => {
+    expect(contrast(t['--accent'], t['--bg'])).toBeGreaterThanOrEqual(3)
   })
 })
 
-describe('the pink accent', () => {
-  it('is used as text only in dark theme; on white it would fail, hence --accent-text', () => {
-    expect(contrast(light['--accent'], light['--bg-elev-1'])).toBeLessThan(3)
-    expect(light['--accent-text']).not.toBe(light['--accent'])
+describe('the brand red', () => {
+  it('is one colour family in both themes: the same fill, a lighter red only for text on dark', () => {
+    expect(light['--accent']).toBe(dark['--accent'])
+    expect(contrast(dark['--accent-text'], dark['--bg'])).toBeGreaterThan(contrast(dark['--accent'], dark['--bg']))
   })
 
-  it('stands out as a map pin on the dark background (3:1)', () => {
-    expect(contrast(dark['--accent'], dark['--bg'])).toBeGreaterThanOrEqual(3)
+  it('carries white text on its fill in both themes', () => {
+    expect(dark['--text-on-accent']).toBe('#ffffff')
+    expect(light['--text-on-accent'] ?? dark['--text-on-accent']).toBe('#ffffff')
   })
 })

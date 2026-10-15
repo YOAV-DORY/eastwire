@@ -30,18 +30,22 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
-  font-family: var(--font-serif);
+  font-family: var(--font-headline);
   font-size: var(--text-h2);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   line-height: 1.2;
   font-optical-sizing: auto;
 }
 
-.dot {
-  flex: none;
-  width: 12px;
-  height: 12px;
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
 }
 
 .definition {
@@ -58,7 +62,7 @@
 
 .count strong {
   color: var(--text);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .arrow {
@@ -126,7 +130,7 @@
   align-items: center;
   min-height: var(--tap);
   color: var(--text);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   text-decoration-color: var(--text-faint);
   text-underline-offset: 3px;
 }

@@ -1,18 +1,21 @@
 import clsx from 'clsx'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { useCountries, useMapCities, usePlaces, useStatus } from '../api/queries'
+import { useCountries, useFront, useMapCities, usePlaces, useStatus } from '../api/queries'
 import { FrontPage } from '../components/front/FrontPage'
-import { Flag } from '../components/graphics/Flag'
-import { CountryCounts, MapCompanion, SocialPreview } from '../components/home/Companion'
+import { SectorIcon } from '../components/graphics/SectorIcon'
+import { CountryStrip } from '../components/home/CountryStrip'
+import { LiveStats, MapCompanion, SocialPreview } from '../components/home/Companion'
+import { NowTicker } from '../components/home/NowTicker'
 import { SectorTiles } from '../components/home/SectorTiles'
 import { StaleBanner } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
 import { FilterTabs } from '../components/ui/FilterTabs'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { DEFAULT_ROLES } from '../lib/map'
+import { SECTOR_TILE_IMAGES } from '../lib/pageImages'
 import { relativeTime } from '../lib/time'
-import { SECTORS, isSectorId, sectorColor, sectorLabel } from '../sectors'
+import { SECTORS, isSectorId, sectorLabel } from '../sectors'
 import styles from './Home.module.css'
 
 interface Filters {
@@ -25,10 +28,9 @@ const today = () =>
   new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())
 
 /**
- * The front page: news first. A lead story (on the ink panel), two more and the start of
- * Latest fill the first screen; the map, country counts and social posts sit beside them on
- * wide screens and below on phones. The rest of Latest and the dated Reading section run the
- * full width underneath.
+ * The front page. "Now in Asia" runs across the top; under the date, the four countries (with
+ * live counts) and the sectors filter the page; then the split lead, Latest beside the map,
+ * In focus, sector tiles, the rest by country, Reading and posts from newsrooms on social.
  */
 export function Home() {
   const [params, setParams] = useSearchParams()
@@ -42,6 +44,7 @@ export function Home() {
   const places = usePlaces(country)
   const status = useStatus()
   const map = useMapCities({ window: '7d', roles: DEFAULT_ROLES, country, sector })
+  const everything = useFront({})
 
   const countryNames = useMemo(
     () => Object.fromEntries((countries.data ?? []).map((c) => [c.iso2, c.name])),
@@ -67,90 +70,81 @@ export function Home() {
       {city ? `All of ${countryNames[country ?? ''] ?? country}` : 'All countries'}
     </Button>
   ) : undefined
-
+  // Sector chips and the city picker: under the countries on wide screens; on phones after the
+  // top stories, so the lead's headline is on the first screen.
+  const sectorChips = (
+    <>
+          <FilterTabs
+            label="Filter by sector"
+            value={sector}
+            onChange={(s) => select({ country, city, sector: s })}
+            options={[
+              { value: undefined, label: 'All sectors' },
+              ...SECTORS.map((s) => ({ value: s.id, label: s.label, leading: <SectorIcon sector={s.id} size={15} /> })),
+            ]}
+          />
+          {country && (places.data?.length ?? 0) > 0 && (
+            <label className={styles.cityPicker}>
+              <span>City</span>
+              <select value={city ?? ''} onChange={(e) => select({ country, city: e.target.value || undefined, sector })}>
+                <option value="">All of {countryNames[country] ?? country}</option>
+                {places.data?.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+    </>
+  )
+  const tickerItems = everything.data?.latest.slice(0, 10) ?? []
+  const stories24h = (countries.data ?? []).reduce((sum, c) => sum + c.last24h, 0)
 
   return (
-    <div className={clsx('container', styles.page)}>
-      <header className={styles.header}>
-        <h1 className="visually-hidden">Latest news from China, India, South Korea and Japan</h1>
-        <p className={styles.dateline}>
-          <span className={styles.date}>{today()}</span>
-          <span className={styles.tagline}>China, India, South Korea and Japan, from sources whose terms allow it</span>
-        </p>
-      </header>
+    <>
+      <NowTicker items={tickerItems} />
+      <div className={clsx('container', styles.page)}>
+        <header className={styles.header}>
+          <h1 className="visually-hidden">Latest news from China, India, South Korea and Japan</h1>
+          <p className={styles.dateline}>
+            <span className={styles.date}>{today()}</span>
+            <span className={styles.tagline}>
+              Numbers: stories our sources published in the last 24 hours, not how much happened
+            </span>
+          </p>
+        </header>
 
-      {/* Chips with counts and colour dots; on phones the rows scroll, with an arrow while more are hidden. */}
-      <div className={styles.filtersWide}>
-        <FilterTabs
-          label="Filter by country"
-          value={country}
-          onChange={(c) => select({ country: c, sector })}
-          options={[
-            { value: undefined, label: 'All' },
-            ...(countries.data ?? []).map((c) => ({
-              value: c.iso2,
-              label: c.name,
-              leading: <Flag country={c.iso2} />,
-              count: c.last24h,
-              countTitle: `${c.last24h} news stories about ${c.name} in the last 24 hours`,
-            })),
-          ]}
-        />
-        <p className={styles.countsNote}>Numbers: news stories about each country in the last 24 hours.</p>
-        <FilterTabs
-          quiet
-          label="Filter by sector"
-          value={sector}
-          onChange={(s) => select({ country, city, sector: s })}
-          options={[
-            { value: undefined, label: 'All sectors' },
-            ...SECTORS.map((s) => ({
-              value: s.id,
-              label: s.label,
-              leading: <span className={styles.dot} style={{ background: sectorColor(s.id) }} aria-hidden="true" />,
-            })),
-          ]}
-        />
+        <CountryStrip countries={countries.data} selected={country} onSelect={(c) => select({ country: c, sector })} />
+        <div className={clsx(styles.filters, styles.wideOnly)}>{sectorChips}</div>
+        {(status.data?.state === 'stale' || status.data?.state === 'outage') && status.data.lastSuccessAt && (
+          <StaleBanner
+            state={status.data.state}
+            detail={`Every source was last checked successfully ${relativeTime(status.data.lastSuccessAt)}.`}
+          />
+        )}
+
+        <div className={styles.front}>
+          <FrontPage
+            filters={{ country, city, sector }}
+            countryNames={countryNames}
+            emptyTitle={emptyTitle}
+            emptyAction={emptyAction}
+            onHighlight={setHighlighted}
+            highlightedPlace={highlighted}
+            reservedImages={SECTOR_TILE_IMAGES}
+            rail={
+              <>
+                <MapCompanion data={map.data} countryNames={countryNames} country={country} highlightedId={highlighted} />
+                <LiveStats stories={countries.data ? stories24h : undefined} cities={map.data?.cities.length} status={status.data} />
+              </>
+            }
+            after={<SectorTiles />}
+            between={<div className={clsx(styles.filters, styles.phoneOnly)}>{sectorChips}</div>}
+          />
+          <SocialPreview country={country} />
+        </div>
       </div>
-      {country && (places.data?.length ?? 0) > 0 && (
-        <label className={styles.cityPicker}>
-          <span>City</span>
-          <select value={city ?? ''} onChange={(e) => select({ country, city: e.target.value || undefined, sector })}>
-            <option value="">All of {countryNames[country] ?? country}</option>
-            {places.data?.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-
-      {(status.data?.state === 'stale' || status.data?.state === 'outage') && status.data.lastSuccessAt && (
-        <StaleBanner
-          state={status.data.state}
-          detail={`Every source was last checked successfully ${relativeTime(status.data.lastSuccessAt)}.`}
-        />
-      )}
-
-      <FrontPage
-        filters={{ country, city, sector }}
-        countryNames={countryNames}
-        emptyTitle={emptyTitle}
-        emptyAction={emptyAction}
-        onHighlight={setHighlighted}
-        highlightedPlace={highlighted}
-        rail={
-          <>
-            <MapCompanion data={map.data} countryNames={countryNames} country={country} highlightedId={highlighted} />
-            {countries.data && (
-              <CountryCounts countries={countries.data} selected={country} onSelect={(c) => select({ country: c, sector })} />
-            )}
-          </>
-        }
-        after={<SectorTiles />}
-      />
-      <SocialPreview country={country} />
-    </div>
+    </>
   )
 }

@@ -51,14 +51,14 @@ const GROUPS: { title: string; note: string; folded?: boolean; match: (s: Source
 
 /** /about: the method page. What is shown, from where, and what is missing. */
 export function AboutPage() {
-  usePageTitle('How it works')
+  usePageTitle('About & sources')
   const sources = useSources()
   return (
     <div className={clsx('container', styles.page)}>
       <PageHeader
         image={PAGE_IMAGES.about}
         kicker="About EastWire"
-        title="How it works"
+        title="About & sources"
         lede="Headlines from China, India, South Korea and Japan, only from sources whose terms allow it, each linked to the original. Here is exactly what that means, and where it falls short."
       />
 

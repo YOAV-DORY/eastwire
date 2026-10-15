@@ -9,19 +9,20 @@ import { StoryCard } from './StoryCard'
 const NOW = new Date('2026-10-13T12:00:00Z')
 const NAMES = { IN: 'India', JP: 'Japan' }
 
-const openDetails = () => userEvent.click(screen.getByRole('button', { name: 'Details' }))
+const openDetails = () => userEvent.click(screen.getByRole('button', { name: /^Details/ }))
 
 describe('StoryCard', () => {
-  it('links the headline to the original in a new tab, safely', () => {
+  it('links the headline (and so the whole card) to the original in a new tab, safely', () => {
     render(<StoryCard article={article()} countryNames={NAMES} now={NOW} />)
     const link = screen.getByRole('link', { name: /Metro line opens in Bengaluru/ })
     expect(link).toHaveAttribute('href', 'https://scroll.in/article/1/made-up')
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-    expect(link).toHaveTextContent('(opens in a new tab)')
+    expect(link).toHaveTextContent('read at Scroll.in, opens in a new tab')
+    expect(screen.getByText('Read at source')).toBeInTheDocument()
   })
 
-  it('puts publisher, main place and an honest time in one line under the headline', () => {
+  it('puts the main place over the headline and the publisher with an honest time under it', () => {
     render(<StoryCard article={article()} countryNames={NAMES} now={NOW} />)
     expect(screen.getByText('Scroll.in')).toBeInTheDocument()
     expect(screen.getByText('Bengaluru')).toBeInTheDocument()
@@ -42,12 +43,15 @@ describe('StoryCard', () => {
     expect(screen.queryByText('New')).not.toBeInTheDocument()
   })
 
-  it('keeps provenance behind Details', async () => {
+  it('keeps provenance in the story sheet that Details opens, and closes it again', async () => {
     render(<StoryCard article={article({ alsoReportedBy: 2 })} countryNames={NAMES} now={NOW} />)
     expect(screen.queryByText(/GDELT Project/)).not.toBeInTheDocument()
     await openDetails()
-    expect(screen.getByRole('button', { name: 'Details' })).toHaveAttribute('aria-expanded', 'true')
-    expect(screen.getByText(/Found through the GDELT Project/)).toHaveTextContent('also reported by 2 other sources')
+    const sheet = screen.getByRole('dialog', { name: /Metro line opens in Bengaluru/ })
+    expect(within(sheet).getByText(/Found through the GDELT Project/)).toHaveTextContent('also reported by 2 other sources')
+    expect(within(sheet).getByRole('link', { name: /Read at Scroll.in/ })).toHaveAttribute('href', 'https://scroll.in/article/1/made-up')
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Close story details' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('never invents an excerpt, and shows one only when the source allowed it', () => {
@@ -82,21 +86,50 @@ describe('StoryCard', () => {
       />,
     )
     await openDetails()
-    const places = within(screen.getByRole('list', { name: 'Places' }))
-    expect(places.getByText(/Mentions: Tokyo/)).toHaveTextContent('(low confidence)')
-    expect(places.getByText(/Dateline: Osaka/)).toHaveTextContent('(what the story is about)')
+    const sheet = within(screen.getByRole('dialog'))
+    expect(sheet.getByText(/About: Tokyo/)).toHaveTextContent('low confidence')
+    expect(sheet.getByText(/Dateline: Osaka/)).toHaveTextContent('(what the story is about)')
   })
 
-  it('has three clear weights: lead, standard and compact', () => {
+  it('shows the summary on cards, not in list rows, and no Details on compact previews', () => {
     const story = article({ excerpt: 'A licensed excerpt.' })
-    const { rerender } = render(<StoryCard article={story} variant="lead" now={NOW} />)
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Metro line opens in Bengaluru')
-    rerender(<StoryCard article={story} variant="standard" now={NOW} />)
-    expect(screen.getByRole('heading', { level: 3 })).toBeInTheDocument()
+    const { rerender } = render(<StoryCard article={story} variant="feature" now={NOW} />)
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Metro line opens in Bengaluru')
     expect(screen.getByText('A licensed excerpt.')).toBeInTheDocument()
-    rerender(<StoryCard article={story} variant="compact" now={NOW} />)
+    rerender(<StoryCard article={story} variant="row" now={NOW} />)
     expect(screen.queryByText('A licensed excerpt.')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Details' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Details/ })).toBeInTheDocument()
+    rerender(<StoryCard article={story} variant="compact" now={NOW} />)
+    expect(screen.queryByRole('button', { name: /^Details/ })).not.toBeInTheDocument()
+  })
+
+  it('shows a credited picture, or EastWire\'s own labelled tile, never a bare frame', () => {
+    const { rerender, container } = render(<StoryCard article={article()} image={null} now={NOW} />)
+    expect(screen.getByText('Illustration')).toBeInTheDocument()
+    rerender(
+      <StoryCard
+        article={article()}
+        now={NOW}
+        image={{
+          id: 'x',
+          src: 'https://upload.wikimedia.org/x.jpg',
+          srcSet: '',
+          alt: 'A street in Bengaluru',
+          caption: 'Bengaluru',
+          credit: 'A. Photographer',
+          license: 'CC BY-SA 4.0',
+          licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0',
+          filePage: 'https://commons.wikimedia.org/wiki/File:X.jpg',
+          position: '50% 50%',
+          label: 'Illustrative image',
+        }}
+      />,
+    )
+    expect(screen.getByRole('img', { name: 'A street in Bengaluru' })).toBeInTheDocument()
+    expect(screen.getByText('Illustrative image')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /A. Photographer/ })).toHaveAttribute('href', 'https://commons.wikimedia.org/wiki/File:X.jpg')
+    expect(screen.getByRole('link', { name: 'CC BY-SA 4.0' })).toBeInTheDocument()
+    expect(container.querySelector('figure')).not.toBeNull()
   })
 
   it('tells a map which pin to light while the reader points at the story', async () => {
@@ -141,5 +174,6 @@ describe('primaryPlace', () => {
     render(<StoryCard article={article()} countryNames={NAMES} now={NOW} />)
     await openDetails()
     expect(screen.queryByRole('list', { name: 'Sectors' })).not.toBeInTheDocument()
+    expect(screen.getByText('No sector rule matched this headline.')).toBeInTheDocument()
   })
 })

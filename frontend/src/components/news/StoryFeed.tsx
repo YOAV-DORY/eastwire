@@ -1,8 +1,10 @@
 import clsx from 'clsx'
-import { useId, type ReactNode } from 'react'
+import { useId, useMemo, type ReactNode } from 'react'
 import { useArticleFeed, type FeedFilters } from '../../api/queries'
 import type { ArticleView } from '../../api/types'
 import { useSlow } from '../../hooks/useSlow'
+import { storyImage } from '../../lib/imagery'
+import { mainCountry } from '../front/storyCountry'
 import { ColdStart, EmptyState, ErrorState, FeedSkeleton } from '../status/Feedback'
 import { Button } from '../ui/Button'
 import { StoryCard } from './StoryCard'
@@ -46,10 +48,18 @@ export function StoryFeed({
   const items = feed.data?.pages.flatMap((p) => p.items) ?? []
   const total = feed.data?.pages[0]?.total ?? 0
 
+  // A photo of the story's city or subject where one fits, each file once in the list.
+  const images = useMemo(() => {
+    const used = new Set<string>()
+    const all = feed.data?.pages.flatMap((p) => p.items) ?? []
+    return new Map(all.map((a) => [a.id, storyImage(a, mainCountry(a), used) ?? undefined]))
+  }, [feed.data])
+
   const card = (a: ArticleView, variant: 'lead' | 'standard' | 'compact') => (
     <StoryCard
       article={a}
-      variant={variant}
+      variant={variant === 'lead' ? 'feature' : variant === 'standard' ? 'row' : 'compact'}
+      image={variant === 'lead' ? (images.get(a.id) ?? null) : variant === 'standard' ? images.get(a.id) : undefined}
       countryNames={countryNames}
       onHighlight={onHighlight}
       highlighted={highlightedPlace != null && a.locations.some((l) => l.primary && l.placeId === highlightedPlace)}

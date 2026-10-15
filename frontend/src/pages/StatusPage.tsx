@@ -2,7 +2,8 @@ import clsx from 'clsx'
 import { CircleAlert, CircleCheck, CircleDashed, CircleX } from 'lucide-react'
 import { useStatus } from '../api/queries'
 import type { FreshnessState, SourceStatus, Status } from '../api/types'
-import { PageHeader } from '../components/layout/PageHeader'
+import { Hero } from '../components/media/Hero'
+import { fromLibrary } from '../lib/imagery'
 import { ErrorState, FeedSkeleton } from '../components/status/Feedback'
 import { formatUtc, relativeTime, storyDate } from '../lib/time'
 import { usePageTitle } from '../hooks/usePageTitle'
@@ -23,18 +24,20 @@ export function StatusPage() {
   usePageTitle('Status')
   const status = useStatus()
   return (
+    <>
+    <Hero
+      size="compact"
+      image={fromLibrary(PAGE_IMAGES.status)}
+      kicker="Status"
+      title={status.data ? headline(status.data) : 'How fresh are the sources?'}
+      lede={
+        <>
+          EastWire checks every source once an hour. A successful check only means the source answered: it can find
+          nothing new, so the newest story&apos;s own date is shown separately.
+        </>
+      }
+    />
     <div className={clsx('container', styles.page)}>
-      <PageHeader
-        image={PAGE_IMAGES.status}
-        kicker="Status"
-        title={status.data ? headline(status.data) : 'How fresh are the sources?'}
-        lede={
-          <>
-            EastWire checks every source once an hour. A successful check only means the source answered: it can find
-            nothing new, so the newest story&apos;s own date is shown separately.
-          </>
-        }
-      />
 
       {status.isLoading && <FeedSkeleton count={2} />}
       {status.isError && <ErrorState message="Status is unavailable right now." onRetry={() => void status.refetch()} />}
@@ -54,6 +57,7 @@ export function StatusPage() {
 
       {status.data?.database && <DatabaseSize {...status.data.database} />}
     </div>
+    </>
   )
 }
 
