@@ -68,6 +68,7 @@ sources:
     name: Global Voices
     kind: news_feed
     connector: global_voices_rss
+    story_type: feature      # citizen-media analysis and essays: the reading section, not Latest
     # Country feeds, plus topic feeds whose items are kept only if Global Voices tagged them
     # with a covered country (the RSS <category> list).
     feeds:
@@ -100,6 +101,94 @@ sources:
       url: https://globalvoices.org/about/global-voices-attribution-policy/
       checked_on: 2026-10-13
       note: Policy "Updated 9 April 2025"; text under CC BY; media may be licensed differently.
+
+  # Direct headline feeds from publishers whose terms were read on 2026-10-15. Headline, link,
+  # publisher credit and publication time only: no excerpt, no images. The feed text is read
+  # only to find datelines and places, and is not stored. See docs/source-matrix.md.
+  - slug: mainichi-english
+    name: The Mainichi (English edition) latest-articles RSS
+    kind: news_feed
+    connector: headline_rss
+    feeds:
+      - https://mainichi.jp/rss/etc/english_latest.rss
+    publisher: The Mainichi
+    publisher_country: JP
+    publisher_city_geonames_id: 1850147            # Tokyo
+    # Mainichi's English feed mixes Japan news with world wire copy; an item is kept only when
+    # its headline or dateline places it in a covered country.
+    covers_country: null
+    story_type: news
+    auth: none
+    quota: 20 latest items; checked hourly
+    status: verified
+    enabled: true
+    display_mode: headline_only
+    max_excerpt_chars: 0
+    images: false
+    attribution: "The Mainichi"
+    retention_days: 30
+    evidence:
+      url: https://mainichi.jp/english/rss/
+      checked_on: 2026-10-15
+      note: >-
+        The RSS page's own terms prohibit only commercial use of the RSS service. The copyright
+        page (reviewed 2026-10-13, rule A1) has no clause on linking. robots.txt names only AI
+        crawlers. EastWire is non-commercial and shows headline links only.
+
+  - slug: sixth-tone
+    name: Sixth Tone RSS
+    kind: news_feed
+    connector: headline_rss
+    feeds:
+      - https://www.sixthtone.com/rss
+    publisher: Sixth Tone
+    publisher_country: CN
+    publisher_city_geonames_id: 1796236            # Shanghai
+    covers_country: CN       # a China-only publication
+    story_type: news
+    feature_categories: [FEATURES, "Q & A", VOICES, "VOICES & OPINION", PODCAST]
+    auth: none
+    quota: About 50 items spanning a week; checked hourly
+    status: verified
+    enabled: true
+    display_mode: headline_only
+    max_excerpt_chars: 0
+    images: false
+    attribution: "Sixth Tone"
+    retention_days: 30
+    evidence:
+      url: https://www.sixthtone.com/terms-use
+      checked_on: 2026-10-15
+      note: >-
+        Linking is "free (and encouraged)"; citing is allowed without permission when Sixth Tone
+        is credited by name (rule A2). No clause on automated access; the site has no robots.txt.
+
+  - slug: nippon-com
+    name: Nippon.com (English) RSS
+    kind: news_feed
+    connector: headline_rss
+    feeds:
+      - https://www.nippon.com/en/feed/
+    publisher: Nippon.com
+    publisher_country: JP
+    publisher_city_geonames_id: 1850147            # Tokyo
+    covers_country: JP       # a Japan-only publication
+    story_type: feature      # explainers and essays: the reading section, not Latest
+    auth: none
+    quota: About 20 items over ten days; checked hourly
+    status: verified
+    enabled: true
+    display_mode: headline_only
+    max_excerpt_chars: 0
+    images: false
+    attribution: "Nippon.com"
+    retention_days: 30
+    evidence:
+      url: https://www.nippon.com/en/copyright/
+      checked_on: 2026-10-15
+      note: >-
+        Users may link directly to pages without permission or notice; links must say they go to
+        Nippon.com, and framing is not allowed (rule A2). robots.txt does not cover the feed.
 
   - slug: japan-times
     name: The Japan Times

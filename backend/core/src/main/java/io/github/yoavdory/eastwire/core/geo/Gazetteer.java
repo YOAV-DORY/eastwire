@@ -64,9 +64,20 @@ public final class Gazetteer {
         this.pattern = Pattern.compile("(?<![\\p{L}\\p{N}])(" + alternation + ")(?![\\p{L}\\p{N}])");
         for (Country country : countries) {
             List<String> words = COUNTRY_WORDS.getOrDefault(country.iso2(), List.of(country.name()));
-            countryPatterns.put(country.iso2(), Pattern.compile(
-                    "(?<![\\p{L}])(" + words.stream().map(Pattern::quote).collect(Collectors.joining("|")) + ")(?![\\p{L}])"));
+            String alternatives = words.stream().map(Gazetteer::countryWord).collect(Collectors.joining("|"));
+            countryPatterns.put(country.iso2(), Pattern.compile("(?<![\\p{L}])(" + alternatives + ")(?![\\p{L}])"));
         }
+    }
+
+    /**
+     * A country word as a regex. A bare "Korea" or "Korean" counts for South Korea only when it is
+     * not "North Korea", "N. Korea" or "N.Korea": North Korea is a different country.
+     */
+    private static String countryWord(String word) {
+        if (word.startsWith("Korea")) {
+            return "(?<!North )(?<!N\\. )(?<!N\\.)" + Pattern.quote(word);
+        }
+        return Pattern.quote(word);
     }
 
     /** Cities named in {@code text}, each at most once, in order of first appearance. */

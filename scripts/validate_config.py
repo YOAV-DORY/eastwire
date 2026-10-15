@@ -12,6 +12,7 @@ import argparse
 import csv
 import datetime
 import os
+import re
 import sys
 
 import yaml
@@ -25,6 +26,12 @@ MUST_DENY = {"scmp.com", "thehindu.com", "thehindubusinessline.com", "koreatimes
 # The database's article_sector check constraint allows exactly these.
 SECTOR_SLUGS = {"economy", "geopolitics", "technology", "business", "society", "environment"}
 SECTOR_RULE_KEYS = ("keywords", "negative", "gdelt_themes", "feed_categories")
+STORY_TYPES = {"news", "feature"}
+# Illustrative images: licenses that allow reuse with credit, and where the files live.
+IMAGE_LICENSE = re.compile(r"CC0|Public domain|CC BY(-SA)? [234]\.\d")
+IMAGE_HOSTS = ("https://thumb.wikimedia.org/", "https://upload.wikimedia.org/")
+IMAGE_REQUIRED = ("id", "file", "file_page", "image_url", "creator", "license", "attribution", "permitted_use",
+                  "changes", "alt", "caption")
 
 
 class Report:
@@ -44,7 +51,7 @@ def is_date(value):
     return isinstance(value, datetime.date)
 
 
-def check_sources(sources, city_ids, report):
+def check_sources(sources, city_ids, country_codes, report):
     seen = set()
     for s in sources:
         where = f"sources.yaml[{s.get('slug', '?')}]"
@@ -70,6 +77,50 @@ def check_sources(sources, city_ids, report):
         city = s.get("publisher_city_geonames_id")
         if city is not None and city not in city_ids:
             report.error(where, f"publisher_city_geonames_id {city} is not in cities.csv")
+        if s.get("story_type") is not None and s.get("story_type") not in STORY_TYPES:
+            report.error(where, f"story_type must be one of {sorted(STORY_TYPES)}")
+        if s.get("covers_country") is not None and s.get("covers_country") not in country_codes:
+            report.error(where, f"covers_country {s.get('covers_country')} is not a country in countries.yaml")
+        if s.get("connector") == "headline_rss":
+            # Direct publisher feeds are headline links only: no excerpt, no images, a named publisher.
+            if not s.get("feeds") or not s.get("publisher"):
+                report.error(where, "headline_rss sources need feeds and a publisher name")
+            if s.get("display_mode") != "headline_only" or s.get("max_excerpt_chars", 0) != 0:
+                report.error(where, "headline_rss sources must be headline_only with max_excerpt_chars: 0")
+
+
+def check_images(data, city_ids, country_codes, report):
+    if not is_date(data.get("checked_on")):
+        report.error("images.yaml", "checked_on (YYYY-MM-DD) is required")
+    seen = set()
+    for i in data.get("images") or []:
+        where = f"images.yaml[{i.get('id', '?')}]"
+        for key in IMAGE_REQUIRED:
+            if not str(i.get(key) or "").strip():
+                report.error(where, f"{key} is required")
+        if i.get("id") in seen:
+            report.error(where, "duplicate id")
+        seen.add(i.get("id"))
+        if not IMAGE_LICENSE.fullmatch(str(i.get("license") or "")):
+            report.error(where, f"license {i.get('license')!r} is not one EastWire accepts")
+        if not str(i.get("file_page") or "").startswith("https://commons.wikimedia.org/wiki/File:"):
+            report.error(where, "file_page must be the file's Wikimedia Commons page")
+        url = str(i.get("image_url") or "")
+        if not url.startswith(IMAGE_HOSTS) or "{width}" not in url:
+            report.error(where, "image_url must be a Wikimedia thumbnail template with {width}")
+        cities, country = i.get("cities") or [], i.get("country")
+        if bool(cities) == bool(country):
+            report.error(where, "an image illustrates either cities or a country with sectors")
+        for c in cities:
+            if c not in city_ids:
+                report.error(where, f"city {c} is not in cities.csv")
+        if country:
+            if country not in country_codes:
+                report.error(where, f"country {country} is not in countries.yaml")
+            if not set(i.get("sectors") or []) <= SECTOR_SLUGS or not i.get("sectors"):
+                report.error(where, "sectors must be non-empty and among the six sectors")
+            if not i.get("headline_words"):
+                report.error(where, "a topic image needs headline_words")
 
 
 def check_domains(domains, report):
@@ -195,7 +246,9 @@ def main(argv):
     check_countries(countries, report)
     with open(path("cities.csv"), encoding="utf-8") as f:
         city_ids = check_cities(list(csv.DictReader(f)), countries, report)
-    check_sources(load_yaml(path("sources.yaml"))["sources"], city_ids, report)
+    country_codes = {c["iso2"] for c in countries}
+    check_sources(load_yaml(path("sources.yaml"))["sources"], city_ids, country_codes, report)
+    check_images(load_yaml(path("images.yaml")), city_ids, country_codes, report)
     with open(path("cities.csv"), encoding="utf-8") as f:
         city_names = {r["name"] for r in csv.DictReader(f)}
     for name in load_yaml(path("city_curation.yaml")).get("requires_country_context", []):

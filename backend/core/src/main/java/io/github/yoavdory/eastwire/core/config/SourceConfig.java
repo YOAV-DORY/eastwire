@@ -29,10 +29,26 @@ public record SourceConfig(
         Long publisherCityGeonamesId,
         List<String> feeds,
         License license,
-        Evidence evidence) {
+        Evidence evidence,
+        String publisher,
+        String coversCountry,
+        String storyType,
+        List<String> featureCategories) {
 
     public SourceConfig {
         feeds = feeds == null ? List.of() : List.copyOf(feeds);
+        featureCategories = featureCategories == null ? List.of() : List.copyOf(featureCategories);
+    }
+
+    /**
+     * Whether an item from this source is a feature (essay, explainer, citizen media) rather than
+     * news: the source's own {@code story_type}, or one of its {@code feature_categories}.
+     */
+    public boolean isFeature(java.util.Collection<String> itemCategories) {
+        if ("feature".equals(storyType)) {
+            return true;
+        }
+        return itemCategories.stream().anyMatch(c -> featureCategories.stream().anyMatch(f -> f.equalsIgnoreCase(c.strip())));
     }
 
     /** Content license, when the source has one (Global Voices: CC BY 3.0). */
@@ -49,13 +65,15 @@ public record SourceConfig(
     public SourceConfig withFeeds(List<String> newFeeds) {
         return new SourceConfig(slug, name, kind, connector, status, enabled, displayMode,
                 maxExcerptChars, images, attribution, excerptNote, label, wireCreditMode, partnerReprints,
-                retentionDays, publisherCountry, publisherCityGeonamesId, newFeeds, license, evidence);
+                retentionDays, publisherCountry, publisherCityGeonamesId, newFeeds, license, evidence, publisher,
+                coversCountry, storyType, featureCategories);
     }
 
     /** A copy with a different {@code enabled} flag; used when a conditional source is turned on. */
     public SourceConfig withEnabled(boolean newEnabled) {
         return new SourceConfig(slug, name, kind, connector, status, newEnabled, displayMode,
                 maxExcerptChars, images, attribution, excerptNote, label, wireCreditMode, partnerReprints,
-                retentionDays, publisherCountry, publisherCityGeonamesId, feeds, license, evidence);
+                retentionDays, publisherCountry, publisherCityGeonamesId, feeds, license, evidence, publisher,
+                coversCountry, storyType, featureCategories);
     }
 }
