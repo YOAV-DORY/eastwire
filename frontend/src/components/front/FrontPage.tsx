@@ -121,7 +121,8 @@ export function FrontPage({
             </section>
           )}
         </div>
-        {rail && (
+        {/* The rail waits for the stories, so nothing below them jumps when they arrive. */}
+        {rail && (data || front.isError) && (
           <aside className={styles.rail} aria-label="Map, countries and social posts">
             {rail}
           </aside>

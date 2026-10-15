@@ -67,7 +67,10 @@
 
 .skeleton {
   display: grid;
+  align-content: start;
   gap: var(--space-5);
+  /* Holds a screen's worth of space, so the footer stays below the fold until stories arrive. */
+  min-height: 110vh;
 }
 
 .skeletonLead {

@@ -1,16 +1,21 @@
 import { expect, test } from '@playwright/test'
 import { mockApi, watchCsp } from './api'
 
-test('a filter lives in the URL: reloading shows the same stories', async ({ page }) => {
+test('a filter lives in the URL: reloading shows the same stories', async ({ page }, info) => {
   await mockApi(page)
   await page.goto('/')
-  await page.getByRole('group', { name: 'Filter by country' }).getByRole('button', { name: /Japan/ }).click()
+  if (info.project.name === 'phone') {
+    await page.getByRole('group', { name: 'Filters' }).getByRole('combobox', { name: 'Country' }).selectOption('JP')
+  } else {
+    await page.getByRole('group', { name: 'Filter by country' }).getByRole('button', { name: /Japan/ }).click()
+  }
   await expect(page).toHaveURL(/\?country=JP$/)
-  await expect(page.getByRole('heading', { name: /Latest · Japan · 1 story/ })).toBeVisible()
+  const lead = page.getByRole('article', { name: /Port expansion approved in Osaka/ })
+  await expect(lead).toBeVisible()
 
   await page.reload()
-  await expect(page.getByRole('heading', { name: /Latest · Japan · 1 story/ })).toBeVisible()
-  await expect(page.getByRole('link', { name: /Port expansion approved in Osaka/ })).toBeVisible()
+  await expect(lead).toBeVisible()
+  await expect(page.getByRole('heading', { name: /^Latest · 1 story from the last 48 hours/ })).toBeVisible()
 })
 
 test('a shared search link opens the same results and filters', async ({ page }) => {
@@ -22,10 +27,14 @@ test('a shared search link opens the same results and filters', async ({ page })
   await expect(page.getByLabel('Order')).toHaveValue('date')
 })
 
-test('sector tabs filter the feed and every tag explains itself', async ({ page }) => {
+test('sector filters narrow the front page and every tag explains itself', async ({ page }, info) => {
   await mockApi(page)
   await page.goto('/')
-  await page.getByRole('group', { name: 'Filter by sector' }).getByRole('button', { name: 'Economy' }).click()
+  if (info.project.name === 'phone') {
+    await page.getByRole('group', { name: 'Filters' }).getByRole('combobox', { name: 'Sector' }).selectOption('economy')
+  } else {
+    await page.getByRole('group', { name: 'Filter by sector' }).getByRole('button', { name: 'Economy' }).click()
+  }
   await expect(page).toHaveURL(/sector=economy/)
   await page.getByRole('button', { name: 'Details' }).first().click()
   const tag = page.getByRole('button', { name: 'Economy: why this sector' }).first()
@@ -39,7 +48,12 @@ test('clicking a city pin narrows the story list; the population layer has its o
   await page.goto('/map')
   await page.getByRole('button', { name: 'Osaka: 1 story' }).click()
   await expect(page).toHaveURL(/\/map\/city\/1853909/)
-  if (phone) await page.getByRole('button', { name: 'Show stories' }).click()
+  if (phone) {
+    // The selection and its stories show under the map; the full list is one switch away.
+    await expect(page.getByRole('button', { name: 'Reset' })).toBeVisible()
+    await expect(page.getByText('1 story · last 7 days')).toBeVisible()
+    await page.getByRole('group', { name: 'View' }).getByRole('button', { name: 'List' }).click()
+  }
   await expect(page.getByRole('heading', { name: 'Osaka', exact: true, level: 2 })).toBeVisible()
   await expect(page.getByRole('link', { name: /Port expansion approved in Osaka/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /Rupee steadies/ })).toHaveCount(0)
@@ -73,14 +87,24 @@ test('pointing at a story lights its pin on the map', async ({ page }, info) => 
   await expect(pin).not.toHaveClass(/ew-hot/)
 })
 
-test('on phones the map keeps at least half the screen, with a Map/List switch', async ({ page }, info) => {
+test('on phones the map leaves room for the selection and its stories, with a Map/List switch', async ({ page }, info) => {
   test.skip(info.project.name !== 'phone', 'Phone layout only.')
   await mockApi(page)
   await page.goto('/map')
   const map = page.locator('.leaflet-container')
   await expect(map).toBeVisible()
   const box = (await map.boundingBox())!
-  expect(box.height).toBeGreaterThanOrEqual(844 / 2)
+  expect(box.height).toBeGreaterThanOrEqual(844 * 0.3)
+  expect(box.height).toBeLessThanOrEqual(844 * 0.55)
+
+  await page.getByRole('button', { name: 'Osaka: 1 story' }).click()
+  // Map, selection and the first story are on screen together.
+  await expect(page.getByRole('button', { name: 'Reset' })).toBeInViewport()
+  await expect(page.getByRole('link', { name: /Port expansion approved in Osaka/ })).toBeInViewport()
+  await page.getByRole('button', { name: 'Reset' }).click()
+  await expect(page).toHaveURL(/\/map$/)
+  await expect(page.getByText(/cities with stories · last 7 days/)).toBeVisible()
+
   await page.getByRole('group', { name: 'View' }).getByRole('button', { name: 'List' }).click()
   await expect(map).toBeHidden()
   await expect(page.getByRole('link', { name: /Port expansion approved in Osaka/ })).toBeVisible()
@@ -106,7 +130,7 @@ test('social embeds request nothing from Bluesky or YouTube until the reader ask
     if (/bsky\.app|youtube|ytimg/.test(r.url()) && !r.url().includes('i.ytimg.com')) thirdParty.push(r.url())
   })
   await page.goto('/social')
-  await expect(page.getByText('Not verified reporting.', { exact: true })).toBeVisible()
+  await expect(page.getByText(/Not verified reporting, so it is kept apart from the news/)).toBeVisible()
   await expect(page.getByRole('button', { name: 'Load post from Bluesky' })).toBeVisible()
   expect(thirdParty).toEqual([])
 })
@@ -114,7 +138,7 @@ test('social embeds request nothing from Bluesky or YouTube until the reader ask
 test('no page breaks the Content-Security-Policy', async ({ page }) => {
   const violations = watchCsp(page)
   await mockApi(page)
-  for (const path of ['/', '/map', '/search?q=metro', '/search?q=zzzxq', '/sectors', '/sector/economy', '/social', '/about', '/status']) {
+  for (const path of ['/', '/?country=KR', '/map', '/map/city/1853909', '/search?q=metro', '/search?q=zzzxq', '/sectors', '/sector/economy', '/social', '/about', '/status']) {
     await page.goto(path)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   }
