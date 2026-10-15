@@ -1281,6 +1281,22 @@ Snags on the way, now in docs/database.md and docs/deploy.md:
 - Two password mismatches, fixed by setting the secret and the role from one generated value.
 - Cloudflare's "Create application" made a Worker instead of a Pages project.
 
+**Redesign (2026-10-14, PR #11, live):** editorial "news atlas", main-subject places (V6), balanced feed, press releases filtered.
+
+**Editorial pass (branch `editorial-2`, 2026-10-15, not deployed):**
+- Coverage: GDELT's English stream had 0 rows from the allowed Japanese and Chinese outlets, so
+  Mainichi, Sixth Tone and Nippon.com are read directly (headline links only; terms read
+  2026-10-15). South Korea remains the documented gap.
+- Times: publication, discovery, ingestion and source checks kept apart (V7); Latest is news of
+  the last 48 hours; features and older reports go to a dated Reading section.
+- Ranking: `GET /api/v1/front` with a lead, two secondary stories and an explained order
+  (docs/ranking.md); one story per event; publisher cap.
+- Images: 20 Wikimedia Commons files cleared one by one (docs/images.md), shown as labelled,
+  credited illustrative images only where relevant.
+- Loading: requests give up within about 90 s; a dated saved copy covers return visits.
+- Map: readable tiles, English country labels, framing and selection context.
+
 **Next:**
-1. UX/UI changes (owner's list).
+1. Owner: ask Hankyoreh (copyright@hani.co.kr) about headline links; read a Korea.net KOGL mark in a
+   browser; request a CARTO key if a basemap with English labels is wanted.
 2. The "Later" list (section 3): Japan Times and NHK once their checks clear, journalists, more countries. Optional `YOUTUBE_API_KEY`.
