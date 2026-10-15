@@ -4,7 +4,10 @@
  */
 export const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'
 
-const TIMEOUT_MS = 20_000
+/** A normal request's time limit. The first attempt of a query waits longer: see {@link FIRST_ATTEMPT_TIMEOUT_MS}. */
+export const TIMEOUT_MS = 15_000
+/** The free-tier server can take about a minute to wake; the first attempt waits for it. */
+export const FIRST_ATTEMPT_TIMEOUT_MS = 30_000
 
 /** A failed request. status 0 means the server could not be reached (e.g. still waking up). */
 export class ApiError extends Error {
@@ -35,8 +38,8 @@ export function buildUrl(path: string, params: Params = {}): string {
   return url.toString()
 }
 
-export async function apiGet<T>(path: string, params: Params = {}, signal?: AbortSignal): Promise<T> {
-  const timeout = AbortSignal.timeout(TIMEOUT_MS)
+export async function apiGet<T>(path: string, params: Params = {}, signal?: AbortSignal, timeoutMs = TIMEOUT_MS): Promise<T> {
+  const timeout = AbortSignal.timeout(timeoutMs)
   const combined = signal ? AbortSignal.any([signal, timeout]) : timeout
   let response: Response
   try {

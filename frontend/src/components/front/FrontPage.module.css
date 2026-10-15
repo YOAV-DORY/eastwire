@@ -1,0 +1,126 @@
+.top {
+  display: grid;
+  gap: var(--space-10);
+}
+
+.main {
+  display: grid;
+  align-content: start;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.rail {
+  display: grid;
+  align-content: start;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.secondary {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.secondary > li {
+  border-bottom: 1px solid var(--rule);
+}
+
+.latest {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.latestTitle {
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--text);
+  color: var(--text);
+}
+
+.latestNote {
+  padding-top: var(--space-2);
+  color: var(--text-faint);
+  font-size: var(--text-small);
+}
+
+.latestNote a {
+  color: inherit;
+}
+
+.list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list > li {
+  border-bottom: 1px solid var(--rule);
+}
+
+.more {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.skeleton {
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+  /* Holds a screen's worth of space, so the footer stays below the fold until stories arrive. */
+  min-height: 110vh;
+}
+
+.skeletonLead {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--ink);
+}
+
+.skeletonRow {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (max-width: 1023px) {
+  .rail {
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--rule);
+  }
+}
+
+@media (min-width: 720px) {
+  .secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-8);
+  }
+
+  .skeletonRow {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-8);
+  }
+}
+
+@media (min-width: 1024px) {
+  .withRail {
+    grid-template-columns: minmax(0, 1fr) var(--rail-w);
+    column-gap: var(--space-12);
+  }
+
+  .withRail .rail {
+    padding-left: var(--space-10);
+    border-left: 1px solid var(--rule);
+  }
+
+  .columns {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

@@ -166,6 +166,38 @@ class ApiDatabaseIntegrationTest {
     }
 
     @Test
+    void frontPageLeadsWithRecentNewsAndKeepsFeaturesInADatedReadingSection() throws Exception {
+        jdbc.sql("UPDATE article SET story_type = 'feature' WHERE id = 2").update();
+        mvc.perform(get("/api/v1/front"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.latestWindowHours").value(48))
+                .andExpect(jsonPath("$.lead.article.title").value("Tokyo story"))
+                .andExpect(jsonPath("$.lead.article.storyType").value("news"))
+                .andExpect(jsonPath("$.lead.why[0]").value(org.hamcrest.Matchers.startsWith("Found")))
+                // The Tokyo image from config/images.yaml, with its rights and the illustrative label.
+                .andExpect(jsonPath("$.lead.image.id").value("tokyo-marunouchi"))
+                .andExpect(jsonPath("$.lead.image.illustrative").value(true))
+                .andExpect(jsonPath("$.lead.image.license").value("CC BY-SA 4.0"))
+                .andExpect(jsonPath("$.lead.image.filePage").value(org.hamcrest.Matchers.startsWith("https://commons.wikimedia.org/wiki/File:")))
+                .andExpect(jsonPath("$.latestCount").value(1))
+                .andExpect(jsonPath("$.latest", hasSize(0)))
+                .andExpect(jsonPath("$.reading", hasSize(1)))
+                .andExpect(jsonPath("$.reading[0].title").value("India story"))
+                .andExpect(jsonPath("$.reading[0].storyType").value("feature"))
+                .andExpect(jsonPath("$.readingFrom").isNotEmpty());
+    }
+
+    @Test
+    void oldNewsLeavesLatestForTheReadingSection() throws Exception {
+        jdbc.sql("UPDATE article SET discovered_at = now() - interval '3 days' WHERE id = 1").update();
+        mvc.perform(get("/api/v1/front"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.lead").doesNotExist())
+                .andExpect(jsonPath("$.latestCount").value(0))
+                .andExpect(jsonPath("$.reading[*].title", org.hamcrest.Matchers.hasItem("Tokyo story")));
+    }
+
+    @Test
     void countryAndCityFiltersMatchWhatTheStoryIsAbout() throws Exception {
         mvc.perform(get("/api/v1/articles").param("country", "JP")).andExpect(jsonPath("$.total").value(1));
         mvc.perform(get("/api/v1/articles").param("city", "1850147"))

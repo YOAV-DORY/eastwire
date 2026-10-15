@@ -54,6 +54,10 @@ final class GlobalVoicesMapper {
     }
 
     Optional<ArticleCandidate> map(String sourceSlug, SyndEntry entry, Instant now) {
+        return map(sourceSlug, entry, now, false);
+    }
+
+    Optional<ArticleCandidate> map(String sourceSlug, SyndEntry entry, Instant now, boolean feature) {
         Set<String> categories = entry.getCategories().stream()
                 .map(SyndCategory::getName)
                 .filter(n -> n != null && !n.isBlank())
@@ -90,7 +94,8 @@ final class GlobalVoicesMapper {
         String author = entry.getAuthor() == null || entry.getAuthor().isBlank() ? null : entry.getAuthor().strip();
         return Optional.of(new ArticleCandidate(sourceSlug, entry.getLink().strip(), title, summary, author, null,
                 PartnerReprints.isPartnerReprint(content), ArticleCandidate.ExcerptKind.CC_BY_EXCERPT,
-                toInstant(entry.getPublishedDate()), now, "en", marked, SectorSignals.categories(categories)));
+                toInstant(entry.getPublishedDate()), now, "en", marked, SectorSignals.categories(categories),
+                feature ? ArticleCandidate.StoryType.FEATURE : ArticleCandidate.StoryType.NEWS));
     }
 
     private static Instant toInstant(Date date) {

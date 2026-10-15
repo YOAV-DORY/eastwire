@@ -1,6 +1,6 @@
 import type { Page, Route } from '@playwright/test'
 import type { ArticleView, CityPin, MapData, PlaceView } from '../src/api/types'
-import { article, COUNTRIES, ECONOMY_TAG, page, SECTORS_VIEW, socialItem, status, VIDEO } from '../src/test/fixtures'
+import { article, COUNTRIES, ECONOMY_TAG, front, IMAGE, page, SECTORS_VIEW, socialItem, status, VIDEO } from '../src/test/fixtures'
 
 /** Invented stories: two in India, one in Japan. */
 export const ARTICLES: ArticleView[] = [
@@ -39,7 +39,7 @@ const PINS: CityPin[] = [
 ]
 
 /** A 1×1 transparent PNG, so map tiles never hit OpenStreetMap from tests. */
-const TILE = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64')
+const TILE = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64')
 
 function articlesFor(url: URL) {
   const country = url.searchParams.get('country')
@@ -56,6 +56,23 @@ function articlesFor(url: URL) {
   return page(items)
 }
 
+/** An invented feature for the Reading section. */
+export const ESSAY: ArticleView = article({
+  id: 50,
+  title: 'An essay on late-night buses',
+  publisher: 'Nippon.com',
+  storyType: 'feature',
+  publishedAt: '2026-10-08T06:00:00Z',
+})
+
+function frontFor(url: URL) {
+  const items = articlesFor(url).items
+  const page = front(items, [ESSAY])
+  // The lead's illustrative image is served from this test server, not from Wikimedia.
+  if (page.lead) page.lead.image = { ...IMAGE, src: '/__test-image.png', srcSet: '/__test-image.png 500w' }
+  return page
+}
+
 function mapFor(url: URL): MapData {
   const country = url.searchParams.get('country')
   return {
@@ -70,6 +87,8 @@ function mapFor(url: URL): MapData {
 export async function mockApi(page: Page): Promise<URL[]> {
   const calls: URL[] = []
   await page.route('https://tile.openstreetmap.org/**', (route) => route.fulfill({ body: TILE, contentType: 'image/png' }))
+  // Stands in for a Wikimedia photo: the site's own favicon, a real image the browser can decode.
+  await page.route('**/__test-image.png', (route) => route.fulfill({ path: 'public/favicon.svg', contentType: 'image/svg+xml' }))
   await page.route('**/api/v1/**', (route: Route) => {
     const url = new URL(route.request().url())
     calls.push(url)
@@ -78,6 +97,8 @@ export async function mockApi(page: Page): Promise<URL[]> {
         case '/api/v1/articles':
         case '/api/v1/search':
           return articlesFor(url)
+        case '/api/v1/front':
+          return frontFor(url)
         case '/api/v1/countries':
           return COUNTRIES
         case '/api/v1/status':

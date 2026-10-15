@@ -3,7 +3,9 @@
  * Warm graphite surfaces (dark) or warm paper (light), crisp hairlines, a newsroom serif
  * for headlines and a grotesk drawn for a news publisher for everything else.
  * One accent, Gumroad-warm pink, for: primary buttons, active filters, map pins, the search
- * focus ring, "New" stickers and links on hover. Everything else stays neutral.
+ * focus ring, "New" stickers and links on hover; a very pale pink (--select) sits under
+ * selected filters and rows. A deep ink surface (--ink) carries the lead story; colour also
+ * comes from the cleared photographs. Source health has its own colours, never the pink.
  * Contrast ratios are checked by src/styles/tokens.test.ts.
  */
 
@@ -35,6 +37,17 @@
   --accent-2: #ffe27a; /* stale / attention markers only */
   --danger: #ff6b6b;
   --ok: #3dd68c;
+  /* the lead story's deep-ink panel: a second surface tone, not another accent */
+  --ink: #171c29;
+  --on-ink: #f4f1ea;
+  --on-ink-muted: #b8b5ad;
+  --ink-rule: rgba(255, 255, 255, 0.14);
+  /* selected filters and rows: a very pale pink surface under the pink underline */
+  --select: #2b1e2a;
+  /* source health: its own colours (always with an icon and words), never the action pink */
+  --health-ok: #4fd18b;
+  --health-warn: #ffcf5a;
+  --health-bad: #ff7b7b;
   /* sectors: dots only, always next to a text label */
   --sector-economy: #2fb7c4;
   --sector-geopolitics: #f2994a;
@@ -68,6 +81,14 @@
   --accent-wash: rgba(176, 22, 143, 0.07);
   --danger: #c62828;
   --ok: #1e8a55;
+  --ink: #15192a;
+  --on-ink: #f7f5f0;
+  --on-ink-muted: #c3c0b8;
+  --ink-rule: rgba(247, 245, 240, 0.16);
+  --select: #fbe8f5;
+  --health-ok: #17784a;
+  --health-warn: #8f5a00;
+  --health-bad: #b42323;
   --sector-economy: #0e7c86;
   --sector-geopolitics: #b3541e;
   --sector-technology: #2f5fd0;

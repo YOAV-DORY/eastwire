@@ -1,0 +1,45 @@
+# How the front page is chosen
+
+`GET /api/v1/front` (and the same for a country, city or sector) builds every front page from
+fixed rules in [`FrontRanker`](../backend/api/src/main/java/io/github/yoavdory/eastwire/api/front/FrontRanker.java).
+No AI, no click data, no hand-picking. The rules only order what the sources published; they never
+change a headline or invent a story. Tests: `FrontRankerTest`, `ImageMatcherTest`.
+
+## What is eligible
+
+- **Latest** holds *news* published in the last **48 hours**. When a source gives no publication
+  time (most GDELT items), the time it was found counts instead, and the card and the "why it
+  leads" line both say "found".
+- **Features** (Global Voices, Nippon.com, Sixth Tone's FEATURES / Q & A / VOICES) and news older
+  than 48 hours go to the dated **Reading** section, never to Latest. Reading shows up to eight
+  stories from the last 30 days, one publisher at a time, newest first.
+- Every story passes the display policy again first, so a story hidden by policy is never ranked.
+
+## Score
+
+| Part | Points | Why |
+|---|---|---|
+| Freshness | up to 3, halving every 12 hours | Today's news first |
+| No publication time | −0.2 | The age is less certain |
+| Sector | geopolitics 1, economy 0.8, technology 0.8, environment 0.6, society 0.5, business 0.4 | Broad significance; company news is narrower |
+| Other outlets on the same event | +0.4 each, up to +1.2 | Corroboration and significance |
+| Reaches beyond one country | +0.8 when the headline names another government, an international body, trade, tariffs, sanctions, climate, AI, chips, nuclear or missiles | Relevance to a reader outside the country |
+| Several of our countries | +0.5 when the story is about two or more of China, India, Japan and South Korea | Same |
+| Routine market item | −1.5 (index moves, "stocks to watch", results tables, dividends) | Useful, not front-page news |
+| About a country we do not cover | −0.5 when the headline names one (e.g. North Korea) and none of ours | A Beijing dateline alone does not make it China news |
+| No main-subject place | −1 | It may only mention our countries in passing |
+
+## Lead, secondary and order
+
+- **Lead:** the highest score among stories with a main-subject place in our countries that are
+  neither routine nor about another country.
+- **Two secondary stories:** the best of the rest, each losing 0.8 per earlier pick from the
+  same publisher and 0.4 if it is about the lead's country, so the top three vary.
+- **One story per event:** stories in the same cluster, or whose headlines share at least half
+  their content words, appear once (the best-scoring one); the card counts the others.
+- **Latest order:** best first, but no publisher fills more than 40% of the list or appears three
+  times in a row while others wait.
+- **Images:** see [images.md](images.md). A story without a cleared image runs as text.
+
+The lead shows its reasons ("Why it leads: Published 2 h ago · Technology · Reaches beyond one
+country") so the choice can be checked.

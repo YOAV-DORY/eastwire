@@ -1,0 +1,387 @@
+# Illustrative images: Wikimedia Commons files whose own file pages were read on the date given.
+# Each entry records creator, file page, license, attribution and the conditions that come with it.
+# Images are shown only as clearly labelled "Illustrative image", never as a photo of the reported event.
+# Rules (checked by scripts/validate_config.py and ImageCatalog):
+#   - license is one of CC0, Public domain, CC BY 2.0-4.0, CC BY-SA 2.0-4.0; anything else is rejected;
+#   - files on Commons with a personality-rights, trademark or deletion notice are rejected;
+#   - no image is used twice on one page; at most the lead and two secondary stories get one;
+#   - a city image needs the city to be the story's main subject and named in its headline or
+#     dateline; a topic image (country + sectors) also needs one of its headline_words.
+# Rejected candidates and why: docs/images.md.
+
+checked_on: 2026-10-15
+
+images:
+  - id: new-delhi-india-gate
+    file: "India Gate, New Delhi from West.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:India_Gate%2C_New_Delhi_from_West.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/India_Gate%2C_New_Delhi_from_West.jpg/{width}px-India_Gate%2C_New_Delhi_from_West.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 3426
+    height: 2658
+    creator: "Nikhilb239"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "Nikhilb239"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "India Gate, a sandstone war memorial arch, seen across a lawn in New Delhi"
+    caption: "India Gate, New Delhi"
+    position: "50% 40%"
+    cities: [1273294, 1261481]
+  - id: mumbai-gateway
+    file: "Panoramic view of Taj Palace Hotel and Taj Tower with the iconic Gateway of India in the background.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Panoramic_view_of_Taj_Palace_Hotel_and_Taj_Tower_with_the_iconic_Gateway_of_India_in_the_background.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/Panoramic_view_of_Taj_Palace_Hotel_and_Taj_Tower_with_the_iconic_Gateway_of_India_in_the_background.jpg/{width}px-Panoramic_view_of_Taj_Palace_Hotel_and_Taj_Tower_with_the_iconic_Gateway_of_India_in_the_background.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 5515
+    height: 3102
+    creator: "iMahesh"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "iMahesh"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The Taj Palace hotel and the Gateway of India on the Mumbai waterfront, seen from the harbour"
+    caption: "Mumbai waterfront"
+    position: "50% 50%"
+    cities: [1275339]
+  - id: bengaluru-vidhana-soudha
+    file: "Vidhana Soudha LE.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Vidhana_Soudha_LE.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/Vidhana_Soudha_LE.jpg/{width}px-Vidhana_Soudha_LE.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 6489
+    height: 4326
+    creator: "DeepanjanGhosh"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "DeepanjanGhosh"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The lit facade of Vidhana Soudha, the Karnataka state legislature, in Bengaluru at night"
+    caption: "Vidhana Soudha, Bengaluru"
+    position: "50% 45%"
+    cities: [1277333]
+  - id: kolkata-howrah-bridge
+    file: "Howrah Bridge, Foggy.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Howrah_Bridge%2C_Foggy.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Howrah_Bridge%2C_Foggy.jpg/{width}px-Howrah_Bridge%2C_Foggy.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 4270
+    height: 2775
+    creator: "Dey.sandip"
+    license: "CC BY-SA 3.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/3.0"
+    attribution: "Dey.sandip"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The steel Howrah Bridge over the Hooghly River in Kolkata on a foggy morning"
+    caption: "Howrah Bridge, Kolkata"
+    position: "50% 40%"
+    cities: [1275004]
+  - id: chennai-ripon-building
+    file: "Ripon Building panorama.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Ripon_Building_panorama.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/Ripon_Building_panorama.jpg/{width}px-Ripon_Building_panorama.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 4000
+    height: 1810
+    creator: "PlaneMad"
+    license: "CC BY-SA 2.5"
+    license_url: "https://creativecommons.org/licenses/by-sa/2.5"
+    attribution: "CC-by-sa PlaneMad/Wikimedia"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The white Ripon Building, seat of the Chennai city corporation, behind a lawn"
+    caption: "Ripon Building, Chennai"
+    position: "50% 50%"
+    cities: [1264527]
+    note: "The author asks for the credit CC-by-sa PlaneMad/Wikimedia and a link to the file page."
+  - id: hyderabad-char-kaman
+    file: "Char Kaman 01.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Char_Kaman_01.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Char_Kaman_01.jpg/{width}px-Char_Kaman_01.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 4856
+    height: 3359
+    creator: "Bernard Gagnon"
+    license: "CC BY-SA 3.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/3.0"
+    attribution: "Bernard Gagnon"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "Traffic passing under one of the Char Kaman arches in the old city of Hyderabad"
+    caption: "Char Kaman, Hyderabad"
+    position: "50% 50%"
+    cities: [1269843]
+  - id: ahmedabad-houses
+    file: "Houses in Ahmedabad.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Houses_in_Ahmedabad.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Houses_in_Ahmedabad.jpg/{width}px-Houses_in_Ahmedabad.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 4831
+    height: 3221
+    creator: "Bernard Gagnon"
+    license: "CC BY-SA 3.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/3.0"
+    attribution: "Bernard Gagnon"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "Painted houses with balconies along a street in Ahmedabad"
+    caption: "Houses in Ahmedabad"
+    position: "50% 50%"
+    cities: [1279233]
+  - id: tokyo-marunouchi
+    file: "Marunouchi Central Plaza with blue sky, Tokyo station and Shin-Marunouchi Building, panoramic view from JP Tower, Tokyo, Japan.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Marunouchi_Central_Plaza_with_blue_sky%2C_Tokyo_station_and_Shin-Marunouchi_Building%2C_panoramic_view_from_JP_Tower%2C_Tokyo%2C_Japan.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Marunouchi_Central_Plaza_with_blue_sky%2C_Tokyo_station_and_Shin-Marunouchi_Building%2C_panoramic_view_from_JP_Tower%2C_Tokyo%2C_Japan.jpg/{width}px-Marunouchi_Central_Plaza_with_blue_sky%2C_Tokyo_station_and_Shin-Marunouchi_Building%2C_panoramic_view_from_JP_Tower%2C_Tokyo%2C_Japan.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 6115
+    height: 4077
+    creator: "Basile Morin"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "Basile Morin"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "Tokyo Station’s red-brick building and the Marunouchi office towers seen from above"
+    caption: "Marunouchi and Tokyo Station"
+    position: "50% 55%"
+    cities: [1850147]
+  - id: osaka-dotonbori
+    file: "Osaka Dotonbori Canal.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Osaka_Dotonbori_Canal.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Osaka_Dotonbori_Canal.jpg/{width}px-Osaka_Dotonbori_Canal.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 4032
+    height: 3024
+    creator: "32linesky"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "32linesky"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The Dotonbori canal in Osaka lined with shop signs"
+    caption: "Dotonbori, Osaka"
+    position: "50% 50%"
+    cities: [1853909]
+  - id: seoul-gyedong-gil
+    file: "Gyedong-gil street with climbing plants at golden hour in Seoul South Korea.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Gyedong-gil_street_with_climbing_plants_at_golden_hour_in_Seoul_South_Korea.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Gyedong-gil_street_with_climbing_plants_at_golden_hour_in_Seoul_South_Korea.jpg/{width}px-Gyedong-gil_street_with_climbing_plants_at_golden_hour_in_Seoul_South_Korea.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 6631
+    height: 3949
+    creator: "Basile Morin"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "Basile Morin"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "A quiet street of low buildings and a vine-covered facade in Bukchon, Seoul"
+    caption: "Gyedong-gil, Seoul"
+    position: "50% 55%"
+    cities: [1835848]
+  - id: busan-gamcheon
+    file: "Gamcheon Culture Village.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Gamcheon_Culture_Village.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/Gamcheon_Culture_Village.jpg/{width}px-Gamcheon_Culture_Village.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 5089
+    height: 3393
+    creator: "Bernard Gagnon"
+    license: "CC0"
+    license_url: "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+    attribution: "Bernard Gagnon"
+    attribution_required: false
+    share_alike: false
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "Brightly painted houses stacked on a hillside in Gamcheon, Busan"
+    caption: "Gamcheon, Busan"
+    position: "50% 50%"
+    cities: [1838524]
+  - id: beijing-qianmen
+    file: "201902 Qianmen Street in snow.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:201902_Qianmen_Street_in_snow.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/08/201902_Qianmen_Street_in_snow.jpg/{width}px-201902_Qianmen_Street_in_snow.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 4032
+    height: 3024
+    creator: "Zheng sun"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "Zheng sun"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "Qianmen gate at the end of a snowy pedestrian street in Beijing"
+    caption: "Qianmen Street, Beijing"
+    position: "50% 45%"
+    cities: [1816670]
+  - id: shanghai-yu-garden
+    file: "Yu Garden Shanghai November 2017 001.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Yu_Garden_Shanghai_November_2017_001.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Yu_Garden_Shanghai_November_2017_001.jpg/{width}px-Yu_Garden_Shanghai_November_2017_001.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 6016
+    height: 4016
+    creator: "King of Hearts"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "King of Hearts"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The Huxinting teahouse on its pond in Yu Garden, Shanghai"
+    caption: "Yu Garden, Shanghai"
+    position: "50% 50%"
+    cities: [1796236]
+  - id: guangzhou-canton-tower
+    file: "View of Canton Tower near Guangzhou Library.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:View_of_Canton_Tower_near_Guangzhou_Library.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/View_of_Canton_Tower_near_Guangzhou_Library.jpg/{width}px-View_of_Canton_Tower_near_Guangzhou_Library.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 3982
+    height: 2986
+    creator: "そらみみ"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "そらみみ"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "Canton Tower rising beyond an open plaza in Guangzhou"
+    caption: "Canton Tower, Guangzhou"
+    position: "50% 50%"
+    cities: [1809858]
+  - id: japan-diet
+    file: "National Diet Building 20170209.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:National_Diet_Building_20170209.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/National_Diet_Building_20170209.jpg/{width}px-National_Diet_Building_20170209.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 5184
+    height: 3456
+    creator: "Suicasmo"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "Suicasmo"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The National Diet Building, Japan’s parliament, in Tokyo"
+    caption: "National Diet Building, Tokyo"
+    position: "50% 45%"
+    country: JP
+    sectors: ['geopolitics']
+    headline_words: [parliament, diet, lawmakers, minister, prime minister, cabinet, election, government, policy, law, bill, ruling party, opposition, defence, defense, diplomacy]   # a topic image needs one of these in the headline
+  - id: japan-stock-exchange
+    file: "Tokyo Stock Exchange Main Building (1988).jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Tokyo_Stock_Exchange_Main_Building_%281988%29.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/Tokyo_Stock_Exchange_Main_Building_%281988%29.jpg/{width}px-Tokyo_Stock_Exchange_Main_Building_%281988%29.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 2500
+    height: 1643
+    creator: "Kakidai"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "Kakidai"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The Tokyo Stock Exchange building in Nihonbashi Kabutocho"
+    caption: "Tokyo Stock Exchange"
+    position: "50% 45%"
+    country: JP
+    sectors: ['economy', 'business']
+    headline_words: [stock, stocks, shares, nikkei, topix, market, markets, investors, listing, ipo, exchange, yen]   # a topic image needs one of these in the headline
+  - id: india-parliament
+    file: "Sansad Bhavan, Delhi, BNK.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Sansad_Bhavan%2C_Delhi%2C_BNK.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Sansad_Bhavan%2C_Delhi%2C_BNK.jpg/{width}px-Sansad_Bhavan%2C_Delhi%2C_BNK.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 2808
+    height: 1848
+    creator: "Nikhilb239"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "Nikhilb239"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The circular old Parliament House of India in New Delhi behind trees"
+    caption: "Parliament House, New Delhi"
+    position: "50% 50%"
+    country: IN
+    sectors: ['geopolitics']
+    headline_words: [parliament, lok sabha, rajya sabha, mps, minister, cabinet, election, government, policy, law, bill, opposition, modi, congress, bjp]   # a topic image needs one of these in the headline
+  - id: india-stock-exchange
+    file: "BSE - Bombay Stock Exchange Building.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:BSE_-_Bombay_Stock_Exchange_Building.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/BSE_-_Bombay_Stock_Exchange_Building.jpg/{width}px-BSE_-_Bombay_Stock_Exchange_Building.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 2291
+    height: 1917
+    creator: "Niyantha Shekhar"
+    license: "CC BY 2.0"
+    license_url: "https://creativecommons.org/licenses/by/2.0"
+    attribution: "Niyantha Shekhar"
+    attribution_required: true
+    share_alike: false
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The Bombay Stock Exchange tower on Dalal Street, Mumbai"
+    caption: "Bombay Stock Exchange, Mumbai"
+    position: "50% 35%"
+    country: IN
+    sectors: ['economy', 'business']
+    headline_words: [stock, stocks, shares, sensex, nifty, market, markets, investors, listing, ipo, sebi, exchange, rupee]   # a topic image needs one of these in the headline
+  - id: korea-national-assembly
+    file: "Republic of Korea capitol.jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Republic_of_Korea_capitol.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/Republic_of_Korea_capitol.jpg/{width}px-Republic_of_Korea_capitol.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 4032
+    height: 2268
+    creator: "Cjb8293"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "Cjb8293"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The domed National Assembly building of South Korea in Seoul"
+    caption: "National Assembly, Seoul"
+    position: "50% 50%"
+    country: KR
+    sectors: ['geopolitics']
+    headline_words: [assembly, lawmakers, parliament, minister, president, election, government, policy, law, bill, ruling party, opposition, impeachment]   # a topic image needs one of these in the headline
+  - id: china-great-hall
+    file: "Great Hall of the People (20200825114146).jpg"
+    file_page: https://commons.wikimedia.org/wiki/File:Great_Hall_of_the_People_%2820200825114146%29.jpg
+    image_url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/59/Great_Hall_of_the_People_%2820200825114146%29.jpg/{width}px-Great_Hall_of_the_People_%2820200825114146%29.jpg"   # Wikimedia thumbnail; {width} is 500, 960 or 1920
+    width: 6505
+    height: 4337
+    creator: "N509FZ"
+    license: "CC BY-SA 4.0"
+    license_url: "https://creativecommons.org/licenses/by-sa/4.0"
+    attribution: "N509FZ"
+    attribution_required: true
+    share_alike: true
+    permitted_use: "Illustration beside news stories about the place or topic, with credit and license link"
+    changes: "Resized by Wikimedia's thumbnailer and cropped to the page layout by CSS; no other edits"
+    alt: "The Great Hall of the People on Tiananmen Square, Beijing"
+    caption: "Great Hall of the People, Beijing"
+    position: "50% 45%"
+    country: CN
+    sectors: ['geopolitics']
+    headline_words: [congress, npc, party, communist, xi, premier, minister, government, policy, law, beijing summit, leadership, politburo]   # a topic image needs one of these in the headline

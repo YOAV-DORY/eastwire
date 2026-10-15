@@ -59,4 +59,14 @@ class GazetteerTest {
         assertThat(gazetteer.lookup("OITA")).get().extracting(c -> c.name()).isEqualTo("Ōita");
         assertThat(gazetteer.lookup("Atlantis")).isEmpty();
     }
+
+    @Test
+    void northKoreaIsNotSouthKorea() {
+        assertThat(gazetteer.mentionsCountry("KR", "China, N. Korea hold ceremony to open a bridge")).isFalse();
+        assertThat(gazetteer.mentionsCountry("KR", "North Korea says it test-fired missiles")).isFalse();
+        assertThat(gazetteer.mentionsCountry("KR", "N.Korea and Russia sign a pact")).isFalse();
+        assertThat(gazetteer.mentionsCountry("KR", "South Korean exports rise")).isTrue();
+        assertThat(gazetteer.mentionsCountry("KR", "Korean carmakers face tariffs")).isTrue();
+        assertThat(gazetteer.mentionsCountry("KR", "Seoul and Tokyo discuss North Korea; Korea's president travels")).isTrue();
+    }
 }

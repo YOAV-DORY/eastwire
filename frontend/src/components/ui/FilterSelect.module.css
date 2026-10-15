@@ -1,0 +1,55 @@
+.pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  min-width: 0;
+  padding: 0 var(--space-8) 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elev-1);
+  font-size: var(--text-small);
+}
+
+.pill[data-active] {
+  border-color: var(--accent-text);
+  background: var(--select);
+}
+
+.text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.label {
+  color: var(--text-muted);
+}
+
+.text strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.chevron {
+  position: absolute;
+  right: var(--space-3);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* The real control: invisible, covering the pill, so the whole pill is the touch target. */
+.pill select {
+  position: absolute;
+  inset: -1px; /* over the border too, so the control itself is the full 44px pill */
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  opacity: 0;
+  font-size: 16px; /* no zoom-on-focus on iOS */
+  cursor: pointer;
+}
+
+.pill:focus-within {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}

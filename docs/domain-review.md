@@ -86,10 +86,33 @@ Korean publishers barely appear.
 Already decided in batch 1 and frequent in the sample: thehindu.com (58), hindustantimes.com (53),
 thehindubusinessline.com (36), livemint.com (28), koreaherald.com (12); all denied.
 
+## Third batch (2026-10-15): why Japan, Korea and China were missing
+
+A fresh 6-hour sample (23 GKG files, 18,952 rows, 2026-10-15 02:45–08:45 UTC) counted publishers
+per covered country. The allowed Japanese and Chinese outlets **did not appear at all**: Mainichi,
+Asahi, Sixth Tone and Caixin each had 0 rows. The English GKG stream carries the high-volume
+outlets that deny display (China Daily 95 rows about China, Korea Herald 34 about Korea, Times
+of India 24 about Japan) and aggregators. GDELT alone cannot fix the imbalance, so three
+publishers whose terms allow headline links are now read directly (see sources.yaml and
+source-matrix.md rows 8a–8f):
+
+| Domain | Decision | Rule | Basis (paraphrased) | Evidence |
+|---|---|---|---|---|
+| mainichi.jp (English RSS) | allow (direct feed) | A1 + RSS terms | The RSS page forbids only commercial use of the RSS service; robots.txt names only AI crawlers | [RSS page](https://mainichi.jp/english/rss/) |
+| sixthtone.com (RSS) | allow (direct feed) | A2 | Linking free and encouraged; citing allowed with credit; no clause on automated access; no robots.txt | [terms](https://www.sixthtone.com/terms-use) |
+| nippon.com | **allow** | A2 | Free to link without permission; links must say they go to Nippon.com; no framing | [copyright](https://www.nippon.com/en/copyright/) |
+| world.kbs.co.kr | deny | D2 | Footer: no copy, distribution or use of the content | [RSS page footer](https://world.kbs.co.kr/service/about_rss.htm?lang=e) |
+| hani.co.kr | pending | P2 | Web use of articles is licensed for a fee; silent on headline links | [copyright guide](https://member.hani.co.kr/help/rules/mypage_help_copyright.hani) |
+| korea.net | pending | P1 | Every automated request redirected in a loop; no license mark readable | — |
+| english.news.cn, en.people.cn | pending | P1 | Terms not found on 2026-10-15 | — |
+
+South Korea is still the largest gap: no Korean outlet checked allows headline display without
+permission. The site says so on Sources & method.
+
 ## What this means for coverage
 
-- **Allowed now** (6):
-  - Japan: Mainichi, Asahi.
+- **Allowed now** (7, plus direct headline feeds from Mainichi, Sixth Tone and Nippon.com since 2026-10-15):
+  - Japan: Mainichi, Asahi, Nippon.com.
   - China: Sixth Tone, Caixin Global.
   - India: Scroll, Business Standard.
 - **Most high-volume publishers deny display without permission.** Of the frequent original-reporting publishers in the sample, only Business Standard could be allowed. GDELT will stay a small, India-leaning layer. Global Voices (CC BY) and, later, social accounts carry most of the Japan and Korea coverage.

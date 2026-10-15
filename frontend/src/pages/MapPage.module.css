@@ -166,56 +166,79 @@
 
 .mapFrame {
   position: relative;
-  /* Phones: the map keeps most of the screen between the masthead, the switch and the bottom bar. */
-  height: calc(100dvh - var(--header-h) - var(--bottomnav-h) - 190px);
-  min-height: 300px;
+  /* Phones: a bit under half the screen, so the selection and its stories show below it. */
+  height: clamp(240px, 44dvh, 420px);
 }
 
-.cityCard {
-  position: absolute;
-  left: var(--space-3);
-  right: var(--space-3);
-  bottom: var(--space-3);
-  z-index: 500;
+.phoneContext {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.contextHead {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-lg);
-  background: var(--bg-elev-2);
-  box-shadow: var(--shadow-pop);
-  animation: rise var(--dur-enter) var(--ease-out);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--select);
 }
 
-.cityCard > div {
+.contextHead p {
   display: grid;
-  flex: 1;
   min-width: 0;
 }
 
-.cityCard > div > strong {
+.contextHead strong {
   font-family: var(--font-serif);
   font-size: 1.25rem;
   line-height: 1.2;
 }
 
-.cityCard > div > span {
+.contextHead span {
   color: var(--text-muted);
   font-size: var(--text-small);
 }
 
-.cityCardClose {
+.reset {
   display: inline-flex;
+  flex: none;
   align-items: center;
-  justify-content: center;
-  width: var(--tap);
-  height: var(--tap);
-  border: 0;
+  gap: var(--space-1);
+  min-height: var(--tap);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
-  background: none;
-  color: var(--text-muted);
+  background: var(--bg-elev-1);
+  color: var(--text);
+  font-size: var(--text-small);
+  font-weight: 600;
   cursor: pointer;
+}
+
+.reset:hover {
+  border-color: var(--accent-text);
+}
+
+.contextNote {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.preview {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.preview > li {
+  border-bottom: 1px solid var(--rule);
+}
+
+.phoneContext > button {
+  justify-self: start;
 }
 
 @keyframes rise {
@@ -286,7 +309,7 @@
     min-height: 420px;
   }
 
-  .cityCard {
+  .phoneContext {
     display: none;
   }
 }

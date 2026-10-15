@@ -28,8 +28,8 @@ export function CityPanel({
             {place.name}
           </h2>
         </div>
-        <button type="button" className={styles.close} onClick={onClose} aria-label="Close city and show all stories">
-          <X size={20} strokeWidth={1.75} />
+        <button type="button" className={styles.close} onClick={onClose}>
+          <X size={16} strokeWidth={2} aria-hidden="true" /> All cities
         </button>
       </div>
       <dl className={styles.counts}>

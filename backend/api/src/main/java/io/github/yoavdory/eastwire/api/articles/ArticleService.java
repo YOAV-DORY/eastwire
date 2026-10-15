@@ -66,7 +66,7 @@ public class ArticleService {
         return ordered.subList(from, Math.min(ordered.size(), from + q.size()));
     }
 
-    ArticleView toView(ArticleRow r, Instant now) {
+    public ArticleView toView(ArticleRow r, Instant now) {
         DisplayDecision d = policy.decide(new DisplayRequest(r.sourceSlug(), r.url(), r.author(), r.creditLine(), false));
         if (!d.visible()) {
             return null;
@@ -86,7 +86,8 @@ public class ArticleService {
                 excerpt, attribution, license,
                 r.locations().stream().map(l -> new ArticleView.LocationView(l.role(), l.precision(), l.confidence(),
                         l.method(), l.countryIso2(), l.placeId(), l.placeName(), l.evidence(), l.primary())).toList(),
-                r.sectors().stream().map(this::sectorTag).toList(), Math.max(0, r.clusterSize() - 1));
+                r.sectors().stream().map(this::sectorTag).toList(), Math.max(0, r.clusterSize() - 1),
+                r.ingestedAt(), r.storyType() == null ? "news" : r.storyType());
     }
 
     private ArticleView.SectorTag sectorTag(ArticleRow.SectorRow row) {

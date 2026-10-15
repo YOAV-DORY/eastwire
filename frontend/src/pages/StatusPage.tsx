@@ -1,18 +1,21 @@
 import clsx from 'clsx'
+import { CircleAlert, CircleCheck, CircleDashed, CircleX } from 'lucide-react'
 import { useStatus } from '../api/queries'
 import type { FreshnessState, SourceStatus, Status } from '../api/types'
 import { PageHeader } from '../components/layout/PageHeader'
 import { ErrorState, FeedSkeleton } from '../components/status/Feedback'
-import { formatUtc, relativeTime } from '../lib/time'
+import { formatUtc, relativeTime, storyDate } from '../lib/time'
 import { usePageTitle } from '../hooks/usePageTitle'
 import styles from './StatusPage.module.css'
 
 const STATE_LABEL: Record<FreshnessState, string> = {
-  fresh: 'Up to date',
-  stale: 'Stale',
-  outage: 'Offline',
+  fresh: 'Source check succeeded',
+  stale: 'Behind: no successful check for over 2 hours',
+  outage: 'Failing: no successful check for over a day',
   unknown: 'Not checked yet',
 }
+
+const STATE_ICON = { fresh: CircleCheck, stale: CircleAlert, outage: CircleX, unknown: CircleDashed } as const
 
 /** Per-source freshness: checking a source and finding something new are reported separately. */
 export function StatusPage() {
@@ -25,8 +28,8 @@ export function StatusPage() {
         title={status.data ? headline(status.data) : 'How fresh are the sources?'}
         lede={
           <>
-            EastWire checks every source once an hour. A check can succeed and still find nothing new, so
-            &ldquo;last checked&rdquo; and &ldquo;newest item&rdquo; are kept apart.
+            EastWire checks every source once an hour. A successful check only means the source answered: it can find
+            nothing new, so the newest story&apos;s own date is shown separately.
           </>
         }
       />
@@ -55,19 +58,20 @@ export function StatusPage() {
 /** The page title says the overall state in words. */
 function headline(status: Status): string {
   const behind = status.sources.filter((s) => s.state === 'stale' || s.state === 'outage').length
-  if (status.state === 'outage') return 'Sources are offline'
-  if (behind === 0 && status.state === 'fresh') return 'Every source is up to date'
-  if (behind === 1) return 'One source is behind'
-  if (behind > 1) return `${behind} sources are behind`
-  return 'How fresh are the sources?'
+  if (status.state === 'outage') return 'Source checks are failing'
+  if (behind === 0 && status.state === 'fresh') return 'Every source check succeeded'
+  if (behind === 1) return 'One source check is behind'
+  if (behind > 1) return `${behind} source checks are behind`
+  return 'How are the sources?'
 }
 
 /** One source: a row of facts on wide screens, a small stack on phones; never a sideways scroll. */
 function SourceRow({ source: s }: { source: SourceStatus }) {
+  const Icon = STATE_ICON[s.state]
   return (
-    <li className={styles.row}>
+    <li className={styles.row} data-state={s.state}>
       <div className={styles.name}>
-        <span className={styles.dot} data-state={s.state} aria-hidden="true" />
+        <Icon className={styles.icon} size={18} strokeWidth={2} aria-hidden="true" />
         <div>
           <h3>{s.name}</h3>
           <p className={styles.state}>
@@ -78,26 +82,35 @@ function SourceRow({ source: s }: { source: SourceStatus }) {
       </div>
       <dl className={styles.facts}>
         <div>
-          <dt>Checked</dt>
+          <dt>Last check</dt>
           <dd className="num" title={s.lastSuccessAt ? formatUtc(s.lastSuccessAt) : undefined}>
             {s.lastSuccessAt ? relativeTime(s.lastSuccessAt) : 'never'}
           </dd>
         </div>
         <div>
-          <dt>Newest item</dt>
-          <dd className="num" title={s.newestItemAt ? formatUtc(s.newestItemAt) : undefined}>
-            {s.newestItemAt ? relativeTime(s.newestItemAt) : 'none yet'}
+          <dt>Newest story</dt>
+          <dd className="num" title={newest(s) ? formatUtc(newest(s)!) : undefined}>
+            {newest(s) ? `published ${storyDate(newest(s)!)}` : s.newestItemAt ? `found ${relativeTime(s.newestItemAt)}` : 'none yet'}
+          </dd>
+        </div>
+        <div>
+          <dt>Last added</dt>
+          <dd className="num" title={s.lastStoredAt ? formatUtc(s.lastStoredAt) : undefined}>
+            {s.lastStoredAt ? relativeTime(s.lastStoredAt) : '—'}
           </dd>
         </div>
         <div>
           <dt>Failed runs</dt>
-          <dd className="num">
-            {s.consecutiveFailures === 0 ? 'None' : `${s.consecutiveFailures} in a row`}
-          </dd>
+          <dd className="num">{s.consecutiveFailures === 0 ? 'None' : `${s.consecutiveFailures} in a row`}</dd>
         </div>
       </dl>
     </li>
   )
+}
+
+/** The newest story's own publication date, when the source gives dates. */
+function newest(s: SourceStatus): string | null {
+  return s.newestPublishedAt ?? null
 }
 
 const MB = 1024 * 1024

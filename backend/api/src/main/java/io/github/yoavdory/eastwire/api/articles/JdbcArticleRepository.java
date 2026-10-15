@@ -38,7 +38,7 @@ public class JdbcArticleRepository implements ArticleRepository {
         String sql = """
                 SELECT a.id, s.slug AS source_slug, a.title, a.canonical_url, a.domain, a.excerpt, a.author,
                        a.credit_line, a.attribution, a.license_name, a.license_url, a.published_at, a.discovered_at,
-                       COALESCE(c.size, 1) AS cluster_size
+                       COALESCE(c.size, 1) AS cluster_size, a.cluster_id, a.story_type, a.ingested_at
                 FROM article a
                 JOIN source s ON s.id = a.source_id
                 LEFT JOIN story_cluster c ON c.id = a.cluster_id
@@ -87,6 +87,10 @@ public class JdbcArticleRepository implements ArticleRepository {
         if (q.sector() != null) {
             conditions.add("EXISTS (SELECT 1 FROM article_sector t WHERE t.article_id = a.id AND t.sector = :sector)");
             params.put("sector", q.sector());
+        }
+        if (q.storyType() != null) {
+            conditions.add("a.story_type = :storyType");
+            params.put("storyType", q.storyType());
         }
         if (q.from() != null) {
             conditions.add("COALESCE(a.published_at, a.discovered_at) >= :from");
@@ -143,7 +147,8 @@ public class JdbcArticleRepository implements ArticleRepository {
                 rs.getString("canonical_url"), rs.getString("domain"), rs.getString("excerpt"), rs.getString("author"),
                 rs.getString("credit_line"), rs.getString("attribution"), rs.getString("license_name"),
                 rs.getString("license_url"), instant(rs.getTimestamp("published_at")),
-                instant(rs.getTimestamp("discovered_at")), rs.getInt("cluster_size"), List.of(), List.of());
+                instant(rs.getTimestamp("discovered_at")), rs.getInt("cluster_size"), List.of(), List.of(),
+                (Long) rs.getObject("cluster_id"), rs.getString("story_type"), instant(rs.getTimestamp("ingested_at")));
     }
 
     private static Instant instant(Timestamp ts) {

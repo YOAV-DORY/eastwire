@@ -439,14 +439,47 @@ domains:
     publisher: The Hankyoreh (English edition)
     country: KR
     decision: pending
-    rule: P1
-    next_action: Find and review the English-edition copyright terms (only member terms were found).
+    rule: P2
+    evidence_url: https://member.hani.co.kr/help/rules/mypage_help_copyright.hani
+    checked_on: 2026-10-15
+    notes: >-
+      The copyright guide routes web and mobile use of articles through paid licensing (Korea Press
+      Foundation's News Store, or copyright@hani.co.kr) and says nothing about headline links.
+      An English RSS feed exists. Ambiguous for an automated pipeline.
+    next_action: Email copyright@hani.co.kr asking whether non-commercial headline links from the RSS feed are acceptable.
   - domain: nippon.com
-    publisher: nippon.com
+    publisher: Nippon.com
     country: JP
+    decision: allow
+    rule: A2
+    conditions: [credit_by_name, no_frames]
+    evidence_url: https://www.nippon.com/en/copyright/
+    checked_on: 2026-10-15
+    ownership_note: pending
+    notes: >-
+      Users may link directly to pages without permission or notifying the site; links must say
+      they lead to Nippon.com, and framing is not allowed. Republishing text or pictures needs
+      written approval, so EastWire shows the headline link only.
+  - domain: world.kbs.co.kr
+    publisher: KBS World
+    country: KR
+    decision: deny
+    rule: D2
+    evidence_url: https://world.kbs.co.kr/service/about_rss.htm?lang=e
+    checked_on: 2026-10-15
+    notes: >-
+      Site footer (also on the RSS page): no copy, distribution or use of the content without
+      permission, AI learning included.
+  - domain: korea.net
+    publisher: Korea.net (KOCIS)
+    country: KR
     decision: pending
     rule: P1
-    next_action: Terms page not found from the homepage; find and review.
+    checked_on: 2026-10-15
+    notes: >-
+      Government news site that may publish under the Korea Open Government License, but every
+      automated request was redirected in a loop, so no page, license mark or feed could be read.
+    next_action: Read an article's license mark (KOGL type) in a normal browser; only KOGL Type 1 would allow headline and excerpt use.
   - domain: news.cn
     publisher: Xinhua (English)
     country: CN

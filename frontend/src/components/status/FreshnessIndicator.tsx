@@ -1,27 +1,51 @@
 import clsx from 'clsx'
+import { CircleAlert, CircleCheck, CircleDashed, CircleX } from 'lucide-react'
 import { Link } from 'react-router'
 import type { FreshnessState, Status } from '../../api/types'
 import { freshnessLabel, freshnessShort } from '../../lib/freshness'
 import { formatUtc } from '../../lib/time'
 import styles from './FreshnessIndicator.module.css'
 
+type Shown = FreshnessState | 'loading' | 'unavailable'
+
+const ICON = {
+  fresh: CircleCheck,
+  stale: CircleAlert,
+  outage: CircleX,
+  unknown: CircleDashed,
+  loading: CircleDashed,
+  unavailable: CircleX,
+} as const
+
 /**
- * "Sources updated 12 min ago" with a state dot: when EastWire last checked its sources, not
- * how old any story is (each story shows its own date). Links to /status.
+ * "Sources checked 12 min ago": when EastWire last checked its sources successfully, in a
+ * health colour with an icon and words (never the action pink). Not how old any story is:
+ * each story shows its own date. Links to /status, which separates checks from story times.
  */
-export function FreshnessIndicator({ status, loading, now }: { status?: Status; loading: boolean; now?: Date }) {
-  const state: FreshnessState | 'loading' = loading && !status ? 'loading' : (status?.state ?? 'unknown')
+export function FreshnessIndicator({
+  status,
+  loading,
+  failed = false,
+  now,
+}: {
+  status?: Status
+  loading: boolean
+  failed?: boolean
+  now?: Date
+}) {
+  const state: Shown = status ? status.state : failed ? 'unavailable' : loading ? 'loading' : 'unknown'
+  const Icon = ICON[state]
   return (
     <Link
       to="/status"
-      className={styles.pill}
-      title={status?.lastSuccessAt ? `All sources updated by ${formatUtc(status.lastSuccessAt)}` : undefined}
+      className={clsx(styles.pill, styles[state])}
+      title={status?.lastSuccessAt ? `Every source checked successfully by ${formatUtc(status.lastSuccessAt)}` : undefined}
       aria-live="polite"
     >
-      <span className={clsx(styles.dot, styles[state])} aria-hidden="true" />
-      <span className={styles.full}>{freshnessLabel(status, loading, now)}</span>
+      <Icon className={styles.icon} size={16} strokeWidth={2} aria-hidden="true" />
+      <span className={styles.full}>{freshnessLabel(status, loading, now, failed)}</span>
       <span className={styles.short} aria-hidden="true">
-        {freshnessShort(status, loading, now)}
+        {freshnessShort(status, loading, now, failed)}
       </span>
     </Link>
   )

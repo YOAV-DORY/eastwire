@@ -7,6 +7,7 @@ import { PageHeader } from '../components/layout/PageHeader'
 import { SocialCard } from '../components/social/SocialCard'
 import { ColdStart, EmptyState, ErrorState, FeedSkeleton } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
+import { FilterSelect } from '../components/ui/FilterSelect'
 import { FilterTabs } from '../components/ui/FilterTabs'
 import { useSlow } from '../hooks/useSlow'
 import { usePageTitle } from '../hooks/usePageTitle'
@@ -41,31 +42,15 @@ export function SocialPage() {
 
   return (
     <div className={clsx('container', styles.page)}>
-      <div className={styles.top}>
-        <PageHeader
-          kicker="Social"
-          title="Posts & videos"
-          lede="What newsrooms in and about the region are posting, from accounts we chose by hand. It sits apart from the news because it is not verified reporting."
-        />
-        <ul className={styles.rules} aria-label="How this section works">
-          <li>
-            <p>
-              <strong>Not verified reporting.</strong> A post is what an account said, nothing more.
-            </p>
-          </li>
-          <li>
-            <p>
-              <strong>Curated accounts only.</strong> Each card says why its account is listed.{' '}
-              <a href={DOCS}>How accounts are chosen</a>
-            </p>
-          </li>
-          <li>
-            <p>
-              <strong>Nothing loads until you ask.</strong> Bluesky and YouTube see your visit only after you press load.
-            </p>
-          </li>
-        </ul>
-      </div>
+      <PageHeader
+        kicker="Social"
+        title="Posts & videos"
+        lede="What newsrooms in and about the region are posting, from accounts we chose by hand. Not verified reporting, so it is kept apart from the news."
+      >
+        <p className={styles.note}>
+          Nothing loads from Bluesky or YouTube until you press load. <a href={DOCS}>How accounts are chosen</a>
+        </p>
+      </PageHeader>
 
       <div className={styles.filters}>
         <FilterTabs
@@ -83,6 +68,20 @@ export function SocialPage() {
             { value: undefined, label: 'All countries' },
             ...(countries.data ?? []).map((c) => ({ value: c.iso2, label: c.name, leading: <Flag country={c.iso2} /> })),
           ]}
+        />
+      </div>
+      <div className={styles.filtersCompact}>
+        <FilterSelect
+          label="Platform"
+          value={platform}
+          onChange={(p) => select({ platform: p, country })}
+          options={[{ value: undefined, label: 'All' }, ...PLATFORMS]}
+        />
+        <FilterSelect
+          label="Country"
+          value={country}
+          onChange={(c) => select({ platform, country: c })}
+          options={[{ value: undefined, label: 'All' }, ...(countries.data ?? []).map((c) => ({ value: c.iso2, label: c.name }))]}
         />
       </div>
 

@@ -69,7 +69,7 @@ export function CountryCounts({
   return (
     <section className={styles.panel} aria-labelledby="companion-countries">
       <h2 id="companion-countries" className="kicker">
-        By country, last 24 hours
+        News in the last 24 hours, by country
       </h2>
       <ul className={styles.countries}>
         {countries.map((c) => (

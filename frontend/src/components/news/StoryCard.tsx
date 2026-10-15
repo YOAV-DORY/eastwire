@@ -152,6 +152,22 @@ export function StoryCard({
                   ` · also reported by ${article.alsoReportedBy} ${article.alsoReportedBy === 1 ? 'other source' : 'other sources'}`}
                 {!licensed && article.attribution && ` · ${article.attribution}`}
               </p>
+              <dl className={styles.times} aria-label="Times">
+                <div>
+                  <dt>Published</dt>
+                  <dd>{article.publishedAt ? formatUtc(article.publishedAt) : 'not given by the source'}</dd>
+                </div>
+                <div>
+                  <dt>{article.viaDiscovery ? 'Found by GDELT' : 'First in the feed'}</dt>
+                  <dd>{formatUtc(article.discoveredAt)}</dd>
+                </div>
+                {article.ingestedAt && (
+                  <div>
+                    <dt>Added to EastWire</dt>
+                    <dd>{formatUtc(article.ingestedAt)}</dd>
+                  </div>
+                )}
+              </dl>
             </div>
           )}
         </div>

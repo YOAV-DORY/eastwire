@@ -5,7 +5,7 @@ import { mockApi } from './api'
  * The screenshot checklist from docs/PLAN.md section 17.6, automated where a rule can be
  * measured. Screenshots for the human pass land in test-results/screens/ (not committed).
  */
-const PAGES = ['/', '/?country=JP', '/map', '/map/city/1853909', '/search?q=metro', '/search?q=zzzxq', '/sectors', '/sector/economy', '/social', '/about', '/status']
+const PAGES = ['/', '/?country=JP', '/?country=KR', '/map', '/map/city/1853909', '/search?q=metro', '/search?q=zzzxq', '/sectors', '/sector/economy', '/sector/technology', '/social', '/about', '/status']
 
 for (const theme of ['dark', 'light'] as const) {
   test(`every page fits the width and is screenshotted (${theme})`, async ({ page }, info) => {
@@ -20,6 +20,16 @@ for (const theme of ['dark', 'light'] as const) {
         innerWidth: window.innerWidth,
       }))
       expect(scrollWidth, `${path} scrolls sideways`).toBeLessThanOrEqual(innerWidth)
+      // Every photo loads and carries its illustrative label and Commons credit.
+      await page.waitForFunction(() => [...document.querySelectorAll('figure img')].every((i) => (i as HTMLImageElement).complete))
+      const images = await page.evaluate(() =>
+        [...document.querySelectorAll('figure img')].map((img) => ({
+          loaded: (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0,
+          credited: /Illustrative image/.test(img.closest('figure')?.querySelector('figcaption')?.textContent ?? ''),
+          linked: Boolean(img.closest('figure')?.querySelector('figcaption a[href*="commons.wikimedia.org"]')),
+        })),
+      )
+      for (const image of images) expect(image, `${path} image`).toEqual({ loaded: true, credited: true, linked: true })
       const name = `${info.project.name}-${theme}-${path.replace(/[/?=&]+/g, '_') || 'home'}.png`
       await page.screenshot({ path: `test-results/screens/${name}`, fullPage: true })
     }
@@ -82,8 +92,8 @@ test('controls on phones are at least 44px tall', async ({ page }, info) => {
           const s = getComputedStyle(el)
           return r.width > 0 && r.height > 0 && s.visibility !== 'hidden'
         })
-        // Links in running text are exempt (WCAG 2.5.8); Leaflet's attribution is third-party; pins get a CSS hit area.
-        .filter((el) => !(el.tagName === 'A' && el.closest('p, h1, h2, h3, h4, dd, blockquote')))
+        // Links in running text and photo credits are exempt (WCAG 2.5.8); Leaflet's attribution is third-party; pins get a CSS hit area.
+        .filter((el) => !(el.tagName === 'A' && el.closest('p, h1, h2, h3, h4, dd, blockquote, figcaption')))
         .filter((el) => !el.closest('.leaflet-control-attribution') && !el.matches('.leaflet-marker-icon'))
         .filter((el) => el.getBoundingClientRect().height < 44)
         .map((el) => `${el.tagName} "${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 30)}"`),

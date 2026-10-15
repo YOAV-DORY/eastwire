@@ -81,7 +81,7 @@ export function AppShell() {
             ))}
           </nav>
           <div className={styles.actions}>
-            <FreshnessIndicator status={status.data} loading={status.isLoading} />
+            <FreshnessIndicator status={status.data} loading={status.isLoading} failed={status.isError} />
             <ThemeToggle />
           </div>
         </div>

@@ -9,6 +9,10 @@ import java.util.List;
  * @param viaDiscovery   true when found through GDELT (shown as "via GDELT")
  * @param isNew          published in the last hour (discovered, if the source gives no time)
  * @param alsoReportedBy other stored articles in the same story cluster
+ * @param publishedAt    the publisher's own time, or null when the source gives none
+ * @param discoveredAt   when the source first listed it (GDELT's crawl time, or the feed)
+ * @param ingestedAt     when EastWire stored it
+ * @param storyType      news, or feature (analysis, essays, citizen media: the reading section)
  */
 public record ArticleView(
         long id,
@@ -26,7 +30,9 @@ public record ArticleView(
         License license,
         List<LocationView> locations,
         List<SectorTag> sectors,
-        int alsoReportedBy) {
+        int alsoReportedBy,
+        Instant ingestedAt,
+        String storyType) {
 
     public record Source(String slug, String name) {
     }

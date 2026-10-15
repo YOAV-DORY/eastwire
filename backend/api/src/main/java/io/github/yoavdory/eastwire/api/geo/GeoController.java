@@ -18,6 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 class GeoController {
 
+    /**
+     * @param last24h news stories (not features) about the country, published (or, without a
+     *                publication time, found) in the last 24 hours
+     * @param total   every live story about it, of any age and type
+     */
     record CountryView(String iso2, String name, long last24h, long total) {
     }
 
@@ -40,8 +45,8 @@ class GeoController {
         Map<String, Counts> counts = new java.util.HashMap<>();
         jdbc.sql("""
                         SELECT l.country_iso2,
-                               count(DISTINCT a.id) FILTER (WHERE COALESCE(a.published_at, a.discovered_at)
-                                                                  > now() - interval '24 hours') AS last24h,
+                               count(DISTINCT a.id) FILTER (WHERE a.story_type = 'news'
+                                   AND COALESCE(a.published_at, a.discovered_at) > now() - interval '24 hours') AS last24h,
                                count(DISTINCT a.id) AS total
                         FROM article_location l JOIN article a ON a.id = l.article_id
                         WHERE l.role IN ('mentioned', 'event') AND l.is_primary AND a.expires_at > now()

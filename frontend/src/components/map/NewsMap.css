@@ -11,15 +11,28 @@
 }
 
 /*
- * OSM tiles are toned down so they read as a quiet base: inverted for the dark theme,
- * desaturated for the light one. Our English pin labels sit on top.
+ * OSM's own colours, softened: blue-grey water, warm land, faint borders. No inversion, so the
+ * tiles' labels stay readable; the dark theme only dims the tiles a little.
  */
-[data-theme="dark"] .ew-tiles {
-  filter: invert(1) hue-rotate(180deg) saturate(0.3) brightness(1.08) contrast(0.9);
+[data-theme="light"] .ew-tiles {
+  filter: saturate(0.62) sepia(0.08) brightness(1.02);
 }
 
-[data-theme="light"] .ew-tiles {
-  filter: grayscale(0.85) contrast(0.88) brightness(1.04) sepia(0.08);
+[data-theme="dark"] .ew-tiles {
+  filter: saturate(0.55) sepia(0.06) brightness(0.84) contrast(0.96);
+}
+
+/* English country names: small caps in the serif, over the tiles' local-script names. */
+.ew-map .ew-country {
+  color: #3d3a33;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 0 3px #fffdf6, 0 0 6px #fffdf6;
+  pointer-events: none;
 }
 
 /* ---------------------------------------------------------------- English city labels */
@@ -39,6 +52,13 @@
 
 .ew-map .ew-label::before {
   display: none;
+}
+
+/* The chosen city: its label on the pale pink selection surface, in bold. */
+.ew-map .ew-label--selected {
+  border-color: var(--accent-text);
+  background: var(--select);
+  font-weight: 700;
 }
 
 /* The pin of the story the reader is pointing at, or the cluster holding it. */
@@ -76,8 +96,8 @@
 }
 
 .ew-pin--selected svg {
-  transform: scale(1.15);
-  filter: drop-shadow(0 0 0 #fff) drop-shadow(0 0 3px #fff);
+  transform: scale(1.3);
+  filter: drop-shadow(0 0 0 #fff) drop-shadow(0 0 2px #fff) drop-shadow(0 0 4px var(--ink));
 }
 
 .ew-pin--drop svg {

@@ -7,11 +7,13 @@ import { renderRoute, stubApi } from '../test/render'
 const BASE = { '/api/v1/countries': COUNTRIES, '/api/v1/status': status('fresh') }
 
 describe('social page', () => {
-  it('shows curated posts under a permanent not-verified notice', async () => {
+  it('shows curated posts under one not-verified statement', async () => {
     stubApi({ ...BASE, '/api/v1/social': { items: [socialItem(), VIDEO], page: 1, size: 12, total: 2, hasMore: false } })
     renderRoute('/social')
     expect(await screen.findByRole('heading', { name: 'Posts & videos', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText('Not verified reporting.')).toBeInTheDocument()
+    expect(screen.getByText(/Not verified reporting, so it is kept apart from the news/)).toBeInTheDocument()
+    // One statement for the page; each card is tagged as a post, not with the warning again.
+    expect(screen.getAllByText(/not verified reporting/i)).toHaveLength(1)
     expect(await screen.findByText('2 items · last 30 days')).toBeInTheDocument()
     expect(screen.getAllByRole('article')).toHaveLength(2)
   })
@@ -19,9 +21,11 @@ describe('social page', () => {
   it('keeps platform and country filters in the URL', async () => {
     const calls = stubApi({ ...BASE, '/api/v1/social': { items: [], page: 1, size: 12, total: 0, hasMore: false } })
     const router = renderRoute('/social')
-    await userEvent.click(await screen.findByRole('button', { name: 'YouTube' }))
+    const platforms = await screen.findByRole('group', { name: 'Filter by platform' })
+    await userEvent.click(within(platforms).getByRole('button', { name: 'YouTube' }))
     await waitFor(() => expect(router.state.location.search).toBe('?platform=youtube'))
-    await userEvent.click(await screen.findByRole('button', { name: 'Japan' }))
+    const countries = await screen.findByRole('group', { name: 'Filter by country' })
+    await userEvent.click(await within(countries).findByRole('button', { name: 'Japan' }))
     await waitFor(() => expect(router.state.location.search).toBe('?platform=youtube&country=JP'))
     await waitFor(() =>
       expect(calls.some((u) => u.searchParams.get('platform') === 'youtube' && u.searchParams.get('country') === 'JP')).toBe(true),

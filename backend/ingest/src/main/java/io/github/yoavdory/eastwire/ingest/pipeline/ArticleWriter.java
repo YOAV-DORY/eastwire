@@ -112,10 +112,10 @@ public class ArticleWriter implements ArticleSink {
         return jdbc.sql("""
                         INSERT INTO article (source_id, canonical_url, url_hash, domain, title, excerpt, excerpt_kind,
                                              author, credit_line, published_at, discovered_at, language, display_mode,
-                                             license_name, license_url, attribution, expires_at)
+                                             license_name, license_url, attribution, expires_at, ingested_at, story_type)
                         VALUES (:sourceId, :url, :hash, :domain, :title, :excerpt, :excerptKind,
                                 :author, :credit, :publishedAt, :discoveredAt, :language, :displayMode,
-                                :licenseName, :licenseUrl, :attribution, :expiresAt)
+                                :licenseName, :licenseUrl, :attribution, :expiresAt, :ingestedAt, :storyType)
                         ON CONFLICT (url_hash) DO NOTHING
                         RETURNING id
                         """)
@@ -136,6 +136,8 @@ public class ArticleWriter implements ArticleSink {
                 .param("licenseUrl", decision.licenseUrl())
                 .param("attribution", decision.attributionLine(hasExcerpt))
                 .param("expiresAt", ts(expiresAt))
+                .param("ingestedAt", ts(now))
+                .param("storyType", c.storyType().name().toLowerCase(Locale.ROOT))
                 .query(Long.class)
                 .optional();
     }

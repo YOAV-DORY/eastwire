@@ -54,6 +54,7 @@ class IngestRunner implements ApplicationRunner {
     private final SocialAccounts socialAccounts;
     private final SocialLinker socialLinker;
     private final Map<String, Connector> connectors;
+    private final Map<String, Connector> connectorsByKey;
     private final DataSource dataSource;
     private final Clock clock;
     private final boolean useLock;
@@ -71,6 +72,8 @@ class IngestRunner implements ApplicationRunner {
         this.socialAccounts = socialAccounts;
         this.socialLinker = socialLinker;
         this.connectors = connectors.stream().collect(Collectors.toMap(Connector::sourceSlug, Function.identity()));
+        this.connectorsByKey = connectors.stream().filter(c -> c.connectorKey() != null)
+                .collect(Collectors.toMap(Connector::connectorKey, Function.identity()));
         this.dataSource = dataSource;
         this.clock = clock;
         this.useLock = useLock;
@@ -107,7 +110,7 @@ class IngestRunner implements ApplicationRunner {
             if (!source.enabled()) {
                 continue;
             }
-            Connector connector = connectors.get(source.slug());
+            Connector connector = connectors.getOrDefault(source.slug(), connectorsByKey.get(source.connector()));
             if (connector == null) {
                 log.info("{}: enabled but no connector is implemented yet", source.slug());
                 continue;

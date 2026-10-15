@@ -44,7 +44,8 @@ class StatusControllerTest {
 
     private static StatusRepository.SourceRow source(String slug, Duration sinceSuccess, int failures) {
         Instant success = sinceSuccess == null ? null : NOW.minus(sinceSuccess);
-        return new StatusRepository.SourceRow(slug, NOW.minusSeconds(60), success, success, failures, null, null);
+        return new StatusRepository.SourceRow(slug, NOW.minusSeconds(60), success, success, failures, null, null,
+                success == null ? null : success.minusSeconds(3 * 86_400), success);
     }
 
     @Test
@@ -60,6 +61,17 @@ class StatusControllerTest {
                 .andExpect(jsonPath("$.sources[0].state").value("fresh"))
                 .andExpect(jsonPath("$.sources[1].name").value("Global Voices"))
                 .andExpect(jsonPath("$.sources[1].consecutiveFailures").value(3));
+    }
+
+    @Test
+    void aSuccessfulCheckIsReportedApartFromHowOldTheNewestStoryIs() throws Exception {
+        when(repository.enabledSources()).thenReturn(List.of(source("global-voices", Duration.ofMinutes(10), 0)));
+        mvc.perform(get("/api/v1/status"))
+                .andExpect(jsonPath("$.sources[0].state").value("fresh"))
+                .andExpect(jsonPath("$.sources[0].lastSuccessAt").value("2026-10-13T11:50:00Z"))
+                // The source answered ten minutes ago, but its newest story is three days old.
+                .andExpect(jsonPath("$.sources[0].newestPublishedAt").value("2026-10-10T11:50:00Z"))
+                .andExpect(jsonPath("$.sources[0].lastStoredAt").value("2026-10-13T11:50:00Z"));
     }
 
     @Test

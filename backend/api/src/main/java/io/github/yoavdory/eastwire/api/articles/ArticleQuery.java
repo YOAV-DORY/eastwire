@@ -12,9 +12,10 @@ import java.time.Instant;
  * @param page    1-based page number
  * @param text    full-text search query (Postgres websearch syntax), or null for the plain feed
  * @param sector  sector slug (economy, technology...), or null for all
+ * @param storyType news | feature, or null for both
  */
 public record ArticleQuery(String country, Long cityId, Instant from, Instant to, int page, int size, String text, Sort sort,
-        String sector) {
+        String sector, String storyType) {
 
     public static final int MAX_PAGE = 20;
     public static final int MAX_SIZE = 50;
@@ -29,11 +30,16 @@ public record ArticleQuery(String country, Long cityId, Instant from, Instant to
 
     /** A feed query (no search text), newest first. */
     public ArticleQuery(String country, Long cityId, Instant from, Instant to, int page, int size) {
-        this(country, cityId, from, to, page, size, null, Sort.DATE, null);
+        this(country, cityId, from, to, page, size, null, Sort.DATE, null, null);
     }
 
     public ArticleQuery(String country, Long cityId, Instant from, Instant to, int page, int size, String text, Sort sort) {
-        this(country, cityId, from, to, page, size, text, sort, null);
+        this(country, cityId, from, to, page, size, text, sort, null, null);
+    }
+
+    public ArticleQuery(String country, Long cityId, Instant from, Instant to, int page, int size, String text, Sort sort,
+            String sector) {
+        this(country, cityId, from, to, page, size, text, sort, sector, null);
     }
 
     public int offset() {

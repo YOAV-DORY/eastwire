@@ -43,40 +43,36 @@
   color: var(--text);
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--text-disabled);
+.icon {
+  flex: none;
+  color: var(--text-faint);
 }
 
-.fresh {
-  background: var(--accent);
-  animation: pulse var(--dur-pulse) ease-in-out infinite;
+.fresh .icon {
+  color: var(--health-ok);
 }
 
-.stale {
-  background: var(--accent-2);
+.stale .icon {
+  color: var(--health-warn);
 }
 
-.outage {
-  background: var(--danger);
+.outage .icon,
+.unavailable .icon {
+  color: var(--health-bad);
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.45;
-    transform: scale(0.8);
+.loading .icon {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fresh {
+  .loading .icon {
     animation: none;
   }
 }

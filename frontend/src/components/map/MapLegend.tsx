@@ -25,10 +25,13 @@ export function MapLegend({
   countryOnly,
   countryNames,
   population,
+  windowLabel,
 }: {
   countryOnly: { country: string; count: number }[]
   countryNames: Record<string, string>
   population: boolean
+  /** The time window the pins count, e.g. "7 days". */
+  windowLabel?: string
 }) {
   return (
     <aside className={styles.legend} aria-label="Map legend">
@@ -36,7 +39,7 @@ export function MapLegend({
         <li>
           <Pin total={1} />
           <Pin total={5} />
-          <Pin total={20} /> <span>Stories about a city (1–4, 5–19, 20+)</span>
+          <Pin total={20} /> <span>Stories about a city{windowLabel ? `, last ${windowLabel}` : ''} (1–4, 5–19, 20+)</span>
         </li>
         <li>
           <Pin total={1} low /> <span>Dashed: low confidence only</span>
