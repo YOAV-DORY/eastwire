@@ -94,7 +94,8 @@ public final class DisplayPolicy {
             excerpt = 0;
         }
         boolean licensed = source.license() != null && !partnerReprint;
-        return new DisplayDecision(true, "ok", Math.max(excerpt, 0), false, source.name(),
+        String publisher = source.publisher() != null ? source.publisher() : source.name();
+        return new DisplayDecision(true, "ok", Math.max(excerpt, 0), false, publisher,
                 attribution(source.attribution(), request.author()),
                 licensed ? source.license().name() : null, licensed ? source.license().url() : null,
                 source.excerptNote(), source.label());
