@@ -5,9 +5,9 @@ import { useCountries, useMapCities, usePlaces, useStatus } from '../api/queries
 import { FrontPage } from '../components/front/FrontPage'
 import { Flag } from '../components/graphics/Flag'
 import { CountryCounts, MapCompanion, SocialPreview } from '../components/home/Companion'
+import { SectorTiles } from '../components/home/SectorTiles'
 import { StaleBanner } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
-import { FilterSelect } from '../components/ui/FilterSelect'
 import { FilterTabs } from '../components/ui/FilterTabs'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { DEFAULT_ROLES } from '../lib/map'
@@ -68,11 +68,6 @@ export function Home() {
     </Button>
   ) : undefined
 
-  const countryOptions = [
-    { value: undefined, label: 'All' },
-    ...(countries.data ?? []).map((c) => ({ value: c.iso2, label: `${c.name} (${c.last24h} today)` })),
-  ]
-  const sectorOptions = [{ value: undefined, label: 'All' }, ...SECTORS.map((s) => ({ value: s.id, label: s.label }))]
 
   return (
     <div className={clsx('container', styles.page)}>
@@ -84,7 +79,7 @@ export function Home() {
         </p>
       </header>
 
-      {/* Wide screens: text tabs. Phones: two pills that show the active choice and open every option. */}
+      {/* Chips with counts and colour dots; on phones the rows scroll, with an arrow while more are hidden. */}
       <div className={styles.filtersWide}>
         <FilterTabs
           label="Filter by country"
@@ -116,10 +111,6 @@ export function Home() {
             })),
           ]}
         />
-      </div>
-      <div className={styles.filtersCompact} role="group" aria-label="Filters">
-        <FilterSelect label="Country" value={country} options={countryOptions} onChange={(c) => select({ country: c, sector })} />
-        <FilterSelect label="Sector" value={sector} options={sectorOptions} onChange={(s) => select({ country, city, sector: s })} />
       </div>
       {country && (places.data?.length ?? 0) > 0 && (
         <label className={styles.cityPicker}>
@@ -155,10 +146,11 @@ export function Home() {
             {countries.data && (
               <CountryCounts countries={countries.data} selected={country} onSelect={(c) => select({ country: c, sector })} />
             )}
-            <SocialPreview country={country} />
           </>
         }
+        after={<SectorTiles />}
       />
+      <SocialPreview country={country} />
     </div>
   )
 }

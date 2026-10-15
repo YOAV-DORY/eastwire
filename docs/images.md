@@ -60,6 +60,30 @@ photograph of the city or institution the story is about, from Wikimedia Commons
 Ripon Building: the author asks for the credit "CC-by-sa PlaneMad/Wikimedia" and a link to the
 file page; that is the credit shown.
 
+## Page and sector headers (frontend/src/lib/pageImages.ts)
+
+Every page has a header photo, chosen from the files above plus two more whose pages were read
+on 2026-10-15. Each is labelled ("Illustrative image" or "Historical map") and credited with
+links to its file page and license.
+
+| Page | File | Creator | License |
+|---|---|---|---|
+| Map | [1864 Mitchell Map of Asia](https://commons.wikimedia.org/wiki/File:1864_Mitchell_Map_of_Asia_-_Geographicus_-_Asia-mitchell-1864.jpg) | Samuel Augustus Mitchell (via Geographicus) | Public domain |
+| Environment sector | [Mount Fuji at sunset, March 2025](https://commons.wikimedia.org/wiki/File:Mount_Fuji_at_sunset,_March_2025.jpg) | Romain Guy | CC0 (Featured picture) |
+| Search | Yu Garden, Shanghai | King of Hearts | CC BY-SA 4.0 |
+| Sectors | Gamcheon Culture Village, Busan | Bernard Gagnon | CC0 |
+| Social | Char Kaman, Hyderabad | Bernard Gagnon | CC BY-SA 3.0 |
+| Status | Howrah Bridge, foggy | Dey.sandip | CC BY-SA 3.0 |
+| How it works | Qianmen Street in snow, Beijing | Zheng sun | CC BY-SA 4.0 |
+| Economy sector | Bombay Stock Exchange | Niyantha Shekhar | CC BY 2.0 |
+| Geopolitics sector | National Assembly, Seoul | Cjb8293 | CC BY-SA 4.0 |
+| Technology sector | Marunouchi and Tokyo Station | Basile Morin | CC BY-SA 4.0 |
+| Business sector | Tokyo Stock Exchange | Kakidai | CC BY-SA 4.0 |
+| Society sector | Gyedong-gil, Seoul | Basile Morin | CC BY-SA 4.0 |
+
+Story cards without a cleared photo use EastWire's own artwork (a country motif and a sector
+icon, drawn in code, `StoryArt`), always labelled "Illustration".
+
 ## Rejected candidates (2026-10-15)
 
 | File | Why |

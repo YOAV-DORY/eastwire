@@ -93,14 +93,14 @@ describe('home front page', () => {
     expect(await screen.findByDisplayValue('All of Japan')).toBeInTheDocument()
   })
 
-  it('phones get compact filters that show the active choice', async () => {
+  it('filter chips keep their counts and colour dots, and a sector chip narrows the page', async () => {
     const calls = stubApi({ ...BASE, '/api/v1/front': front(STORIES) })
     const router = renderRoute('/?country=JP')
-    const compact = within(await screen.findByRole('group', { name: 'Filters' }))
-    await waitFor(() => expect(compact.getByRole('combobox', { name: 'Country' })).toHaveValue('JP'))
-    await userEvent.selectOptions(compact.getByRole('combobox', { name: 'Sector' }), 'economy')
+    const sectors = within(await screen.findByRole('group', { name: 'Filter by sector' }))
+    await userEvent.click(sectors.getByRole('button', { name: 'Economy' }))
     await waitFor(() => expect(router.state.location.search).toBe('?country=JP&sector=economy'))
     await waitFor(() => expect(calls.some((u) => u.searchParams.get('sector') === 'economy')).toBe(true))
+    expect(sectors.getByRole('button', { name: 'Economy' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('says honestly when a place has nothing new, and still offers the reading section', async () => {

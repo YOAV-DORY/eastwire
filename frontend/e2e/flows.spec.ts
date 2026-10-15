@@ -1,14 +1,10 @@
 import { expect, test } from '@playwright/test'
 import { mockApi, watchCsp } from './api'
 
-test('a filter lives in the URL: reloading shows the same stories', async ({ page }, info) => {
+test('a filter lives in the URL: reloading shows the same stories', async ({ page }) => {
   await mockApi(page)
   await page.goto('/')
-  if (info.project.name === 'phone') {
-    await page.getByRole('group', { name: 'Filters' }).getByRole('combobox', { name: 'Country' }).selectOption('JP')
-  } else {
-    await page.getByRole('group', { name: 'Filter by country' }).getByRole('button', { name: /Japan/ }).click()
-  }
+  await page.getByRole('group', { name: 'Filter by country' }).getByRole('button', { name: /Japan/ }).click()
   await expect(page).toHaveURL(/\?country=JP$/)
   const lead = page.getByRole('article', { name: /Port expansion approved in Osaka/ })
   await expect(lead).toBeVisible()
@@ -27,14 +23,10 @@ test('a shared search link opens the same results and filters', async ({ page })
   await expect(page.getByLabel('Order')).toHaveValue('date')
 })
 
-test('sector filters narrow the front page and every tag explains itself', async ({ page }, info) => {
+test('sector filters narrow the front page and every tag explains itself', async ({ page }) => {
   await mockApi(page)
   await page.goto('/')
-  if (info.project.name === 'phone') {
-    await page.getByRole('group', { name: 'Filters' }).getByRole('combobox', { name: 'Sector' }).selectOption('economy')
-  } else {
-    await page.getByRole('group', { name: 'Filter by sector' }).getByRole('button', { name: 'Economy' }).click()
-  }
+  await page.getByRole('group', { name: 'Filter by sector' }).getByRole('button', { name: 'Economy' }).click()
   await expect(page).toHaveURL(/sector=economy/)
   await page.getByRole('button', { name: 'Details' }).first().click()
   const tag = page.getByRole('button', { name: 'Economy: why this sector' }).first()

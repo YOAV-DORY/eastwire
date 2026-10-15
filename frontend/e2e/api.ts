@@ -88,6 +88,8 @@ export async function mockApi(page: Page): Promise<URL[]> {
   const calls: URL[] = []
   await page.route('https://tile.openstreetmap.org/**', (route) => route.fulfill({ body: TILE, contentType: 'image/png' }))
   // Stands in for a Wikimedia photo: the site's own favicon, a real image the browser can decode.
+  // Header photos come from Wikimedia in production; tests serve a local image instead.
+  await page.route('https://thumb.wikimedia.org/**', (route) => route.fulfill({ path: 'public/favicon.svg', contentType: 'image/svg+xml' }))
   await page.route('**/__test-image.png', (route) => route.fulfill({ path: 'public/favicon.svg', contentType: 'image/svg+xml' }))
   await page.route('**/api/v1/**', (route: Route) => {
     const url = new URL(route.request().url())

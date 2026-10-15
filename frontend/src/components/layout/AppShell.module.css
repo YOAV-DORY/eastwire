@@ -11,15 +11,9 @@
   top: 0;
   z-index: var(--z-sticky);
   height: var(--header-h);
-  border-bottom: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: saturate(140%) blur(10px);
-}
-
-@supports not (backdrop-filter: blur(1px)) {
-  .masthead {
-    background: var(--bg);
-  }
+  /* Solid: nothing (map tiles, photos) shows through the header. */
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--bg);
 }
 
 .mastheadInner {
@@ -100,8 +94,8 @@
 
 @media (max-width: 1023px) {
   .main {
-    /* Room for the bottom bar and the phone's home indicator. */
-    padding-bottom: calc(var(--bottomnav-h) + var(--space-10) + env(safe-area-inset-bottom));
+    /* The footer below already leaves room for the bottom bar; no second band here. */
+    padding-bottom: var(--space-8);
   }
 }
 
@@ -183,9 +177,8 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   height: calc(var(--bottomnav-h) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
-  border-top: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg-elev-1) 94%, transparent);
-  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border-strong);
+  background: var(--bg-elev-1);
 }
 
 .bottomnavLink {
@@ -212,14 +205,20 @@
   color: var(--text);
 }
 
+.bottomnavLink {
+  align-self: stretch;
+}
+
+/* The active tab's bar sits on the bar's top edge, over its border. */
 .bottomnavLink[aria-current='page']::before,
 .bottomnavActive::before {
   content: "";
   position: absolute;
   top: -1px;
-  left: 28%;
-  right: 28%;
-  height: 2px;
+  left: 18%;
+  right: 18%;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
   background: var(--accent);
 }
 

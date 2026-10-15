@@ -89,6 +89,26 @@
   text-transform: uppercase;
 }
 
+.social {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.socialHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+
+.socialTitle {
+  font-size: var(--text-h2);
+}
+
+.socialHead .more {
+  margin-left: auto;
+}
+
 .posts {
   display: grid;
   gap: var(--space-4);
@@ -97,21 +117,68 @@
   list-style: none;
 }
 
+/* Kept visibly apart from reporting: a social surface with a dashed edge. */
+.post {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--bg-social);
+}
+
+.postSource {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-small);
+}
+
+.postSource strong {
+  display: block;
+}
+
+.postWhen {
+  color: var(--text-muted);
+}
+
+.badge {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 1px solid var(--ink-border);
+  color: var(--on-ink);
+  font-weight: 700;
+  font-size: var(--text-small);
+}
+
 .postText {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  font-size: var(--text-small);
+  white-space: pre-line;
 }
 
-.postMeta {
-  margin-top: var(--space-1);
-  color: var(--text-muted);
+.postLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: start;
+  min-height: var(--tap);
+  color: var(--accent-text);
   font-size: var(--text-small);
+  font-weight: 600;
+  text-decoration: none;
 }
 
-.postMeta a {
-  color: var(--text);
-  font-weight: 500;
+@media (min-width: 720px) {
+  .posts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }

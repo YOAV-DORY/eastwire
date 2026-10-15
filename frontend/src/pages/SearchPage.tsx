@@ -1,19 +1,31 @@
 import { useMemo } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link, useLocation, useSearchParams } from 'react-router'
 import { useCountries, usePlaces, useSearch, useSearchSuggestions, type SearchFilters } from '../api/queries'
 import { StoryCard } from '../components/news/StoryCard'
+import { HeaderImage } from '../components/layout/PageHeader'
 import { SearchBar } from '../components/search/SearchBar'
+import { PAGE_IMAGES } from '../lib/pageImages'
 import { ColdStart, EmptyState, ErrorState, FeedSkeleton } from '../components/status/Feedback'
 import { useSlow } from '../hooks/useSlow'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { SECTORS, isSectorId } from '../sectors'
 import styles from './SearchPage.module.css'
 
+/** Quick ranges instead of a date picker; "from" is a UTC day, as the API expects. */
+const RANGES = [
+  { label: 'Any time', days: 0 },
+  { label: '24 hours', days: 1 },
+  { label: '7 days', days: 7 },
+  { label: '30 days', days: 30 },
+]
+const isoDaysAgo = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10)
+
 const PARAM_KEYS = ['q', 'country', 'city', 'sector', 'from', 'to', 'sort'] as const
 
 /** Search with every filter in the URL, so any search can be shared or bookmarked. */
 export function SearchPage() {
   const [params, setParams] = useSearchParams()
+  const location = useLocation()
   const filters: SearchFilters = {
     q: params.get('q') ?? '',
     country: params.get('country') ?? undefined,
@@ -46,6 +58,18 @@ export function SearchPage() {
     setParams(next)
   }
 
+  /** A published-since preset; replaces any custom range from a shared link. */
+  const setRange = (from: string | undefined) => {
+    const next = new URLSearchParams(params)
+    if (from) next.set('from', from)
+    else next.delete('from')
+    next.delete('to')
+    next.delete('page')
+    setParams(next)
+  }
+  const customRange =
+    Boolean(filters.to) || (filters.from !== undefined && !RANGES.some((r) => r.days && isoDaysAgo(r.days) === filters.from))
+
   const pageHref = (page: number) => {
     const next = new URLSearchParams()
     for (const key of PARAM_KEYS) {
@@ -62,6 +86,7 @@ export function SearchPage() {
 
   return (
     <div className={`container ${styles.page}`}>
+      <div className={styles.main}>
       <h1 className={styles.title}>{hasQuery ? <>Results for &ldquo;{filters.q}&rdquo;</> : 'Search'}</h1>
       <SearchBar
         key={filters.q}
@@ -75,9 +100,25 @@ export function SearchPage() {
           to: filters.to,
           sort: params.get('sort') ?? undefined,
         }}
-        autoFocus={!hasQuery}
+        autoFocus={Boolean((location.state as { focusSearch?: boolean } | null)?.focusSearch)}
       />
 
+      <div className={styles.when} role="group" aria-label="Published">
+        {RANGES.map((r) => {
+          const from = r.days ? isoDaysAgo(r.days) : undefined
+          const active = r.days ? filters.from === from && !filters.to : !filters.from && !filters.to
+          return (
+            <button key={r.label} type="button" aria-pressed={active} onClick={() => setRange(from)}>
+              {r.label}
+            </button>
+          )
+        })}
+        {customRange && (
+          <button type="button" aria-pressed onClick={() => setRange(undefined)}>
+            {filters.from ?? '…'} – {filters.to ?? 'now'} ×
+          </button>
+        )}
+      </div>
       <div className={styles.filters} role="group" aria-label="Filters">
         <label>
           <span>Country</span>
@@ -115,14 +156,6 @@ export function SearchPage() {
           </select>
         </label>
         <label>
-          <span>From</span>
-          <input type="date" value={filters.from ?? ''} max={filters.to} onChange={(e) => update('from', e.target.value)} />
-        </label>
-        <label>
-          <span>To</span>
-          <input type="date" value={filters.to ?? ''} min={filters.from} onChange={(e) => update('to', e.target.value)} />
-        </label>
-        <label>
           <span>Order</span>
           <select value={filters.sort} onChange={(e) => update('sort', e.target.value === 'date' ? 'date' : '')}>
             <option value="relevance">Best match</option>
@@ -130,23 +163,6 @@ export function SearchPage() {
           </select>
         </label>
       </div>
-
-      {!hasQuery && (
-        <section className={styles.examples} aria-labelledby="try-title">
-          <h2 id="try-title" className="kicker">
-            Try a search
-          </h2>
-          {examples.length > 0 ? (
-            <Suggestions items={examples.slice(0, 8)} />
-          ) : (
-            <p className="muted">Search headlines and the summaries we are allowed to show.</p>
-          )}
-          <p className={styles.syntax}>
-            Use quotes for an exact phrase (<code>&quot;heat wave&quot;</code>), a minus sign to leave a word out (
-            <code>election -Delhi</code>) and OR for either word (<code>rupee OR yen</code>).
-          </p>
-        </section>
-      )}
 
       {hasQuery && (
         <section aria-labelledby="results-title" className={styles.results} aria-busy={search.isFetching}>
@@ -207,6 +223,24 @@ export function SearchPage() {
           )}
         </section>
       )}
+      </div>
+      <aside className={styles.side} aria-label="Search help">
+        <HeaderImage image={PAGE_IMAGES.search} />
+        <section className={styles.examples} aria-labelledby="try-title">
+          <h2 id="try-title" className="kicker">
+            {hasQuery ? 'Other searches' : 'Try a search'}
+          </h2>
+          {examples.length > 0 ? (
+            <Suggestions items={examples.slice(0, 8)} />
+          ) : (
+            <p className="muted">Search headlines and the summaries we are allowed to show.</p>
+          )}
+          <p className={styles.syntax}>
+            Use quotes for an exact phrase (<code>&quot;heat wave&quot;</code>), a minus sign to leave a word out (
+            <code>election -Delhi</code>) and OR for either word (<code>rupee OR yen</code>).
+          </p>
+        </section>
+      </aside>
     </div>
   )
 }

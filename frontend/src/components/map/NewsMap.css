@@ -18,8 +18,13 @@
   filter: saturate(0.62) sepia(0.08) brightness(1.02);
 }
 
+/*
+ * Dark theme: the tiles are inverted into a quiet charcoal map (dark land, deep blue-grey
+ * water) at low contrast, so the map never outshines the page; OSM's own labels turn light
+ * on dark and stay legible. Pins are drawn outside this filter and keep their colours.
+ */
 [data-theme="dark"] .ew-tiles {
-  filter: saturate(0.55) sepia(0.06) brightness(0.84) contrast(0.96);
+  filter: invert(1) hue-rotate(185deg) saturate(0.45) brightness(0.88) contrast(0.86);
 }
 
 /* English country names: small caps in the serif, over the tiles' local-script names. */
@@ -33,6 +38,11 @@
   white-space: nowrap;
   text-shadow: 0 0 3px #fffdf6, 0 0 6px #fffdf6;
   pointer-events: none;
+}
+
+[data-theme="dark"] .ew-map .ew-country {
+  color: #e9e5dc;
+  text-shadow: 0 0 3px #15171b, 0 0 6px #15171b;
 }
 
 /* ---------------------------------------------------------------- English city labels */

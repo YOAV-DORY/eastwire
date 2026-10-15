@@ -4,6 +4,7 @@ import { useId, useState } from 'react'
 import type { ArticleView, LocationView } from '../../api/types'
 import { formatUtc, relativeTime, storyDate } from '../../lib/time'
 import { Sticker } from '../ui/Sticker'
+import { sectorColor, type SectorId } from '../../sectors'
 import { primaryCityId, primaryPlace } from './places'
 import { SectorTags } from './SectorTags'
 import styles from './StoryCard.module.css'
@@ -63,6 +64,7 @@ export function StoryCard({
   const Heading = variant === 'lead' ? 'h2' : 'h3'
   const licensed = Boolean(article.excerpt && article.license)
   const highlight = onHighlight ? () => onHighlight(primaryCityId(article.locations)) : undefined
+  const mainSector = article.sectors[0]
 
   return (
     <article
@@ -93,6 +95,12 @@ export function StoryCard({
         >
           {when}
         </time>
+        {mainSector && (
+          <span className={clsx(styles.item, styles.sector)}>
+            <span className={styles.sectorDot} style={{ background: sectorColor(mainSector.slug as SectorId) }} aria-hidden="true" />
+            {mainSector.label}
+          </span>
+        )}
         {article.isNew &&
           (variant === 'lead' ? (
             <span className={styles.sticker}>
@@ -103,9 +111,12 @@ export function StoryCard({
           ))}
       </p>
 
-      {article.excerpt && variant !== 'compact' && (
-        <p className={clsx(styles.summary, variant === 'lead' ? 'clamp-3' : 'clamp-2')}>{article.excerpt}</p>
-      )}
+      {article.excerpt && variant !== 'compact' && <p className={clsx(styles.summary, 'clamp-3')}>{article.excerpt}</p>}
+      {/* The whole card opens the story (the headline link covers it); this says so plainly. */}
+      <span className={styles.action} aria-hidden="true">
+        Read at {article.publisher}
+        <ArrowUpRight size={14} strokeWidth={2} />
+      </span>
       {licensed && variant !== 'compact' && (
         <p className={styles.license}>
           {article.attribution}

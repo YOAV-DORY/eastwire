@@ -3,6 +3,8 @@ import type { FrontStory } from '../../api/types'
 import { StoryCard } from '../news/StoryCard'
 import { isCleared } from './cleared'
 import { IllustrativeFigure } from './IllustrativeFigure'
+import { StoryArt } from './StoryArt'
+import { mainCountry } from './storyCountry'
 import styles from './SecondaryStory.module.css'
 
 /** A secondary story: a standard card, with a small credited illustrative photo when one is cleared. */
@@ -21,7 +23,7 @@ export function SecondaryStory({
 }) {
   const image = isCleared(story.image) ? story.image : null
   return (
-    <div className={clsx(styles.secondary, image && styles.withImage)}>
+    <div className={clsx(styles.secondary, styles.withImage)}>
       <StoryCard
         article={story.article}
         variant="standard"
@@ -30,8 +32,13 @@ export function SecondaryStory({
         onHighlight={onHighlight}
         highlighted={highlighted}
       />
-      {image && (
+      {image ? (
         <IllustrativeFigure className={styles.figure} image={image} variant="thumb" sizes="(min-width: 720px) 200px, 40vw" />
+      ) : (
+        // No photo is cleared for this story: EastWire's own artwork, labelled as an illustration.
+        <div className={styles.figure}>
+          <StoryArt country={mainCountry(story.article)} sector={story.article.sectors[0]?.slug} seed={story.article.id} />
+        </div>
       )}
     </div>
   )

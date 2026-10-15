@@ -1,3 +1,27 @@
+.wrap {
+  position: relative;
+  min-width: 0;
+}
+
+/* The scroll cue: a round arrow over the row's faded right edge. */
+.more {
+  position: absolute;
+  top: 50%;
+  right: calc(-1 * var(--space-2));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  transform: translateY(-50%);
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--bg-elev-1);
+  color: var(--text);
+  box-shadow: var(--shadow-hover);
+  cursor: pointer;
+}
+
 .row {
   display: flex;
   gap: var(--space-1);
@@ -7,7 +31,8 @@
   scrollbar-width: none;
   border-bottom: 1px solid var(--rule);
   /* Edges fade where the row continues off screen. */
-  mask-image: linear-gradient(to right, transparent, #000 var(--gutter), #000 calc(100% - var(--gutter)), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 var(--gutter), #000 calc(100% - 64px), transparent);
+  padding-right: 56px;
 }
 
 .row::-webkit-scrollbar {
@@ -70,6 +95,10 @@
     padding-inline: 0;
     overflow: visible;
     mask-image: none;
+  }
+
+  .more {
+    display: none;
   }
 
 }

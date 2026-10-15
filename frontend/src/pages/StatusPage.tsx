@@ -6,6 +6,7 @@ import { PageHeader } from '../components/layout/PageHeader'
 import { ErrorState, FeedSkeleton } from '../components/status/Feedback'
 import { formatUtc, relativeTime, storyDate } from '../lib/time'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { PAGE_IMAGES } from '../lib/pageImages'
 import styles from './StatusPage.module.css'
 
 const STATE_LABEL: Record<FreshnessState, string> = {
@@ -24,6 +25,7 @@ export function StatusPage() {
   return (
     <div className={clsx('container', styles.page)}>
       <PageHeader
+        image={PAGE_IMAGES.status}
         kicker="Status"
         title={status.data ? headline(status.data) : 'How fresh are the sources?'}
         lede={

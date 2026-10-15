@@ -8,13 +8,18 @@ import { isSavedCopy } from '../../lib/savedCopy'
 import { StoryCard } from '../news/StoryCard'
 import { ColdStart, EmptyState, ErrorState, SavedCopyNotice } from '../status/Feedback'
 import { Skeleton } from '../ui/Skeleton'
+import { Flag } from '../graphics/Flag'
+import { sectorColor, type SectorId } from '../../sectors'
+import { FeatureCard } from './FeatureCard'
+import { mainCountry } from './storyCountry'
 import { LeadStory } from './LeadStory'
 import { ReadingList } from './ReadingList'
 import { SecondaryStory } from './SecondaryStory'
 import styles from './FrontPage.module.css'
 
-/** Latest stories shown beside the rail; the rest go full width below it. */
-const TOP_LATEST = 6
+/** Latest stories shown beside the rail; the next ones become the In focus cards; the rest are grouped. */
+const TOP_LATEST = 5
+const FEATURED = 4
 
 /**
  * A ranked front page: lead, two secondaries and the start of Latest beside an optional rail,
@@ -30,8 +35,11 @@ export function FrontPage({
   emptyAction,
   onHighlight,
   highlightedPlace,
+  after,
 }: {
   filters: FrontFilters
+  /** Full-width content between the grouped stories and Reading (e.g. sector tiles). */
+  after?: ReactNode
   countryNames: Record<string, string>
   rail?: ReactNode
   emptyTitle: string
@@ -48,7 +56,10 @@ export function FrontPage({
   const highlighted = (a: ArticleView) =>
     highlightedPlace != null && a.locations.some((l) => l.primary && l.placeId === highlightedPlace)
   const top = data?.latest.slice(0, TOP_LATEST) ?? []
-  const more = data?.latest.slice(TOP_LATEST) ?? []
+  const featured = data?.latest.slice(TOP_LATEST, TOP_LATEST + FEATURED) ?? []
+  const more = data?.latest.slice(TOP_LATEST + FEATURED) ?? []
+  // The rest of Latest under sub-headings: by country on a mixed page, by sector within one country.
+  const groups = groupStories(more, filters.country ? 'sector' : 'country', countryNames)
   const nothingNew = data !== undefined && !data.lead && data.latest.length === 0
 
   return (
@@ -129,18 +140,75 @@ export function FrontPage({
         )}
       </div>
 
-      {more.length > 0 && (
+      {featured.length > 0 && (
+        <section aria-labelledby="focus-title" className={styles.focus}>
+          <h2 id="focus-title" className={clsx('kicker', styles.latestTitle)}>
+            In focus
+          </h2>
+          <ol className={styles.cards}>
+            {featured.map((a, i) => (
+              <li key={a.id}>
+                <FeatureCard article={a} index={i} countryNames={countryNames} />
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {groups.length > 0 && (
         <section aria-labelledby="more-title" className={styles.more}>
           <h2 id="more-title" className={clsx('kicker', styles.latestTitle)}>
             More from the last {data?.latestWindowHours} hours
           </h2>
-          <StoryList items={more} countryNames={countryNames} onHighlight={onHighlight} highlighted={highlighted} columns />
+          <div className={styles.groups}>
+            {groups.map((g) => (
+              <section key={g.key} aria-labelledby={`group-${g.key}`} className={styles.group}>
+                <h3 id={`group-${g.key}`} className={styles.groupTitle}>
+                  {g.flag && <Flag country={g.flag} size={20} />}
+                  {g.dot && <span className={styles.groupDot} style={{ background: g.dot }} aria-hidden="true" />}
+                  {g.label}
+                  <span className={clsx('num', styles.groupCount)}>{g.items.length}</span>
+                </h3>
+                <StoryList items={g.items} countryNames={countryNames} onHighlight={onHighlight} highlighted={highlighted} />
+              </section>
+            ))}
+          </div>
         </section>
       )}
+
+      {after}
 
       {data && <ReadingList items={data.reading} from={data.readingFrom} to={data.readingTo} countryNames={countryNames} />}
     </>
   )
+}
+
+interface Group {
+  key: string
+  label: string
+  items: ArticleView[]
+  flag?: string
+  dot?: string
+}
+
+/** Stories under sub-headings, biggest group first; stories with no country or sector go last. */
+function groupStories(items: ArticleView[], by: 'country' | 'sector', countryNames: Record<string, string>): Group[] {
+  const groups = new Map<string, Group>()
+  for (const a of items) {
+    const key = by === 'country' ? (mainCountry(a) ?? 'other') : (a.sectors[0]?.slug ?? 'other')
+    if (!groups.has(key)) {
+      groups.set(
+        key,
+        key === 'other'
+          ? { key, label: by === 'country' ? 'Across the region' : 'Other stories', items: [] }
+          : by === 'country'
+            ? { key, label: countryNames[key] ?? key, flag: key, items: [] }
+            : { key, label: a.sectors[0]!.label, dot: sectorColor(key as SectorId), items: [] },
+      )
+    }
+    groups.get(key)!.items.push(a)
+  }
+  return [...groups.values()].sort((x, y) => (x.key === 'other' ? 1 : y.key === 'other' ? -1 : y.items.length - x.items.length))
 }
 
 function StoryList({
@@ -187,6 +255,12 @@ function LeadSkeleton() {
         <Skeleton width="100%" height="5em" />
         <Skeleton width="100%" height="5em" />
       </div>
+      {Array.from({ length: 5 }, (_, i) => (
+        <div key={i} className={styles.skeletonItem}>
+          <Skeleton width="85%" height="1.2em" />
+          <Skeleton width="40%" height="0.85em" />
+        </div>
+      ))}
     </div>
   )
 }

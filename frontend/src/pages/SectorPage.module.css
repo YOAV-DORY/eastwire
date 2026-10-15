@@ -1,5 +1,6 @@
 .page {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
 }
 
@@ -14,20 +15,13 @@
 }
 
 .filtersWide {
-  display: none;
-}
-
-.filtersCompact {
   display: grid;
 }
+
 
 @media (min-width: 768px) {
   .filtersWide {
     display: grid;
-  }
-
-  .filtersCompact {
-    display: none;
   }
 }
 

@@ -19,7 +19,7 @@ const NAV = [
   // One sector's page (/sector/economy) is part of the Sectors section too.
   { to: '/sectors', label: 'Sectors', short: 'Sectors', icon: Shapes, match: '/sector' },
   { to: '/social', label: 'Social', short: 'Social', icon: MessagesSquare, match: '/social' },
-  { to: '/about', label: 'Sources & method', short: 'Sources & method', icon: BookOpen, match: '/about' },
+  { to: '/about', label: 'How it works', short: 'How it works', icon: BookOpen, match: '/about' },
 ] as const
 
 const BOTTOM = NAV.slice(0, 4)
@@ -49,7 +49,7 @@ export function AppShell() {
       '/': () => {
         const input = document.querySelector<HTMLInputElement>(`[${SEARCH_INPUT_ATTR}]`)
         if (input) input.focus()
-        else navigate('/search')
+        else navigate('/search', { state: { focusSearch: true } })
       },
       '?': () => setHelpOpen(true),
     }),
@@ -101,7 +101,7 @@ export function AppShell() {
             </p>
           </div>
           <nav aria-label="Footer" className={styles.footerLinks}>
-            <Link to="/about">Sources &amp; method</Link>
+            <Link to="/about">How it works</Link>
             <Link to="/status">Status</Link>
             <a href="https://github.com/YOAV-DORY/eastwire">Code on GitHub</a>
             <button type="button" className={styles.linkButton} onClick={() => setHelpOpen(true)}>

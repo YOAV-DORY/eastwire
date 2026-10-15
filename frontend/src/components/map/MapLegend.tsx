@@ -37,9 +37,16 @@ export function MapLegend({
     <aside className={styles.legend} aria-label="Map legend">
       <ul className={styles.items}>
         <li>
-          <Pin total={1} />
-          <Pin total={5} />
-          <Pin total={20} /> <span>Stories about a city{windowLabel ? `, last ${windowLabel}` : ''} (1–4, 5–19, 20+)</span>
+          <Pin total={1} /> <span>1–4 stories</span>
+        </li>
+        <li>
+          <Pin total={8} /> <span>5–19, count printed</span>
+        </li>
+        <li>
+          <Pin total={24} /> <span>20 or more</span>
+        </li>
+        <li className={styles.wide}>
+          <span>Pins count stories about each city{windowLabel ? ` in the last ${windowLabel}` : ''}; numbered circles group nearby cities.</span>
         </li>
         <li>
           <Pin total={1} low /> <span>Dashed: low confidence only</span>

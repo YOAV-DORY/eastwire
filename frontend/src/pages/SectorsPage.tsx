@@ -8,6 +8,7 @@ import { ErrorState } from '../components/status/Feedback'
 import { Skeleton } from '../components/ui/Skeleton'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { SECTORS, sectorColor } from '../sectors'
+import { PAGE_IMAGES } from '../lib/pageImages'
 import styles from './SectorsPage.module.css'
 
 const DOCS = 'https://github.com/YOAV-DORY/eastwire/blob/main/docs/sectors.md'
@@ -20,6 +21,7 @@ export function SectorsPage() {
   return (
     <div className={clsx('container', styles.page)}>
       <PageHeader
+        image={PAGE_IMAGES.sectors}
         kicker="Sectors"
         title="Six ways into the news"
         lede="Every story can carry up to two sectors, tagged by published rules rather than AI. Many stories get none."
