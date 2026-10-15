@@ -127,7 +127,7 @@ public final class FrontRanker {
             why.add("Published " + age);
         } else {
             score -= 0.2;
-            why.add("Found " + age + " (the source gives no publication time)");
+            why.add("Found " + age + "; the source gives no publication time");
         }
 
         double sector = r.sectors().stream().mapToDouble(t -> SECTOR_WEIGHT.getOrDefault(t.sector(), 0.0)).max().orElse(0);

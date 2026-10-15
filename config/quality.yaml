@@ -3,7 +3,9 @@
 #
 # Press releases: paid or company-written announcements that some publishers host next to
 # their reporting. Business Standard runs ANI's press-release wire under
-# /content/press-releases-ani/ (about a third of its GDELT-discovered items, 2026-10-14).
+# /content/press-releases-ani/ (about a third of its GDELT-discovered items, 2026-10-14), and
+# event and award announcements under /content/specials/ (seen 2026-10-15, e.g. a company's
+# "most preferred workplace" ceremony).
 
 not_news:
   url_contains:
@@ -13,6 +15,7 @@ not_news:
     - /business-wire/
     - /sponsored/
     - /brand-studio/
+    - /content/specials/
   title_contains:
     - "®"
     - "™"

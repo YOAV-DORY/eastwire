@@ -69,7 +69,7 @@ class FrontRankerTest {
     void storiesWithoutAPublicationTimeSayTheyWereFound() {
         var found = FrontRanker.score(story(1, "Ferry service resumes", "A", 2, "JP", null, null, 1, false), "A", NOW);
         var published = FrontRanker.score(story(2, "Ferry service resumes", "A", 2, "JP", null, null, 1, true), "A", NOW);
-        assertThat(found.why().getFirst()).isEqualTo("Found 2 h ago (the source gives no publication time)");
+        assertThat(found.why().getFirst()).isEqualTo("Found 2 h ago; the source gives no publication time");
         assertThat(found.score()).isLessThan(published.score());
     }
 
