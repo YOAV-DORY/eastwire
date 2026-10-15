@@ -51,6 +51,12 @@ describe.each([
     ['--text-on-accent', '--accent'],
     ['--text-on-accent', '--accent-2'],
     ['--danger', '--bg'],
+    ['--on-ink', '--ink'],
+    ['--on-ink-muted', '--ink'],
+    ['--health-ok', '--bg'],
+    ['--health-warn', '--bg'],
+    ['--health-bad', '--bg'],
+    ['--text', '--select'],
   ])('text %s on %s meets AA (4.5:1)', (fg, bg) => {
     expect(contrast(t[fg], t[bg])).toBeGreaterThanOrEqual(4.5)
   })
