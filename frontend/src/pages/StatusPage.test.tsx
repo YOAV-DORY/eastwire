@@ -38,9 +38,10 @@ describe('status page', () => {
       '/api/v1/status': { ...status('stale'), sources: [source('global-voices', 'fresh'), source('gdelt-gkg', 'stale')] },
     })
     renderRoute('/status')
-    expect(await screen.findByRole('heading', { level: 1, name: 'One source is behind' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'One source check is behind' })).toBeInTheDocument()
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
-    expect(screen.getAllByText('Checked')).toHaveLength(2)
+    expect(screen.getAllByText('Last check')).toHaveLength(2)
+    expect(screen.getByText('Source check succeeded')).toBeInTheDocument()
     expect(screen.getByText('2 in a row')).toBeInTheDocument()
     expect(screen.getAllByText('none yet')).toHaveLength(2)
     expect(document.title).toBe('Status · EastWire')

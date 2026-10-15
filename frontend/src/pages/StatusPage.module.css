@@ -41,34 +41,31 @@
   font-size: var(--text-small);
 }
 
-.dot {
+.icon {
   flex: none;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--text-faint);
-  transform: translateY(-1px);
+  align-self: center;
+  color: var(--text-faint);
 }
 
-.dot[data-state='fresh'] {
-  background: var(--accent);
+.row[data-state='fresh'] .icon {
+  color: var(--health-ok);
 }
 
-.dot[data-state='stale'] {
-  background: var(--accent-2);
+.row[data-state='stale'] .icon {
+  color: var(--health-warn);
 }
 
-.dot[data-state='outage'] {
-  background: var(--danger);
+.row[data-state='outage'] .icon {
+  color: var(--health-bad);
 }
 
 /* Facts: three short columns on phones too; they are only a few words each. */
 .facts {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
   margin: 0;
-  padding-left: calc(10px + var(--space-3));
+  padding-left: calc(18px + var(--space-3));
 }
 
 .facts dt {
@@ -84,9 +81,9 @@
   font-size: var(--text-small);
 }
 
-@media (max-width: 379px) {
+@media (min-width: 600px) {
   .facts {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 

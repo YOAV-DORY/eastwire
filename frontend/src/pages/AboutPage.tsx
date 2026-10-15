@@ -16,6 +16,9 @@ const SECTIONS = [
   { id: 'what', label: 'What we show' },
   { id: 'sources', label: 'Sources' },
   { id: 'gaps', label: 'Coverage gaps' },
+  { id: 'ranking', label: 'How the front page is chosen' },
+  { id: 'times', label: 'Dates and times' },
+  { id: 'images', label: 'Images' },
   { id: 'places', label: 'Places' },
   { id: 'sectors', label: 'Sectors' },
   { id: 'credits', label: 'Credits and privacy' },
@@ -138,15 +141,63 @@ export function AboutPage() {
 
           <Section n={3} id="gaps" title="Coverage gaps">
             <p>
-              Coverage is uneven, and we would rather say so. Most high-volume Indian, Korean and Japanese publishers do
-              not allow their headlines to be shown without permission, so stories found through GDELT come from a
-              small, mostly Indian, group of publishers. South Korea and Japan rely largely on Global Voices, which
-              publishes a few posts a month.
+              Coverage is uneven, and we would rather say so. GDELT&apos;s English stream is dominated by Indian
+              publishers, and most high-volume Indian, Korean and Japanese outlets do not allow their headlines to be
+              shown without permission. Japan and China now also come straight from three publishers whose terms allow
+              headline links: The Mainichi, Sixth Tone and Nippon.com.
             </p>
-            <p className={styles.aside}>An empty city means our sources had nothing about it, not that nothing happened.</p>
+            <p>
+              <strong>South Korea is the largest gap.</strong> Every Korean outlet we have checked (Yonhap, The Korea
+              Herald, The Korea Times, JoongAng Daily, KBS World) forbids display without permission, The Hankyoreh
+              licenses its articles for a fee, and the government&apos;s Korea.net could not be read automatically. Korea
+              therefore appears mainly through Global Voices essays and other outlets&apos; reporting.
+            </p>
+            <p className={styles.aside}>An empty country or city means our sources had nothing about it, not that nothing happened.</p>
           </Section>
 
-          <Section n={4} id="places" title="Places">
+          <Section n={4} id="ranking" title="How the front page is chosen">
+            <p>
+              The lead and the order of Latest come from fixed, published rules, not from an AI or from clicks. A story
+              scores for <strong>freshness</strong> (worth half as much every 12 hours), <strong>significance</strong>{' '}
+              (its sector, and other outlets reporting the same event), and <strong>reach beyond one country</strong>{' '}
+              (another government, trade, climate, AI and chips, or more than one of our countries). Routine market
+              items and stories about countries we do not cover are ranked lower, and only a story about one of our
+              countries can lead.
+            </p>
+            <p>
+              Each event appears once; when outlets report the same thing, the card says how many. No publisher may fill
+              more than 40% of the list. Latest holds news from the last 48 hours; essays, explainers and older reports
+              go to the dated Reading section instead. The lead shows the reasons it was chosen.{' '}
+              <a href={`${REPO}/ranking.md`}>The rules in full</a>.
+            </p>
+          </Section>
+
+          <Section n={5} id="times" title="Dates and times">
+            <p>
+              Four different times are kept apart. <strong>Published</strong> is the publisher&apos;s own time; many
+              GDELT items have none, and then the card says &ldquo;found&rdquo; and when. <strong>Found</strong> is when
+              a source first listed the story. <strong>Added</strong> is when EastWire stored it. A{' '}
+              <strong>source check</strong> is when we last asked a source for news: a successful check can find
+              nothing new, so the Status page shows the newest story&apos;s date beside it.
+            </p>
+          </Section>
+
+          <Section n={6} id="images" title="Images">
+            <p>
+              News photos from our sources are not licensed for reuse here, so EastWire never shows them. Some lead
+              stories carry an <strong>illustrative image</strong> instead: a photograph of the city or institution the
+              story is about, from Wikimedia Commons, under a license that allows reuse with credit (CC0, CC BY or CC BY-SA).
+              We read each file&apos;s own page before using it and record its creator, license and any conditions.
+            </p>
+            <p>
+              An illustrative image is labelled as such and is never a photo of the event reported. Each one is credited
+              under it, with links to its file page and license; it is resized and cropped to fit, and not otherwise
+              changed. When no suitable image is cleared, the story runs without one.{' '}
+              <a href={`${REPO}/images.md`}>Every image and every rejected candidate</a>.
+            </p>
+          </Section>
+
+          <Section n={7} id="places" title="Places">
             <p>
               A story is filed under a city or country only when that place is its main subject: named in the
               headline, the dateline, or the first place the article covers. Passing mentions and where the publisher
@@ -158,7 +209,7 @@ export function AboutPage() {
             </p>
           </Section>
 
-          <Section n={5} id="sectors" title="Sectors">
+          <Section n={8} id="sectors" title="Sectors">
             <p>
               Stories are tagged with up to two of six sectors by published keyword rules, the publisher&apos;s own
               topic tags and GDELT themes. No AI. Open a story&apos;s details to see the rules that matched, or read{' '}
@@ -166,7 +217,7 @@ export function AboutPage() {
             </p>
           </Section>
 
-          <Section n={6} id="credits" title="Credits and privacy">
+          <Section n={9} id="credits" title="Credits and privacy">
             <p>
               Discovery data: <a href="https://www.gdeltproject.org/">The GDELT Project</a>. City data:{' '}
               <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0). Map tiles: ©{' '}
@@ -182,8 +233,10 @@ export function AboutPage() {
               data for at most 30 days and deletes it when the platform removes it.
             </p>
             <p>
-              EastWire sets no cookies and uses no trackers. Your theme and shortcut settings are stored only in your
-              browser. Map images load from the OpenStreetMap tile servers, which see your IP address like any website.
+              EastWire sets no cookies and uses no trackers. Your theme and shortcut settings, and a saved copy of the
+              last front page you loaded (so a return visit can show it, dated, while the server wakes), are stored only
+              in your browser. Map images load from the OpenStreetMap tile servers and illustrative photos from
+              Wikimedia&apos;s image servers, which see your IP address like any website.
             </p>
             <p className={styles.aside}>
               To ask for a correction or removal, open an issue on{' '}

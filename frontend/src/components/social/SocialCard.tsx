@@ -21,7 +21,7 @@ export function SocialCard({ item, now }: { item: SocialItemView; now?: Date }) 
   const [loaded, setLoaded] = useState(false)
   return (
     <article className={styles.card}>
-      <p className={styles.label}>{item.label}</p>
+      <p className={styles.label}>{item.platform === 'youtube' ? 'YouTube video' : 'Bluesky post'}</p>
       <header className={styles.header}>
         <strong className={styles.account}>{item.account.name}</strong>
         <span className={styles.byline}>

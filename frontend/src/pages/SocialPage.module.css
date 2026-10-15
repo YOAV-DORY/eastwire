@@ -3,47 +3,38 @@
   gap: var(--space-6);
 }
 
-.top {
-  display: grid;
-  gap: var(--space-6);
-}
-
-/* Three plain rules for the section, numbered by a pink rule rather than icons. */
-.rules {
-  display: grid;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.note {
   color: var(--text-muted);
   font-size: var(--text-small);
 }
 
-.rules li {
-  padding-left: var(--space-4);
-  border-left: 2px solid var(--rule);
-}
-
-.rules li:first-child {
-  border-left-color: var(--text-muted);
-}
-
-.rules strong {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.rules a {
+.note a {
   color: var(--text);
   text-decoration-color: var(--text-faint);
 }
 
-.rules a:hover {
+.note a:hover {
   text-decoration-color: var(--accent);
 }
 
 .filters {
+  display: none;
+}
+
+.filtersCompact {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+@media (min-width: 768px) {
+  .filters {
+    display: grid;
+  }
+
+  .filtersCompact {
+    display: none;
+  }
 }
 
 .list {
@@ -75,17 +66,6 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .top {
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: var(--space-12);
-    align-items: end;
-  }
-
-  .rules {
-    padding-bottom: var(--space-6);
-  }
-}
 
 @media (min-width: 1280px) {
   .grid {
