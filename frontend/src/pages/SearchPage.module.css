@@ -1,11 +1,64 @@
 .page {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-5);
+  gap: var(--space-10);
 }
 
-.page > * {
-  max-width: 820px;
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.side {
+  display: grid;
+  align-content: start;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+/* Published-since presets: chips, not a browser date picker. */
+.when {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.when button {
+  min-height: var(--tap);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elev-1);
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.when button:hover {
+  color: var(--text);
+}
+
+.when button[aria-pressed='true'] {
+  border-color: var(--accent-text);
+  background: var(--select);
+  color: var(--text);
+  font-weight: 600;
+}
+
+@media (min-width: 1024px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    column-gap: var(--space-12);
+  }
+
+  .side {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-6));
+  }
 }
 
 .title {

@@ -25,7 +25,7 @@ for (const theme of ['dark', 'light'] as const) {
       const images = await page.evaluate(() =>
         [...document.querySelectorAll('figure img')].map((img) => ({
           loaded: (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0,
-          credited: /Illustrative image/.test(img.closest('figure')?.querySelector('figcaption')?.textContent ?? ''),
+          credited: /Illustrative image|Historical map|Illustration/.test(img.closest('figure')?.querySelector('figcaption')?.textContent ?? ''),
           linked: Boolean(img.closest('figure')?.querySelector('figcaption a[href*="commons.wikimedia.org"]')),
         })),
       )
@@ -61,7 +61,7 @@ test('every main page is reachable from the phone navigation', async ({ page }, 
     await bottom.getByRole('link', { name }).click()
     await expect(page).toHaveURL(new RegExp(`${path}$`))
   }
-  for (const [name, path] of [['Social', '/social'], ['Sources & method', '/about'], ['Status', '/status']] as const) {
+  for (const [name, path] of [['Social', '/social'], ['How it works', '/about'], ['Status', '/status']] as const) {
     await bottom.getByRole('button', { name: 'More' }).click()
     await page.getByRole('dialog', { name: 'More' }).getByRole('link', { name }).click()
     await expect(page).toHaveURL(new RegExp(`${path}$`))
@@ -75,7 +75,7 @@ test('real news is visible on the first screen', async ({ page }) => {
   const lead = page.getByRole('heading', { level: 2, name: /Metro line opens in Bengaluru/ })
   await expect(lead).toBeInViewport({ ratio: 1 })
   // The lead and at least one more headline, not just a header and filters.
-  await expect(page.getByRole('heading', { level: 3 }).first()).toBeInViewport()
+  await expect(page.getByRole('list', { name: 'Also leading' })).toBeInViewport()
 })
 
 test('controls on phones are at least 44px tall', async ({ page }, info) => {

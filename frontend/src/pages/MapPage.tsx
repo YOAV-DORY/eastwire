@@ -15,6 +15,8 @@ import { Button } from '../components/ui/Button'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { readMapState, writeMapState, type MapState } from '../lib/map'
 import { SECTORS, sectorLabel, type SectorId } from '../sectors'
+import { PageHeader } from '../components/layout/PageHeader'
+import { PAGE_IMAGES } from '../lib/pageImages'
 import styles from './MapPage.module.css'
 
 const WINDOWS: { value: MapWindow; label: string; days: number }[] = [
@@ -146,13 +148,13 @@ export function MapPage() {
 
   return (
     <div className={clsx('container', styles.page)} data-view={state.view}>
-      <header className={styles.intro}>
-        <h1 className={styles.title}>Map</h1>
-        <p className={styles.lede}>
-          Pins mark the cities stories are about. A story that names a country but no one city is counted below the
-          map, never pinned to its capital.
-        </p>
-      </header>
+      <PageHeader
+        kicker="Map"
+        title="Map"
+        image={PAGE_IMAGES.map}
+        imageLabel="Historical map"
+        lede="Pins mark the cities stories are about. A story that names a country but no one city is counted below the map, never pinned to its capital."
+      />
 
       <div className={styles.toolbar}>
         <div className={styles.inlineFilters} role="group" aria-label="Map settings">

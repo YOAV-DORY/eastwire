@@ -1,6 +1,7 @@
 import { ArrowUpRight } from 'lucide-react'
 import { useEffect, useId, useState } from 'react'
 import type { SocialItemView } from '../../api/types'
+import { cleanPostText, initials } from '../../lib/postText'
 import { formatUtc, relativeTime } from '../../lib/time'
 import { Button } from '../ui/Button'
 import styles from './SocialCard.module.css'
@@ -23,6 +24,9 @@ export function SocialCard({ item, now }: { item: SocialItemView; now?: Date }) 
     <article className={styles.card}>
       <p className={styles.label}>{item.platform === 'youtube' ? 'YouTube video' : 'Bluesky post'}</p>
       <header className={styles.header}>
+        <span className={styles.badge} aria-hidden="true">
+          {initials(item.account.name)}
+        </span>
         <strong className={styles.account}>{item.account.name}</strong>
         <span className={styles.byline}>
           <span className={styles.handle}>{item.platform === 'bluesky' ? `@${item.account.handle}` : item.account.handle}</span>
@@ -37,7 +41,7 @@ export function SocialCard({ item, now }: { item: SocialItemView; now?: Date }) 
         loaded ? (
           <BlueskyEmbed item={item} />
         ) : (
-          <blockquote className={styles.quote}>{item.text}</blockquote>
+          <blockquote className={styles.quote}>{cleanPostText(item.text)}</blockquote>
         )
       ) : loaded ? (
         <div className={styles.video}>
@@ -60,7 +64,7 @@ export function SocialCard({ item, now }: { item: SocialItemView; now?: Date }) 
 
       <div className={styles.actions}>
         {!loaded && (
-          <Button variant="secondary" onClick={() => setLoaded(true)}>
+          <Button variant="primary" onClick={() => setLoaded(true)}>
             {item.platform === 'bluesky' ? 'Load post from Bluesky' : 'Load video (YouTube may set cookies)'}
           </Button>
         )}

@@ -38,12 +38,14 @@
   --danger: #ff6b6b;
   --ok: #3dd68c;
   /* the lead story's deep-ink panel: a second surface tone, not another accent */
-  --ink: #171c29;
+  /* the lead story's panel: a lifted surface in the dark theme, a bordered card on paper */
+  --ink: #1f222b;
+  --ink-border: rgba(255, 255, 255, 0.14);
   --on-ink: #f4f1ea;
   --on-ink-muted: #b8b5ad;
   --ink-rule: rgba(255, 255, 255, 0.14);
   /* selected filters and rows: a very pale pink surface under the pink underline */
-  --select: #2b1e2a;
+  --select: #3d2539;
   /* source health: its own colours (always with an icon and words), never the action pink */
   --health-ok: #4fd18b;
   --health-warn: #ffcf5a;
@@ -81,11 +83,12 @@
   --accent-wash: rgba(176, 22, 143, 0.07);
   --danger: #c62828;
   --ok: #1e8a55;
-  --ink: #15192a;
-  --on-ink: #f7f5f0;
-  --on-ink-muted: #c3c0b8;
-  --ink-rule: rgba(247, 245, 240, 0.16);
-  --select: #fbe8f5;
+  --ink: #fffefb;
+  --ink-border: rgba(22, 21, 15, 0.16);
+  --on-ink: #16150f;
+  --on-ink-muted: #57554f;
+  --ink-rule: rgba(22, 21, 15, 0.12);
+  --select: #f6d3ea;
   --health-ok: #17784a;
   --health-warn: #8f5a00;
   --health-bad: #b42323;

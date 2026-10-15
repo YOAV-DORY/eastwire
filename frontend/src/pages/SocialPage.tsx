@@ -7,10 +7,10 @@ import { PageHeader } from '../components/layout/PageHeader'
 import { SocialCard } from '../components/social/SocialCard'
 import { ColdStart, EmptyState, ErrorState, FeedSkeleton } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
-import { FilterSelect } from '../components/ui/FilterSelect'
 import { FilterTabs } from '../components/ui/FilterTabs'
 import { useSlow } from '../hooks/useSlow'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { PAGE_IMAGES } from '../lib/pageImages'
 import styles from './SocialPage.module.css'
 
 const PLATFORMS: { value: SocialPlatform; label: string }[] = [
@@ -43,6 +43,7 @@ export function SocialPage() {
   return (
     <div className={clsx('container', styles.page)}>
       <PageHeader
+        image={PAGE_IMAGES.social}
         kicker="Social"
         title="Posts & videos"
         lede="What newsrooms in and about the region are posting, from accounts we chose by hand. Not verified reporting, so it is kept apart from the news."
@@ -68,20 +69,6 @@ export function SocialPage() {
             { value: undefined, label: 'All countries' },
             ...(countries.data ?? []).map((c) => ({ value: c.iso2, label: c.name, leading: <Flag country={c.iso2} /> })),
           ]}
-        />
-      </div>
-      <div className={styles.filtersCompact}>
-        <FilterSelect
-          label="Platform"
-          value={platform}
-          onChange={(p) => select({ platform: p, country })}
-          options={[{ value: undefined, label: 'All' }, ...PLATFORMS]}
-        />
-        <FilterSelect
-          label="Country"
-          value={country}
-          onChange={(c) => select({ platform, country: c })}
-          options={[{ value: undefined, label: 'All' }, ...(countries.data ?? []).map((c) => ({ value: c.iso2, label: c.name }))]}
         />
       </div>
 

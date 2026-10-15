@@ -12,7 +12,17 @@
     <script src="/theme-init.js"></script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Shown until the app starts (React replaces it): the masthead and a lead-shaped placeholder. -->
+    <style>
+      .boot{min-height:100vh;background:var(--bg,#0f1012)}
+      .boot-bar{height:60px;border-bottom:1px solid var(--border-strong,#333);background:var(--bg,#0f1012);display:flex;align-items:center;padding:0 16px;font:600 20px/1 Georgia,serif;color:var(--text,#f2f0eb)}
+      .boot-main{max-width:1240px;margin:0 auto;padding:24px 16px;display:grid;gap:16px}
+      .boot-b{border-radius:10px;background:var(--bg-elev-2,#1d1e22)}
+      .boot-lead{height:260px}.boot-row{height:56px}
+      @media (prefers-reduced-motion:no-preference){.boot-b{animation:bootp 1.4s ease-in-out infinite}}
+      @keyframes bootp{50%{opacity:.55}}
+    </style>
+    <div id="root"><div class="boot" aria-hidden="true"><div class="boot-bar">EastWire</div><div class="boot-main"><div class="boot-b boot-lead"></div><div class="boot-b boot-row"></div><div class="boot-b boot-row"></div><div class="boot-b boot-row"></div><div class="boot-b boot-row"></div><div class="boot-b boot-row"></div></div></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

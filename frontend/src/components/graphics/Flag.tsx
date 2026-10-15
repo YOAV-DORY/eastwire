@@ -7,6 +7,8 @@ export function Flag({ country, size = 16 }: { country: string; size?: number })
   return (
     <svg width={size} height={height} viewBox="0 0 24 16" aria-hidden="true" focusable="false" style={{ borderRadius: 2 }}>
       {flagShapes(country)}
+      {/* A hairline frame, so white flags (Japan, South Korea) do not vanish on paper. */}
+      <rect x="0.5" y="0.5" width="23" height="15" fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="1" rx="1.5" />
     </svg>
   )
 }

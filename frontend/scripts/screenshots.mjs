@@ -75,7 +75,10 @@ for (const theme of THEMES) {
             .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()))
             .filter(vis)
             .filter((el) => !el.closest('.leaflet-container'))
-            .filter((el) => parseFloat(getComputedStyle(el).fontSize) < 12)
+            .filter((el) =>
+              // SVG text is scaled with its icon: judge its rendered height, not its font-size attribute.
+              el.namespaceURI === 'http://www.w3.org/2000/svg' ? el.getBoundingClientRect().height < 11 : parseFloat(getComputedStyle(el).fontSize) < 12,
+            )
             .map((el) => `${el.tagName.toLowerCase()} ${getComputedStyle(el).fontSize} "${el.textContent.trim().slice(0, 30)}"`)
           const headline = [...document.querySelectorAll('article h2 a, article h3 a')].find((a) => {
             const r = a.getBoundingClientRect()
@@ -87,7 +90,7 @@ for (const theme of THEMES) {
           const uncredited = [...document.querySelectorAll('figure img')]
             .filter((img) => {
               const cap = img.closest('figure')?.querySelector('figcaption')
-              return !cap || !/Illustrative image/i.test(cap.textContent) || !cap.querySelector('a[href*="commons.wikimedia.org"]')
+              return !cap || !/Illustrative image|Historical map|Illustration/i.test(cap.textContent) || !cap.querySelector('a[href*="commons.wikimedia.org"]')
             })
             .map((img) => img.getAttribute('alt'))
           // Latest must not contain stories older than its window (48 h by default).

@@ -7,12 +7,12 @@ import { PageHeader } from '../components/layout/PageHeader'
 import { FrontPage } from '../components/front/FrontPage'
 import { SectorRules } from '../components/news/SectorRules'
 import { Button } from '../components/ui/Button'
-import { FilterSelect } from '../components/ui/FilterSelect'
 import { FilterTabs } from '../components/ui/FilterTabs'
 import { DEFAULT_ROLES } from '../lib/map'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { isSectorId, sectorColor, sectorLabel, type SectorId } from '../sectors'
 import { NotFound } from './NotFound'
+import { PAGE_IMAGES } from '../lib/pageImages'
 import styles from './SectorPage.module.css'
 
 /** /sector/:slug — one sector's stories, where they are, and exactly how stories get this tag. */
@@ -43,6 +43,7 @@ function Sector({ slug }: { slug: SectorId }) {
   return (
     <div className={clsx('container', styles.page)} style={{ '--sector': sectorColor(slug) } as CSSProperties}>
       <PageHeader
+        image={PAGE_IMAGES[`sector-${slug}`]}
         kicker="Sector"
         title={
           <>
@@ -62,14 +63,6 @@ function Sector({ slug }: { slug: SectorId }) {
             { value: undefined, label: 'All countries' },
             ...(countries.data ?? []).map((c) => ({ value: c.iso2, label: c.name, leading: <Flag country={c.iso2} /> })),
           ]}
-        />
-      </div>
-      <div className={styles.filtersCompact}>
-        <FilterSelect
-          label="Country"
-          value={country}
-          onChange={select}
-          options={[{ value: undefined, label: 'All' }, ...(countries.data ?? []).map((c) => ({ value: c.iso2, label: c.name }))]}
         />
       </div>
 

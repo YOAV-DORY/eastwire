@@ -1,8 +1,9 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { useCallback } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useSocial } from '../../api/queries'
 import type { CityPin, CountryView, MapData } from '../../api/types'
+import { cleanPostText, initials } from '../../lib/postText'
 import { relativeTime } from '../../lib/time'
 import { Flag } from '../graphics/Flag'
 import { LazyNewsMap } from '../map/LazyNewsMap'
@@ -98,28 +99,38 @@ export function SocialPreview({ country }: { country?: string }) {
   const items = social.data?.pages[0]?.items ?? []
   if (items.length === 0) return null
   return (
-    <section className={styles.panel} aria-labelledby="companion-social">
-      <h2 id="companion-social" className="kicker">
-        From newsrooms on social
-      </h2>
-      <p className={styles.label}>Not verified reporting</p>
+    <section className={styles.social} aria-labelledby="companion-social">
+      <div className={styles.socialHead}>
+        <h2 id="companion-social" className={styles.socialTitle}>
+          From newsrooms on social
+        </h2>
+        <p className={styles.label}>Not verified reporting</p>
+        <Link to={country ? `/social?country=${country}` : '/social'} className={styles.more}>
+          All posts and videos <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+        </Link>
+      </div>
       <ul className={styles.posts}>
         {items.map((item) => (
-          <li key={item.id}>
-            <p className={styles.postText}>{item.title ?? item.text}</p>
-            <p className={styles.postMeta}>
-              <a href={item.url} target="_blank" rel="noopener noreferrer">
-                {item.account.name}
-                <span className="visually-hidden"> on {item.platform === 'bluesky' ? 'Bluesky' : 'YouTube'} (opens in a new tab)</span>
-              </a>{' '}
-              · {relativeTime(item.createdAt)}
+          <li key={item.id} className={styles.post}>
+            <p className={styles.postSource}>
+              <span className={styles.badge} aria-hidden="true">
+                {initials(item.account.name)}
+              </span>
+              <span>
+                <strong>{item.account.name}</strong>
+                <span className={styles.postWhen}>
+                  {item.platform === 'bluesky' ? 'Bluesky' : 'YouTube'} · {relativeTime(item.createdAt)}
+                </span>
+              </span>
             </p>
+            <p className={styles.postText}>{cleanPostText(item.title ?? item.text)}</p>
+            <a href={item.url} target="_blank" rel="noopener noreferrer" className={styles.postLink}>
+              Open the post <ArrowUpRight size={14} strokeWidth={2} aria-hidden="true" />
+              <span className="visually-hidden"> by {item.account.name} (opens in a new tab)</span>
+            </a>
           </li>
         ))}
       </ul>
-      <Link to={country ? `/social?country=${country}` : '/social'} className={styles.more}>
-        All posts and videos <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
-      </Link>
     </section>
   )
 }

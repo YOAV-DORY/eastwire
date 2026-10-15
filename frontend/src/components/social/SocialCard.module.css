@@ -19,7 +19,27 @@
 
 .header {
   display: grid;
-  gap: 2px;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-3);
+  align-items: center;
+}
+
+.header > :not(.badge) {
+  grid-column: 2;
+}
+
+.badge {
+  display: inline-grid;
+  grid-row: 1 / span 2;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--ink-border);
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--on-ink);
+  font-size: var(--text-small);
+  font-weight: 700;
 }
 
 .account {
@@ -43,6 +63,8 @@
   border-left: 2px solid var(--border-strong);
   white-space: pre-line;
   overflow-wrap: anywhere;
+  font-size: var(--text-body);
+  line-height: 1.55;
 }
 
 .facade {

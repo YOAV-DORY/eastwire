@@ -19,7 +19,7 @@ describe('app shell', () => {
       'Search',
       'Sectors',
       'Social',
-      'Sources & method',
+      'How it works',
     ])
     expect(within(bottom).getAllByRole('link').map((a) => a.textContent)).toEqual(['Home', 'Map', 'Search', 'Sectors'])
     expect(within(bottom).getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page')
