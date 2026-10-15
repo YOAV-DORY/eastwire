@@ -34,7 +34,9 @@ class StatusController {
             Instant lastSuccessAt,
             Instant newestItemAt,
             int consecutiveFailures,
-            boolean circuitOpen) {
+            boolean circuitOpen,
+            Instant newestPublishedAt,
+            Instant lastStoredAt) {
     }
 
     /** @param state ok, or warn once the database nears the free tier's limit */
@@ -64,9 +66,11 @@ class StatusController {
     ResponseEntity<Status> status() {
         Instant now = clock.instant();
         List<SourceStatus> sources = repository.enabledSources().stream()
-                .map(r -> new SourceStatus(r.slug(), config.source(r.slug()).map(s -> s.name()).orElse(r.slug()),
+                .map(r -> new SourceStatus(r.slug(),
+                        config.source(r.slug()).map(s -> s.publisher() != null ? s.publisher() : s.name()).orElse(r.slug()),
                         state(r.lastSuccessAt(), now), r.lastAttemptAt(), r.lastSuccessAt(), r.newestItemAt(),
-                        r.consecutiveFailures(), r.circuitOpenUntil() != null && now.isBefore(r.circuitOpenUntil())))
+                        r.consecutiveFailures(), r.circuitOpenUntil() != null && now.isBefore(r.circuitOpenUntil()),
+                        r.newestPublishedAt(), r.lastStoredAt()))
                 .toList();
         boolean anyNeverRan = sources.isEmpty() || sources.stream().anyMatch(s -> s.lastSuccessAt() == null);
         Instant oldest = sources.stream().map(SourceStatus::lastSuccessAt).filter(Objects::nonNull)
