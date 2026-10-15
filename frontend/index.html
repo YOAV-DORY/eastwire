@@ -5,24 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="News from China, India, South Korea and Japan, from sources whose terms allow it, with every source shown." />
     <meta name="color-scheme" content="dark light" />
-    <meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111214" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f7f4ee" media="(prefers-color-scheme: light)" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>EastWire · News from China, India, South Korea and Japan</title>
     <script src="/theme-init.js"></script>
   </head>
   <body>
-    <!-- Shown until the app starts (React replaces it): the masthead and a lead-shaped placeholder. -->
+    <!-- Shown until the app starts (React replaces it): masthead, ticker and the front page's grid shape. -->
     <style>
-      .boot{min-height:100vh;background:var(--bg,#0f1012)}
-      .boot-bar{height:60px;border-bottom:1px solid var(--border-strong,#333);background:var(--bg,#0f1012);display:flex;align-items:center;padding:0 16px;font:600 20px/1 Georgia,serif;color:var(--text,#f2f0eb)}
-      .boot-main{max-width:1240px;margin:0 auto;padding:24px 16px;display:grid;gap:16px}
-      .boot-b{border-radius:10px;background:var(--bg-elev-2,#1d1e22)}
-      .boot-lead{height:260px}.boot-row{height:56px}
+      .boot{min-height:100vh;background:var(--bg,#111214)}
+      .boot-bar{height:60px;border-top:3px solid #c8102e;border-bottom:1px solid var(--border-strong,#333);background:var(--bg,#111214);display:flex;align-items:center;padding:0 16px;font:600 24px/1 Georgia,serif;color:var(--text,#f3f1ec)}
+      .boot-tick{height:44px;background:#050506;border-left:120px solid #c8102e}
+      .boot-main{max-width:1280px;margin:0 auto;padding:16px;display:grid;gap:16px}
+      .boot-b{background:var(--bg-elev-2,#1f2024)}
+      .boot-strip{height:56px}.boot-lead{aspect-ratio:16/10}.boot-row{height:72px}
+      .boot-grid{display:grid;gap:16px}
+      @media (min-width:1024px){.boot-main{padding:16px 40px}.boot-grid{grid-template-columns:2fr 1fr}.boot-lead{aspect-ratio:11/5}}
       @media (prefers-reduced-motion:no-preference){.boot-b{animation:bootp 1.4s ease-in-out infinite}}
       @keyframes bootp{50%{opacity:.55}}
     </style>
-    <div id="root"><div class="boot" aria-hidden="true"><div class="boot-bar">EastWire</div><div class="boot-main"><div class="boot-b boot-lead"></div><div class="boot-b boot-row"></div><div class="boot-b boot-row"></div><div class="boot-b boot-row"></div><div class="boot-b boot-row"></div><div class="boot-b boot-row"></div></div></div></div>
+    <div id="root"><div class="boot" aria-hidden="true"><div class="boot-bar">EastWire</div><div class="boot-tick"></div><div class="boot-main"><div class="boot-b boot-strip"></div><div class="boot-grid"><div class="boot-b boot-lead"></div><div class="boot-grid" style="grid-template-columns:1fr;align-content:start"><div class="boot-b boot-row"></div><div class="boot-b boot-row"></div><div class="boot-b boot-row"></div></div></div></div></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

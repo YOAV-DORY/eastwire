@@ -55,14 +55,14 @@ export function pinSize(total: number): PinSize {
 
 export const PIN_PIXELS: Record<PinSize, [number, number]> = { s: [18, 24], m: [26, 35], l: [36, 48] }
 
-/** Three tiers that differ in size and in shade (pale, pink, deep magenta), never colour alone: larger pins also print their count. */
-export const PIN_FILL: Record<PinSize, string> = { s: '#ffc7f1', m: '#ff7fdf', l: '#d42f98' }
+/** Three tiers that differ in size and in shade (pale, bright and deep red), never colour alone: larger pins also print their count. */
+export const PIN_FILL: Record<PinSize, string> = { s: '#ff9aa5', m: '#ef3e55', l: '#b3001b' }
 
 function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
 }
 
-/** Flat pink teardrop with a black outline; dashed when every story placing it here is low confidence. */
+/** Flat red teardrop with a black outline; dashed when every story placing it here is low confidence. */
 export function pinSvg(pin: CityPin): string {
   const size = pinSize(pin.total)
   const [w, h] = PIN_PIXELS[size]
@@ -70,7 +70,7 @@ export function pinSvg(pin: CityPin): string {
   const centre =
     size === 's'
       ? `<circle cx="12" cy="12" r="4" fill="#fff"/>`
-      : `<circle cx="12" cy="12" r="8" fill="#fff"/><text x="12" y="16" text-anchor="middle" font-size="${pin.total >= 100 ? 8.5 : 11}" font-weight="700" font-family="system-ui, sans-serif" fill="#000">${pin.total}</text>`
+      : `<circle cx="12" cy="12" r="8" fill="#fff"/><text x="12" y="16" text-anchor="middle" font-size="${pin.total >= 100 ? 8.5 : 11}" font-weight="600" font-family="Schibsted Grotesk Variable, system-ui, sans-serif" fill="#000">${pin.total}</text>`
   return (
     `<svg width="${w}" height="${h}" viewBox="0 0 24 32" aria-hidden="true" focusable="false">` +
     `<path d="M12 1a11 11 0 0 1 11 11c0 8-11 19-11 19S1 20 1 12A11 11 0 0 1 12 1Z" fill="${PIN_FILL[size]}" stroke="#000" stroke-width="1.5"${dash}/>` +

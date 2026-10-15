@@ -11,11 +11,20 @@
 }
 
 @font-face {
-  font-family: "Newsreader Fallback";
-  src: local("Georgia");
+  font-family: "Archivo Fallback";
+  src: local("Arial");
+  size-adjust: 96%;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Source Sans Fallback";
+  src: local("Arial");
   size-adjust: 94%;
-  ascent-override: 98%;
-  descent-override: 26%;
+  ascent-override: 104%;
+  descent-override: 29%;
   line-gap-override: 0%;
 }
 
@@ -35,10 +44,10 @@ body {
   min-height: 100dvh;
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-size: var(--text-body);
+  font-weight: var(--weight-regular);
   line-height: var(--lh-body);
-  font-feature-settings: "ss01";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -51,15 +60,38 @@ figure {
   margin: 0;
 }
 
-/* Headlines are set in the newsroom serif; optical sizing tightens the big ones. */
+/* Every headline: the heavy semi-condensed sans. */
 h1,
 h2,
 h3 {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  font-optical-sizing: auto;
+  font-family: var(--font-headline);
+  font-stretch: var(--headline-stretch);
+  font-weight: var(--weight-black);
   letter-spacing: var(--track-tight);
   text-wrap: balance;
+}
+
+/* Controls and labels use the secondary family. */
+button,
+input,
+select,
+textarea,
+label,
+nav,
+time,
+figcaption {
+  font-family: var(--font-secondary);
+}
+
+code,
+kbd {
+  font-family: var(--font-secondary);
+  font-weight: var(--weight-semibold);
+}
+
+strong,
+b {
+  font-weight: var(--weight-semibold);
 }
 
 p {
@@ -75,7 +107,7 @@ a {
 
 /* Links show the accent on hover; at rest they stay neutral (or --accent-text in prose). */
 a:hover {
-  text-decoration-color: var(--accent);
+  text-decoration-color: var(--accent-text);
 }
 
 ::selection {
@@ -87,7 +119,8 @@ button,
 input,
 select,
 textarea {
-  font: inherit;
+  font-size: inherit;
+  line-height: inherit;
   color: inherit;
 }
 

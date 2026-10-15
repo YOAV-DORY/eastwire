@@ -1,7 +1,9 @@
+import clsx from 'clsx'
 import { ArrowUpRight } from 'lucide-react'
 import { useEffect, useId, useState } from 'react'
 import type { SocialItemView } from '../../api/types'
 import { cleanPostText, initials } from '../../lib/postText'
+import { postTopic, TOPIC_LABEL } from '../../lib/postTopic'
 import { formatUtc, relativeTime } from '../../lib/time'
 import { Button } from '../ui/Button'
 import styles from './SocialCard.module.css'
@@ -16,13 +18,20 @@ const BLUESKY_EMBED_SCRIPT = 'https://embed.bsky.app/static/embed.js'
 
 /**
  * A curated social post or video. Nothing loads from the platform until the reader asks:
- * the card shows our stored text or the API thumbnail, then the official embed on click.
+ * the card shows our stored text (links and "Read more:" lines removed) or the API thumbnail,
+ * then the official embed on click. Prominent cards are larger; a topic accent (conflict,
+ * economy, climate, politics, from the post's own words) changes the card's treatment only.
  */
-export function SocialCard({ item, now }: { item: SocialItemView; now?: Date }) {
+export function SocialCard({ item, now, prominent = false }: { item: SocialItemView; now?: Date; prominent?: boolean }) {
   const [loaded, setLoaded] = useState(false)
+  const text = cleanPostText(item.text)
+  const topic = postTopic(item.title ?? text)
   return (
-    <article className={styles.card}>
-      <p className={styles.label}>{item.platform === 'youtube' ? 'YouTube video' : 'Bluesky post'}</p>
+    <article className={clsx(styles.card, prominent && styles.prominent)} data-topic={topic ?? undefined}>
+      <p className={styles.label}>
+        <span>{item.platform === 'youtube' ? 'YouTube video' : 'Bluesky post'}</span>
+        {topic && <span className={styles.topic}>{TOPIC_LABEL[topic]}</span>}
+      </p>
       <header className={styles.header}>
         <span className={styles.badge} aria-hidden="true">
           {initials(item.account.name)}
@@ -41,7 +50,7 @@ export function SocialCard({ item, now }: { item: SocialItemView; now?: Date }) 
         loaded ? (
           <BlueskyEmbed item={item} />
         ) : (
-          <blockquote className={styles.quote}>{cleanPostText(item.text)}</blockquote>
+          <blockquote className={styles.quote}>{text}</blockquote>
         )
       ) : loaded ? (
         <div className={styles.video}>
@@ -69,7 +78,7 @@ export function SocialCard({ item, now }: { item: SocialItemView; now?: Date }) 
           </Button>
         )}
         <a href={item.url} target="_blank" rel="noopener noreferrer" className={styles.original}>
-          Open on {PLATFORM[item.platform]}
+          Open post on {PLATFORM[item.platform]}
           <ArrowUpRight size={14} strokeWidth={2} aria-hidden="true" />
           <span className="visually-hidden"> (opens in a new tab)</span>
         </a>

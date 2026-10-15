@@ -9,6 +9,7 @@ const PAGES = ['/', '/?country=JP', '/?country=KR', '/map', '/map/city/1853909',
 
 for (const theme of ['dark', 'light'] as const) {
   test(`every page fits the width and is screenshotted (${theme})`, async ({ page }, info) => {
+    test.setTimeout(120_000)
     await mockApi(page)
     await page.addInitScript((t) => localStorage.setItem('eastwire.theme', t), theme)
     for (const path of PAGES) {
@@ -20,10 +21,31 @@ for (const theme of ['dark', 'light'] as const) {
         innerWidth: window.innerWidth,
       }))
       expect(scrollWidth, `${path} scrolls sideways`).toBeLessThanOrEqual(innerWidth)
-      // Every photo loads and carries its illustrative label and Commons credit.
-      await page.waitForFunction(() => [...document.querySelectorAll('figure img')].every((i) => (i as HTMLImageElement).complete))
+      // Every photo loads and carries its illustrative label and Commons credit. Scroll through
+      // first, so lazy pictures start loading.
+      await page.evaluate(async () => {
+        for (let y = 0; y < document.body.scrollHeight; y += 600) {
+          window.scrollTo(0, y)
+          await new Promise((r) => setTimeout(r, 30))
+        }
+        window.scrollTo(0, 0)
+      })
+      await page
+        .waitForFunction(
+          () => [...document.querySelectorAll('figure img')].filter((i) => i.getClientRects().length > 0).every((i) => (i as HTMLImageElement).complete),
+          null,
+          { timeout: 8000 },
+        )
+        .catch(() => undefined)
+      const pending = await page.evaluate(() =>
+        // Pictures in a hidden part of the page (the phone map's list view) are never fetched, by design.
+        [...document.querySelectorAll('figure img')]
+          .filter((i) => i.getClientRects().length > 0 && !(i as HTMLImageElement).complete)
+          .map((i) => i.getAttribute('alt')),
+      )
+      expect(pending, `${path} pictures still loading`).toEqual([])
       const images = await page.evaluate(() =>
-        [...document.querySelectorAll('figure img')].map((img) => ({
+        [...document.querySelectorAll('figure img')].filter((i) => i.getClientRects().length > 0).map((img) => ({
           loaded: (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0,
           credited: /Illustrative image|Historical map|Illustration/.test(img.closest('figure')?.querySelector('figcaption')?.textContent ?? ''),
           linked: Boolean(img.closest('figure')?.querySelector('figcaption a[href*="commons.wikimedia.org"]')),
@@ -47,7 +69,8 @@ test('navigation lives in one place per width, with no sidebar', async ({ page }
     await expect(bottom.getByRole('link')).toHaveCount(4)
     await expect(bottom.getByRole('button', { name: 'More' })).toBeVisible()
   } else {
-    await expect(top.getByRole('link')).toHaveCount(6)
+    // Home, Map, Search, Social: sectors are entered from the home page, About and Status from the footer.
+    await expect(top.getByRole('link')).toHaveCount(4)
     await expect(bottom).toBeHidden()
   }
 })
@@ -57,11 +80,11 @@ test('every main page is reachable from the phone navigation', async ({ page }, 
   await mockApi(page)
   await page.goto('/')
   const bottom = page.locator('nav[aria-label="Primary"]').last()
-  for (const [name, path] of [['Map', '/map'], ['Search', '/search'], ['Sectors', '/sectors'], ['Home', '/']] as const) {
+  for (const [name, path] of [['Map', '/map'], ['Search', '/search'], ['Social', '/social'], ['Home', '/']] as const) {
     await bottom.getByRole('link', { name }).click()
     await expect(page).toHaveURL(new RegExp(`${path}$`))
   }
-  for (const [name, path] of [['Social', '/social'], ['How it works', '/about'], ['Status', '/status']] as const) {
+  for (const [name, path] of [['About & sources', '/about'], ['Status', '/status']] as const) {
     await bottom.getByRole('button', { name: 'More' }).click()
     await page.getByRole('dialog', { name: 'More' }).getByRole('link', { name }).click()
     await expect(page).toHaveURL(new RegExp(`${path}$`))
@@ -110,7 +133,7 @@ test('with reduced motion, transitions are effectively off', async ({ page }) =>
   for (const part of duration.split(',')) expect(parseFloat(part)).toBeLessThan(0.01)
 })
 
-test('the search bar shows the pink focus ring', async ({ page }) => {
+test('the search bar shows the red focus ring', async ({ page }) => {
   await mockApi(page)
   await page.goto('/search')
   const input = page.getByRole('searchbox').first()
@@ -133,7 +156,7 @@ test('the home page barely shifts while it loads (CLS < 0.05)', async ({ page })
   })
   await mockApi(page)
   await page.goto('/')
-  await expect(page.getByRole('heading', { name: /Latest · 3 stories/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Latest', exact: true })).toBeVisible()
   await page.waitForLoadState('networkidle')
   const cls = await page.evaluate(() => (window as unknown as { cls: number }).cls)
   expect(cls).toBeLessThan(0.05)

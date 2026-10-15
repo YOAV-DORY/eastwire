@@ -11,9 +11,10 @@ describe('social page', () => {
     stubApi({ ...BASE, '/api/v1/social': { items: [socialItem(), VIDEO], page: 1, size: 12, total: 2, hasMore: false } })
     renderRoute('/social')
     expect(await screen.findByRole('heading', { name: 'Posts & videos', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText(/Not verified reporting, so it is kept apart from the news/)).toBeInTheDocument()
+    expect(screen.getByText(/Kept apart from the news/)).toBeInTheDocument()
     // One statement for the page; each card is tagged as a post, not with the warning again.
     expect(screen.getAllByText(/not verified reporting/i)).toHaveLength(1)
+    expect(screen.getByRole('complementary', { name: 'Topics and sources' })).toBeInTheDocument()
     expect(await screen.findByText('2 items · last 30 days')).toBeInTheDocument()
     expect(screen.getAllByRole('article')).toHaveLength(2)
   })

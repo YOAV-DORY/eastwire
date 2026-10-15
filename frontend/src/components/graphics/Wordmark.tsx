@@ -1,6 +1,6 @@
 import styles from './Wordmark.module.css'
 
-/** EastWire's own wordmark: a small pin glyph, then "East" upright and "Wire" in italic. */
+/** EastWire's own wordmark: a small red pin glyph, then "East" and "Wire" in the serif, "Wire" in red. */
 export function Wordmark() {
   return (
     <span className={styles.wordmark}>
@@ -9,7 +9,7 @@ export function Wordmark() {
         <circle cx="8" cy="8" r="2.75" fill="var(--bg)" />
       </svg>
       <span>
-        East<em>Wire</em>
+        East<span className={styles.wire}>Wire</span>
       </span>
     </span>
   )

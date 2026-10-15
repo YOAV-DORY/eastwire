@@ -21,11 +21,11 @@
 
 .table thead th {
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
 }
 
 .table tbody th {
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
 }
 
 .table a {

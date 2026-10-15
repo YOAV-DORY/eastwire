@@ -14,7 +14,7 @@
   border-color: color-mix(in srgb, var(--text) 30%, transparent);
 }
 
-/* The search focus ring is one of pink's five roles. */
+/* The search focus ring uses the brand red. */
 .form:focus-within {
   border-color: var(--accent-text);
   box-shadow: 0 0 0 4px var(--accent-glow);
@@ -82,7 +82,7 @@
   color: var(--text);
 }
 
-/* Gumroad-style chunky pink button. */
+/* Brand-red search button. */
 .submit {
   display: inline-flex;
   align-items: center;
@@ -95,7 +95,7 @@
   border-radius: var(--radius-lg);
   background: var(--accent);
   color: var(--text-on-accent);
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
   transition:
     background-color var(--dur-fast) var(--ease-standard),

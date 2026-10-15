@@ -1,11 +1,13 @@
 // Screenshots of every main page at three widths and in both themes, plus layout checks.
+// "article" is the story view: the home page with the lead story's Details sheet open.
 //
 //   node scripts/screenshots.mjs <label> [baseUrl] [apiUrl]
 //
 // Writes redesign-shots/<label>/<theme>-<width>-<page>-{full,first}.png and report.json (not
 // committed). Checks per page: sideways scroll, touch targets under 44px on phones, text under
 // 12px, a story headline on the first screen (front pages), broken images, illustrative images
-// without their credit, loading that never ends, and Latest stories older than its window.
+// without their credit, loading that never ends, Latest stories older than its window, headings
+// cut off sideways, and any font family outside the three (plus the wordmark's serif).
 import { chromium } from '@playwright/test'
 import { mkdirSync, writeFileSync } from 'node:fs'
 
@@ -21,6 +23,8 @@ const PAGES = {
   map: '/map',
   'map-city': city ? `/map/city/${city}` : '/map',
   'map-list': city ? `/map/city/${city}?view=list` : '/map?view=list',
+  'map-japan': '/map?country=JP',
+  article: '/',
   search: '/search?q=Japan',
   'search-zero': '/search?q=zzzxq',
   sectors: '/sectors',
@@ -30,7 +34,8 @@ const PAGES = {
   about: '/about',
   status: '/status',
 }
-const FRONT_PAGES = new Set(['home', 'country-jp', 'sector-economy', 'sector-technology'])
+// Sector pages open on a full-bleed hero, so only the front pages must show a headline on the first screen.
+const FRONT_PAGES = new Set(['home', 'country-jp'])
 const VIEWPORTS = [
   { name: '1440', width: 1440, height: 900, mobile: false },
   { name: '390', width: 390, height: 844, mobile: true },
@@ -52,7 +57,20 @@ for (const theme of THEMES) {
         .waitForFunction(() => !document.querySelector('[aria-busy="true"]'), null, { timeout: 15_000 })
         .then(() => true)
         .catch(() => false)
+      // Scroll through once so lazy pictures load and scroll-driven reveals finish, then back up.
+      await page.evaluate(async () => {
+        for (let y = 0; y < document.body.scrollHeight; y += 600) {
+          window.scrollTo(0, y)
+          await new Promise((r) => setTimeout(r, 60))
+        }
+        document.querySelectorAll('.reveal').forEach((el) => (el.style.animation = 'none'))
+        window.scrollTo(0, 0)
+      })
       await page.waitForTimeout(500)
+      if (name === 'article') {
+        await page.getByRole('button', { name: /^Details/ }).first().click()
+        await page.waitForTimeout(600)
+      }
       const checks = await page.evaluate(
         ({ mobile, front }) => {
           const vis = (el) => {
@@ -80,9 +98,11 @@ for (const theme of THEMES) {
               el.namespaceURI === 'http://www.w3.org/2000/svg' ? el.getBoundingClientRect().height < 11 : parseFloat(getComputedStyle(el).fontSize) < 12,
             )
             .map((el) => `${el.tagName.toLowerCase()} ${getComputedStyle(el).fontSize} "${el.textContent.trim().slice(0, 30)}"`)
+          // A headline starts on the first screen: its first line clears the masthead and the phone's bottom bar.
+          const bottomBar = document.querySelector('nav[aria-label="Primary"]:last-of-type')?.getBoundingClientRect().height ?? 0
           const headline = [...document.querySelectorAll('article h2 a, article h3 a')].find((a) => {
             const r = a.getBoundingClientRect()
-            return r.top >= 0 && r.bottom <= window.innerHeight
+            return r.top >= 0 && r.top + 30 <= window.innerHeight - (mobile ? bottomBar : 0)
           })
           const brokenImages = [...document.querySelectorAll('img')]
             .filter((img) => !img.closest('.leaflet-container') && img.complete && img.naturalWidth === 0)
@@ -100,7 +120,28 @@ for (const theme of THEMES) {
                 .filter((t) => Date.now() - new Date(t.getAttribute('datetime')).getTime() > 49 * 3600_000)
                 .map((t) => t.closest('article')?.querySelector('h2, h3')?.textContent?.slice(0, 50))
             : []
+          const cut = [...document.querySelectorAll('h1, h2, h3')]
+            .filter(vis)
+            .filter((h) => !h.closest('.visually-hidden') && !h.classList.contains('visually-hidden'))
+            .filter((h) => h.scrollWidth > h.clientWidth + 1)
+            .map((h) => h.textContent.trim().slice(0, 40))
+          const allowed = /Archivo|Schibsted|Source Sans|Newsreader/
+          const fonts = new Set()
+          const strayFonts = [...document.querySelectorAll('body *')]
+            .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()))
+            .filter(vis)
+            .filter((el) => !el.closest('.leaflet-container') && !el.closest('.bluesky-embed'))
+            .map((el) => {
+              const family = getComputedStyle(el).fontFamily.split(',')[0].replace(/"/g, '').trim()
+              fonts.add(family)
+              const serifOk = !/Newsreader/.test(family) || el.closest('[class*="wordmark"]')
+              return allowed.test(family) && serifOk ? null : `${el.tagName.toLowerCase()} ${family} "${el.textContent.trim().slice(0, 20)}"`
+            })
+            .filter(Boolean)
           return {
+            cutHeadings: cut,
+            fonts: [...fonts],
+            strayFonts: [...new Set(strayFonts)].slice(0, 6),
             sideways: document.documentElement.scrollWidth > window.innerWidth,
             smallTargets: [...new Set(small)].slice(0, 12),
             tinyText: [...new Set(tiny)].slice(0, 8),
@@ -115,7 +156,7 @@ for (const theme of THEMES) {
       )
       const file = `${theme}-${vp.name}-${name}`
       await page.screenshot({ path: `${out}${file}-first.png` })
-      await page.screenshot({ path: `${out}${file}-full.png`, fullPage: true })
+      if (name !== 'article') await page.screenshot({ path: `${out}${file}-full.png`, fullPage: true })
       report.push({ theme, viewport: vp.name, page: name, path, settled, ...checks })
     }
     await context.close()
@@ -133,6 +174,8 @@ for (const r of report) {
     r.brokenImages.length && `${r.brokenImages.length} broken images`,
     r.uncredited.length && `${r.uncredited.length} images without credit`,
     r.staleInLatest.length && `${r.staleInLatest.length} old stories in Latest`,
+    r.cutHeadings.length && `${r.cutHeadings.length} headings cut off`,
+    r.strayFonts.length && `${r.strayFonts.length} stray fonts`,
   ].filter(Boolean)
   console.log(`${r.theme.padEnd(5)} ${r.viewport.padEnd(5)} ${r.page.padEnd(18)} ${issues.join(', ') || 'ok'}`)
 }

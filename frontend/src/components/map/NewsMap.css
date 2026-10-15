@@ -7,7 +7,7 @@
   background: var(--bg-elev-1);
   /* Keeps Leaflet's internal z-indexes (up to 1000) below the sticky top bar. */
   isolation: isolate;
-  font-family: var(--font-sans);
+  font-family: var(--font-secondary);
 }
 
 /*
@@ -30,9 +30,9 @@
 /* English country names: small caps in the serif, over the tiles' local-script names. */
 .ew-map .ew-country {
   color: #3d3a33;
-  font-family: var(--font-serif);
+  font-family: var(--font-headline);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.16em;
   text-align: center;
   white-space: nowrap;
@@ -53,9 +53,9 @@
   background: color-mix(in srgb, var(--bg) 86%, transparent);
   box-shadow: none;
   color: var(--text);
-  font-family: var(--font-sans);
+  font-family: var(--font-secondary);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   line-height: 1.5;
   white-space: nowrap;
 }
@@ -64,11 +64,11 @@
   display: none;
 }
 
-/* The chosen city: its label on the pale pink selection surface, in bold. */
+/* The chosen city: its label on the pale red selection surface, in bold. */
 .ew-map .ew-label--selected {
   border-color: var(--accent-text);
   background: var(--select);
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
 }
 
 /* The pin of the story the reader is pointing at, or the cluster holding it. */
@@ -142,8 +142,8 @@
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 0 6px var(--accent-glow);
-  color: #000;
-  font-weight: 700;
+  color: #fff;
+  font-weight: var(--weight-semibold);
   font-size: var(--text-small);
   transition: box-shadow var(--dur-fast) var(--ease-standard);
 }
@@ -175,7 +175,7 @@
 }
 
 .ew-popup strong {
-  font-family: var(--font-serif);
+  font-family: var(--font-headline);
   font-size: 1.125rem;
 }
 
@@ -186,7 +186,7 @@
 
 .ew-popup a {
   color: var(--accent-text);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .ew-map .leaflet-popup-close-button {
@@ -202,7 +202,7 @@
 .ew-map .leaflet-control-attribution {
   background: color-mix(in srgb, var(--bg) 80%, transparent);
   color: var(--text-muted);
-  font-family: var(--font-sans);
+  font-family: var(--font-secondary);
   font-size: 12px;
 }
 

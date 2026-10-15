@@ -33,8 +33,9 @@
   border-radius: var(--radius-pill);
   background: var(--bg-elev-1);
   color: var(--text-muted);
+  font-family: var(--font-secondary);
   font-size: var(--text-small);
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -43,16 +44,25 @@
 }
 
 .when button[aria-pressed='true'] {
-  border-color: var(--accent-text);
-  background: var(--select);
-  color: var(--text);
-  font-weight: 600;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--text-on-accent);
 }
 
 @media (min-width: 1024px) {
   .page {
-    grid-template-columns: minmax(0, 1fr) 360px;
-    column-gap: var(--space-12);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--grid-gap);
+  }
+
+  .main {
+    grid-column: 1 / span 8;
+  }
+
+  .side {
+    grid-column: 9 / span 4;
+    padding-left: var(--grid-gap);
+    border-left: 1px solid var(--rule);
   }
 
   .side {
@@ -138,7 +148,7 @@
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   color: var(--text);
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
   transition: border-color var(--dur-fast) var(--ease-standard), background-color var(--dur-fast) var(--ease-standard);
 }
@@ -187,10 +197,51 @@
   align-items: center;
   min-height: var(--tap);
   color: var(--accent-text);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
 }
 
 .pagination a:hover {
   text-decoration: underline;
+}
+
+.heroSearch {
+  max-width: 720px;
+  margin-top: var(--space-3);
+}
+
+.browse {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.browse ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.browse li + li {
+  border-top: 1px solid var(--rule);
+}
+
+.browse a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--tap);
+  color: var(--text);
+  font-family: var(--font-secondary);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+
+.browse a:hover {
+  color: var(--accent-text);
+}
+
+.browse :global(.num) {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-weight: var(--weight-regular);
 }

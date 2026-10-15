@@ -15,7 +15,8 @@ import { Button } from '../components/ui/Button'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { readMapState, writeMapState, type MapState } from '../lib/map'
 import { SECTORS, sectorLabel, type SectorId } from '../sectors'
-import { PageHeader } from '../components/layout/PageHeader'
+import { Hero } from '../components/media/Hero'
+import { cityImage, countryImage, fromLibrary } from '../lib/imagery'
 import { PAGE_IMAGES } from '../lib/pageImages'
 import styles from './MapPage.module.css'
 
@@ -146,15 +147,25 @@ export function MapPage() {
     .filter(Boolean)
     .join(' · ')
 
+  // The hero follows the selection: the city's photo, else its country's, else the 1864 map of Asia.
+  const countryName = state.country ? (countryNames[state.country] ?? state.country) : undefined
+  const heroImage =
+    (selectedId !== undefined ? cityImage(selectedId) : null) ??
+    (state.country ? countryImage(state.country) : null) ??
+    fromLibrary(PAGE_IMAGES.map, 'Historical map')
+  const heroTitle = selectedPlace ? selectedPlace.name : countryName ? `${countryName} on the map` : 'The map'
+
   return (
+    <>
+    <Hero
+      size="compact"
+      image={heroImage}
+      country={selectedPlace?.country ?? state.country}
+      kicker="Map"
+      title={heroTitle}
+      lede="Pins mark the cities stories are about. Stories that name only a country are counted under the map, never pinned to a capital."
+    />
     <div className={clsx('container', styles.page)} data-view={state.view}>
-      <PageHeader
-        kicker="Map"
-        title="Map"
-        image={PAGE_IMAGES.map}
-        imageLabel="Historical map"
-        lede="Pins mark the cities stories are about. A story that names a country but no one city is counted below the map, never pinned to its capital."
-      />
 
       <div className={styles.toolbar}>
         <div className={styles.inlineFilters} role="group" aria-label="Map settings">
@@ -253,6 +264,7 @@ export function MapPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }
 

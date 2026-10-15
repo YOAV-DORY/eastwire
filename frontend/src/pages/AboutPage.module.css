@@ -60,9 +60,9 @@
 
 .n {
   color: var(--text-faint);
-  font-family: var(--font-sans);
+  font-family: var(--font-secondary);
   font-size: var(--text-small);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .section p {
@@ -85,9 +85,9 @@
 .aside {
   padding-left: var(--space-4);
   border-left: 2px solid var(--border-strong);
-  font-family: var(--font-serif);
+  font-family: var(--font-secondary);
   font-size: 1.125rem;
-  font-style: italic;
+  color: var(--text-muted);
   line-height: 1.5;
 }
 
@@ -98,15 +98,15 @@
 }
 
 .groupTitle {
-  font-family: var(--font-sans);
+  font-family: var(--font-secondary);
   font-size: var(--text-body);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
 .groupTitle .num {
   margin-left: var(--space-1);
   color: var(--text-faint);
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
 }
 
 .groupNote {
@@ -140,7 +140,7 @@
   left: 0;
   top: var(--space-3);
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
 }
 
 .folded[open] summary::before {
@@ -184,14 +184,14 @@
 }
 
 .sourceHead strong {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   overflow-wrap: anywhere;
 }
 
 .sourceHead span {
   color: var(--text-faint);
   font-size: var(--text-micro);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   letter-spacing: var(--track-kicker);
   text-transform: uppercase;
 }

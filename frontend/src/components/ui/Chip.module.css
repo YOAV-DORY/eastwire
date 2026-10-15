@@ -9,7 +9,7 @@
   background: var(--bg-elev-1);
   color: var(--text);
   font-size: var(--text-small);
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
   white-space: nowrap;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;

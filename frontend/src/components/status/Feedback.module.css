@@ -13,9 +13,9 @@
 }
 
 .title {
-  font-family: var(--font-serif);
+  font-family: var(--font-headline);
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   line-height: 1.25;
   letter-spacing: var(--track-tight);
 }
@@ -58,7 +58,7 @@
 }
 
 .banner {
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-4);
   border-left: 3px solid var(--accent-2);
   border-radius: var(--radius-sm);
   background: var(--bg-elev-1);
@@ -94,4 +94,11 @@
 
 .saved p {
   max-width: 62ch;
+}
+
+/* Phones: the banner's one sentence is enough; the freshness pill in the masthead has the time. */
+@media (max-width: 599px) {
+  .banner :global(.muted) {
+    display: none;
+  }
 }

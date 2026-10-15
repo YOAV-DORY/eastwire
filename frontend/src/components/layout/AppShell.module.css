@@ -11,7 +11,8 @@
   top: 0;
   z-index: var(--z-sticky);
   height: var(--header-h);
-  /* Solid: nothing (map tiles, photos) shows through the header. */
+  /* Solid: nothing (map tiles, photos) shows through the header. A red rule tops the page. */
+  border-top: 3px solid var(--accent);
   border-bottom: 1px solid var(--border-strong);
   background: var(--bg);
 }
@@ -56,10 +57,11 @@
     display: inline-flex;
     align-items: center;
     height: var(--header-h);
-    padding: 0 var(--space-3);
+    padding: 0 var(--space-4);
     color: var(--text-muted);
+    font-family: var(--font-secondary);
     font-size: 0.9375rem;
-    font-weight: 500;
+    font-weight: var(--weight-semibold);
     text-decoration: none;
     white-space: nowrap;
     transition: color var(--dur-fast) var(--ease-standard);
@@ -69,7 +71,7 @@
     color: var(--text);
   }
 
-  /* The current section: full-strength text and a pink rule on the masthead's edge. */
+  /* The current section: full-strength text and a red rule on the masthead's edge. */
   .topnavLink[aria-current='page'] {
     color: var(--text);
   }
@@ -80,7 +82,7 @@
     left: var(--space-3);
     right: var(--space-3);
     bottom: -1px;
-    height: 2px;
+    height: 3px;
     background: var(--accent);
   }
 }
@@ -195,7 +197,7 @@
   background: none;
   color: var(--text-muted);
   font-size: var(--text-micro);
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
   text-decoration: none;
   cursor: pointer;
 }

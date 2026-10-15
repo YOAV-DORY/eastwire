@@ -55,7 +55,7 @@
   font-size: var(--text-small);
 }
 
-/* A segmented control: the chosen segment is pink, the rest quiet. */
+/* A segmented control: the chosen segment is brand red, the rest quiet. */
 .segmented {
   display: inline-flex;
   padding: 0;
@@ -72,7 +72,7 @@
   background: transparent;
   color: var(--text-muted);
   font-size: var(--text-small);
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
   transition: background-color var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
 }
@@ -97,7 +97,7 @@
   background: var(--bg-elev-1);
   color: var(--text);
   font-size: var(--text-small);
-  font-weight: 500;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 
@@ -192,7 +192,7 @@
 }
 
 .contextHead strong {
-  font-family: var(--font-serif);
+  font-family: var(--font-headline);
   font-size: 1.25rem;
   line-height: 1.2;
 }
@@ -214,7 +214,7 @@
   background: var(--bg-elev-1);
   color: var(--text);
   font-size: var(--text-small);
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
   cursor: pointer;
 }
 

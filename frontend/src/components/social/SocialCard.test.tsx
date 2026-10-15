@@ -41,7 +41,7 @@ describe('SocialCard', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Load video (YouTube may set cookies)' }))
 
     expect(document.querySelector('iframe')!.getAttribute('src')).toBe('https://www.youtube-nocookie.com/embed/vid123')
-    expect(screen.getByRole('link', { name: /Open on YouTube/ })).toHaveAttribute('href', 'https://www.youtube.com/watch?v=vid123')
+    expect(screen.getByRole('link', { name: /Open post on YouTube/ })).toHaveAttribute('href', 'https://www.youtube.com/watch?v=vid123')
   })
 
   it('lists related reporting on request, never calling it verification', async () => {

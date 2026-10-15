@@ -18,3 +18,14 @@ vi.mock('../components/map/NewsMap', async () => {
       createElement('ul', { 'data-testid': 'news-map' }, props.pins.map((p) => createElement('li', { key: p.id }, p.name))),
   }
 })
+
+// jsdom has <dialog> but not its modal methods: open and close it the way browsers do.
+if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.showModal) {
+  HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
+    this.open = true
+  }
+  HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
+    this.open = false
+    this.dispatchEvent(new Event('close'))
+  }
+}

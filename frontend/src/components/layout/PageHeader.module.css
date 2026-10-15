@@ -17,12 +17,12 @@
   line-height: var(--lh-h1);
 }
 
-/* The lede is set in the serif, a step up from body text, like a standfirst. */
+/* The lede is a standfirst in the secondary face. */
 .lede {
   color: var(--text-muted);
-  font-family: var(--font-serif);
-  font-size: 1.1875rem;
-  line-height: 1.5;
+  font-family: var(--font-secondary);
+  font-size: var(--text-dek);
+  line-height: var(--lh-dek);
 }
 
 .lede a {
@@ -74,7 +74,7 @@
 }
 
 .label {
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
   letter-spacing: var(--track-kicker);
   text-transform: uppercase;
 }
