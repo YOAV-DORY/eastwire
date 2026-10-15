@@ -2,12 +2,13 @@ import clsx from 'clsx'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
-import { useAllPlaces, useCountries, useMapCities } from '../api/queries'
+import { useAllPlaces, useArticleFeed, useCountries, useMapCities, type FeedFilters } from '../api/queries'
 import type { CityPin, LocationRole, MapWindow } from '../api/types'
 import { CityListView } from '../components/map/CityListView'
 import { CityPanel } from '../components/map/CityPanel'
 import { LazyNewsMap } from '../components/map/LazyNewsMap'
 import { MapLegend } from '../components/map/MapLegend'
+import { StoryCard } from '../components/news/StoryCard'
 import { StoryFeed } from '../components/news/StoryFeed'
 import { ErrorState } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
@@ -135,6 +136,10 @@ export function MapPage() {
   )
 
   const scope = selectedPlace?.name ?? (state.country ? (countryNames[state.country] ?? state.country) : undefined)
+  const feedFilters =
+    selectedId !== undefined
+      ? { city: String(selectedId), country: selectedPlace?.country, sector: state.sector, from: isoDay(days) }
+      : { country: state.country, sector: state.sector, from: isoDay(days) }
   const listHeading = [scope ? `Stories about ${scope}` : 'Stories on the map', state.sector && sectorLabel(state.sector as SectorId), `last ${windowLabel}`]
     .filter(Boolean)
     .join(' · ')
@@ -190,25 +195,40 @@ export function MapPage() {
                 onSelect={onSelect}
                 highlightedId={highlighted}
               />
-              {selectedPlace && (
-                <div className={styles.cityCard} aria-live="polite">
-                  <div>
-                    <strong>{selectedPlace.name}</strong>
-                    <span>
-                      {selectedPin?.total ?? 0} {(selectedPin?.total ?? 0) === 1 ? 'story' : 'stories'} · last {windowLabel}
-                    </span>
-                  </div>
-                  <Button variant="primary" onClick={() => set({ view: 'list' })}>
-                    Show stories
-                  </Button>
-                  <button type="button" className={styles.cityCardClose} onClick={closeCity} aria-label="Close city">
-                    <X size={18} strokeWidth={1.75} />
-                  </button>
-                </div>
-              )}
             </div>
           )}
-          <MapLegend countryOnly={map.data?.countryOnly ?? []} countryNames={countryNames} population={state.population} />
+          {/* Phones: what is selected and its first stories, right under the map. */}
+          <div className={styles.phoneContext} aria-live="polite">
+            {selectedId !== undefined && selectedPlace ? (
+              <>
+                <div className={styles.contextHead}>
+                  <p>
+                    <strong>{selectedPlace.name}</strong>
+                    <span className="num">
+                      {selectedPin?.total ?? 0} {(selectedPin?.total ?? 0) === 1 ? 'story' : 'stories'} · last {windowLabel}
+                    </span>
+                  </p>
+                  <button type="button" className={styles.reset} onClick={closeCity}>
+                    <X size={16} strokeWidth={2} aria-hidden="true" /> Reset
+                  </button>
+                </div>
+                <PreviewList filters={feedFilters} countryNames={countryNames} onShowAll={() => set({ view: 'list' })} />
+              </>
+            ) : (
+              <p className={styles.contextNote}>
+                <span className="num">
+                  {pins.length} {pins.length === 1 ? 'city' : 'cities'} with stories · last {windowLabel}.
+                </span>{' '}
+                Tap a pin to see its stories.
+              </p>
+            )}
+          </div>
+          <MapLegend
+            countryOnly={map.data?.countryOnly ?? []}
+            countryNames={countryNames}
+            population={state.population}
+            windowLabel={windowLabel}
+          />
         </div>
 
         <div className={styles.listColumn}>
@@ -221,11 +241,7 @@ export function MapPage() {
               </p>
             ) : null)}
           <StoryFeed
-            filters={
-              selectedId !== undefined
-                ? { city: String(selectedId), country: selectedPlace?.country, sector: state.sector, from: isoDay(days) }
-                : { country: state.country, sector: state.sector, from: isoDay(days) }
-            }
+            filters={feedFilters}
             heading={listHeading}
             countryNames={countryNames}
             emptyTitle={scope ? `Nothing about ${scope} in the last ${windowLabel}` : `Nothing in the last ${windowLabel}`}
@@ -235,6 +251,39 @@ export function MapPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+/** Phones: the selected city's first stories under the map, and a way to the full list. */
+function PreviewList({
+  filters,
+  countryNames,
+  onShowAll,
+}: {
+  filters: FeedFilters
+  countryNames: Record<string, string>
+  onShowAll: () => void
+}) {
+  const feed = useArticleFeed(filters)
+  const items = feed.data?.pages[0]?.items.slice(0, 3) ?? []
+  const total = feed.data?.pages[0]?.total ?? 0
+  if (feed.isPending) return <p className={styles.contextNote}>Loading its stories…</p>
+  if (items.length === 0) return <p className={styles.contextNote}>No stories about this city in this time window.</p>
+  return (
+    <>
+      <ol className={styles.preview}>
+        {items.map((a) => (
+          <li key={a.id}>
+            <StoryCard article={a} variant="compact" countryNames={countryNames} />
+          </li>
+        ))}
+      </ol>
+      {total > items.length && (
+        <Button variant="primary" onClick={onShowAll}>
+          Show all {total} stories
+        </Button>
+      )}
+    </>
   )
 }
 

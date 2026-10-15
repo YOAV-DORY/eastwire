@@ -12,10 +12,23 @@ import './NewsMap.css'
  * Interactive Leaflet map: pink city pins (clustered when zoomed out), optional population
  * circles. Loaded lazily (see LazyNewsMap) so Leaflet stays out of the main bundle.
  *
- * Tiles: OpenStreetMap's standard tiles, toned down with a CSS filter so our own English city
- * labels lead (OSM labels places in local scripts). CARTO's tiles need an API key and a terms
- * review first (config/sources.yaml, carto-dark).
+ * Tiles: OpenStreetMap's standard tiles (usage policy checked; attribution always shown), only
+ * lightly desaturated so their own labels stay readable. OSM names places in local scripts, so
+ * English country and city labels are drawn on top. A different provider can be set at build
+ * time (VITE_TILE_URL, VITE_TILE_ATTRIBUTION), e.g. CARTO once the owner has its API key.
  */
+const TILE_URL: string = import.meta.env.VITE_TILE_URL ?? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+const TILE_ATTRIBUTION: string =
+  import.meta.env.VITE_TILE_ATTRIBUTION ??
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+
+/** English names for the covered countries, placed where city pins rarely are (Japan's and Korea's over the sea). */
+const COUNTRY_LABELS: { name: string; at: [number, number] }[] = [
+  { name: 'CHINA', at: [36.5, 96.5] },
+  { name: 'INDIA', at: [19.8, 79.6] },
+  { name: 'JAPAN', at: [39.5, 144.5] },
+  { name: 'SOUTH KOREA', at: [33.2, 125.2] },
+]
 export interface NewsMapProps {
   pins: CityPin[]
   population?: PlaceView[]
@@ -58,12 +71,10 @@ export default function NewsMap({
       markerZoomAnimation={!reducedMotion}
       worldCopyJump
     >
-      <TileLayer
-        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        className="ew-tiles"
-        maxZoom={19}
-      />
+      <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} className="ew-tiles" maxZoom={19} />
+      <CountryLabels pins={pins} />
+      <FrameStories pins={pins} />
+      <ShowSelected pins={pins} selectedId={selectedId} />
       {population?.map((p) => (
         <CircleMarker
           key={p.id}
@@ -76,6 +87,76 @@ export default function NewsMap({
       <Pins pins={pins} selectedId={selectedId} onSelect={onSelect} highlightedId={highlightedId} reducedMotion={reducedMotion} />
     </MapContainer>
   )
+}
+
+/**
+ * English country names over the tiles' local-script labels; not interactive, hidden from
+ * screen readers. A label steps aside (hides) while a pin or cluster sits on it.
+ */
+function CountryLabels({ pins }: { pins: CityPin[] }) {
+  const map = useMap()
+  useEffect(() => {
+    const markers = COUNTRY_LABELS.map(({ name, at }) =>
+      L.marker(at, {
+        icon: L.divIcon({ html: name, className: 'ew-country', iconSize: [120, 16], iconAnchor: [60, 8] }),
+        interactive: false,
+        keyboard: false,
+        zIndexOffset: -1000,
+      }),
+    )
+    const layer = L.layerGroup(markers)
+    map.addLayer(layer)
+    const declutter = () => {
+      COUNTRY_LABELS.forEach(({ name, at }, i) => {
+        const centre = map.latLngToContainerPoint(at)
+        const halfWidth = name.length * 5 + 16
+        const clash = pins.some((p) => {
+          const point = map.latLngToContainerPoint([p.lat, p.lon])
+          return Math.abs(point.x - centre.x) < halfWidth && point.y - centre.y < 24 && centre.y - point.y < 44
+        })
+        markers[i].getElement()?.style.setProperty('visibility', clash ? 'hidden' : 'visible')
+      })
+    }
+    declutter()
+    map.on('zoomend moveend', declutter)
+    return () => {
+      map.off('zoomend moveend', declutter)
+      map.removeLayer(layer)
+    }
+  }, [map, pins])
+  return null
+}
+
+/**
+ * Frames the map on where the stories are (padded, never closer than zoom 6) instead of the
+ * whole region, so a map of three Indian cities is not mostly empty sea. Re-frames only when
+ * the set of pinned cities changes, not when one is selected or highlighted.
+ */
+function FrameStories({ pins }: { pins: CityPin[] }) {
+  const map = useMap()
+  const ids = pins.map((p) => p.id).sort((a, b) => a - b).join(',')
+  useEffect(() => {
+    if (pins.length === 0) {
+      map.fitBounds(COVERED, { padding: [8, 8] })
+      return
+    }
+    const bounds = L.latLngBounds(pins.map((p) => [p.lat, p.lon] as [number, number])).pad(pins.length === 1 ? 2 : 0.35)
+    map.fitBounds(bounds, { padding: [24, 24], maxZoom: 6 })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only a change in the set of cities re-frames
+  }, [map, ids])
+  return null
+}
+
+/** A chosen city is shown on its own: zoom in far enough that its pin leaves any cluster. */
+function ShowSelected({ pins, selectedId }: { pins: CityPin[]; selectedId?: number }) {
+  const map = useMap()
+  const pin = pins.find((p) => p.id === selectedId)
+  useEffect(() => {
+    if (!pin) return
+    map.setView([pin.lat, pin.lon], Math.max(map.getZoom(), 6))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only a new selection moves the map
+  }, [map, pin?.id])
+  return null
 }
 
 function Pins({
@@ -125,7 +206,12 @@ function Pins({
       } as L.MarkerOptions & { stories: number })
       marker.bindPopup(popupHtml(pin), { closeButton: true, className: 'ew-popup-wrap' })
       // English names for the places that have stories; the tiles' own labels are in local scripts.
-      marker.bindTooltip(pin.name, { permanent: true, direction: 'right', offset: [w / 2 - 2, -h / 2], className: 'ew-label' })
+      marker.bindTooltip(pin.name, {
+        permanent: true,
+        direction: 'right',
+        offset: [w / 2 - 2, -h / 2],
+        className: selected ? 'ew-label ew-label--selected' : 'ew-label',
+      })
       markers.current.set(pin.id, marker)
       marker.on('click', () => onSelect?.(pin))
       marker.on('add', () => marker.getElement()?.style.setProperty('--i', String(Math.min(index, 12))))

@@ -1,8 +1,9 @@
 .panel {
   display: grid;
   gap: var(--space-4);
-  padding-bottom: var(--space-5);
-  border-bottom: 1px solid var(--rule);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--select);
 }
 
 .top {
@@ -19,15 +20,17 @@
 
 .close {
   display: inline-flex;
+  flex: none;
   align-items: center;
-  justify-content: center;
-  width: var(--tap);
-  height: var(--tap);
-  margin: -6px -10px 0 0;
-  border: 0;
+  gap: var(--space-1);
+  min-height: var(--tap);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--text-muted);
+  background: var(--bg-elev-1);
+  color: var(--text);
+  font-size: var(--text-small);
+  font-weight: 600;
   cursor: pointer;
 }
 
