@@ -1,4 +1,15 @@
-import type { ArticlePage, ArticleView, CountryView, SectorsView, SectorTag, SocialItemView, Status } from '../api/types'
+import type {
+  ArticlePage,
+  ArticleView,
+  CountryView,
+  FrontPage,
+  FrontStory,
+  IllustrativeImage,
+  SectorsView,
+  SectorTag,
+  SocialItemView,
+  Status,
+} from '../api/types'
 
 /** Invented test data in the API's shape. */
 export function article(overrides: Partial<ArticleView> = {}): ArticleView {
@@ -42,6 +53,8 @@ export function article(overrides: Partial<ArticleView> = {}): ArticleView {
     ],
     sectors: [],
     alsoReportedBy: 0,
+    ingestedAt: '2026-10-13T11:50:00Z',
+    storyType: 'news',
     ...overrides,
   }
 }
@@ -141,3 +154,45 @@ export const VIDEO = socialItem({
   account: { ...socialItem().account, handle: '@desk', name: 'Desk Video' },
   label: 'Video · not verified reporting',
 })
+
+/** A cleared illustrative image, as config/images.yaml would give it (invented file). */
+export const IMAGE: IllustrativeImage = {
+  id: 'tokyo-test',
+  src: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Invented.jpg/960px-Invented.jpg',
+  srcSet: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Invented.jpg/500px-Invented.jpg 500w',
+  width: 4000,
+  height: 3000,
+  alt: 'An invented street in Tokyo',
+  caption: 'An invented street, Tokyo',
+  position: '50% 50%',
+  creator: 'A. Photographer',
+  attribution: 'A. Photographer',
+  license: 'CC BY-SA 4.0',
+  licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0',
+  filePage: 'https://commons.wikimedia.org/wiki/File:Invented.jpg',
+  shareAlike: true,
+  changes: 'Resized and cropped',
+  illustrative: true,
+}
+
+export function frontStory(a: ArticleView, image: IllustrativeImage | null = null, why = ['Published 1 h ago']): FrontStory {
+  return { article: a, image, why }
+}
+
+/** A front page: the first story leads, the next two are secondary, the rest are Latest. */
+export function front(stories: ArticleView[], reading: ArticleView[] = [], overrides: Partial<FrontPage> = {}): FrontPage {
+  const [lead, ...rest] = stories
+  return {
+    generatedAt: '2026-10-13T12:00:00Z',
+    latestWindowHours: 48,
+    lead: lead ? frontStory(lead, IMAGE, ['Published 12 min ago', 'Geopolitics']) : null,
+    secondary: rest.slice(0, 2).map((a) => frontStory(a)),
+    latest: rest.slice(2),
+    latestCount: stories.length,
+    reading,
+    readingWindowDays: 30,
+    readingFrom: reading.length ? (reading[reading.length - 1].publishedAt ?? reading[reading.length - 1].discoveredAt) : null,
+    readingTo: reading.length ? (reading[0].publishedAt ?? reading[0].discoveredAt) : null,
+    ...overrides,
+  }
+}

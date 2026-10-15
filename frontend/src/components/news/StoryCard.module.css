@@ -216,3 +216,27 @@
 .provenance {
   color: var(--text-muted);
 }
+
+/* Publication, discovery and ingestion are different times; Details shows all three. */
+.times {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+
+.times div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+}
+
+.times dt {
+  color: var(--text-faint);
+}
+
+.times dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}

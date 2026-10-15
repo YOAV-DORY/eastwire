@@ -5,10 +5,11 @@
 # Content-Security-Policy, by directive:
 #   script-src   our bundle and theme-init.js, plus Bluesky's official embed script (loaded on click)
 #   style-src    'unsafe-inline' because Leaflet and the embeds set style attributes; scripts stay locked
-#   img-src      map tiles (OpenStreetMap) and YouTube API thumbnails
+#   img-src      map tiles (OpenStreetMap), YouTube API thumbnails and the cleared illustrative
+#                photos from Wikimedia Commons (thumb./upload.wikimedia.org)
 #   frame-src    the two official embeds, loaded only when the reader asks
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://embed.bsky.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org https://i.ytimg.com; font-src 'self'; connect-src 'self' __API_ORIGIN__; frame-src https://embed.bsky.app https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://embed.bsky.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org https://i.ytimg.com https://thumb.wikimedia.org https://upload.wikimedia.org; font-src 'self'; connect-src 'self' __API_ORIGIN__; frame-src https://embed.bsky.app https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

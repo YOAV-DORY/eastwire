@@ -34,6 +34,52 @@ export interface ArticleView {
   locations: LocationView[]
   sectors: SectorTag[]
   alsoReportedBy: number
+  /** When EastWire stored it; publication (publishedAt) and discovery (discoveredAt) are separate. */
+  ingestedAt: string
+  /** news: eligible for Latest. feature: analysis, essays, citizen media, for the reading section. */
+  storyType: 'news' | 'feature'
+}
+
+/** A cleared illustrative image: a Wikimedia Commons file with its full credit. Never a photo of the event. */
+export interface IllustrativeImage {
+  id: string
+  src: string
+  srcSet: string
+  width: number
+  height: number
+  alt: string
+  caption: string
+  position: string
+  creator: string
+  attribution: string
+  license: string
+  licenseUrl: string | null
+  filePage: string
+  shareAlike: boolean
+  changes: string
+  illustrative: true
+}
+
+export interface FrontStory {
+  article: ArticleView
+  image: IllustrativeImage | null
+  /** Why the ranking chose it, in plain words: "Published 3 h ago", "Geopolitics", ... */
+  why: string[]
+}
+
+/** GET /api/v1/front: a ranked front page and the windows its counts cover. */
+export interface FrontPage {
+  generatedAt: string
+  latestWindowHours: number
+  lead: FrontStory | null
+  secondary: FrontStory[]
+  latest: ArticleView[]
+  /** Distinct events in the Latest window, one story each. */
+  latestCount: number
+  reading: ArticleView[]
+  readingWindowDays: number
+  readingFrom: string | null
+  readingTo: string | null
 }
 
 export type SectorRuleKind = 'keyword' | 'negative' | 'gdelt_theme' | 'feed_category'
@@ -102,6 +148,10 @@ export interface SourceStatus {
   newestItemAt: string | null
   consecutiveFailures: number
   circuitOpen: boolean
+  /** Newest publication date among its stored stories (null if none, or the source gives no dates). */
+  newestPublishedAt?: string | null
+  /** When EastWire last stored a new story from it. */
+  lastStoredAt?: string | null
 }
 
 export interface Status {

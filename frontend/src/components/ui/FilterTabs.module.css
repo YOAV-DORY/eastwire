@@ -38,6 +38,8 @@
 
 .tab[aria-pressed='true'] {
   color: var(--text);
+  background: var(--select);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
 .tab[aria-pressed='true']::after {
@@ -70,11 +72,4 @@
     mask-image: none;
   }
 
-  .tab:first-child {
-    padding-left: 0;
-  }
-
-  .tab:first-child[aria-pressed='true']::after {
-    left: 0;
-  }
 }

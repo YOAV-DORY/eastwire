@@ -2,11 +2,12 @@ import clsx from 'clsx'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { useCountries, useMapCities, usePlaces, useStatus } from '../api/queries'
+import { FrontPage } from '../components/front/FrontPage'
 import { Flag } from '../components/graphics/Flag'
 import { CountryCounts, MapCompanion, SocialPreview } from '../components/home/Companion'
-import { StoryFeed } from '../components/news/StoryFeed'
 import { StaleBanner } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
+import { FilterSelect } from '../components/ui/FilterSelect'
 import { FilterTabs } from '../components/ui/FilterTabs'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { DEFAULT_ROLES } from '../lib/map'
@@ -24,8 +25,10 @@ const today = () =>
   new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())
 
 /**
- * The front page: news first. A lead story and a short list fill the first screen; the map
- * sits beside them on wide screens and below them on phones, with a way into the full map.
+ * The front page: news first. A lead story (on the ink panel), two more and the start of
+ * Latest fill the first screen; the map, country counts and social posts sit beside them on
+ * wide screens and below on phones. The rest of Latest and the dated Reading section run the
+ * full width underneath.
  */
 export function Home() {
   const [params, setParams] = useSearchParams()
@@ -46,6 +49,7 @@ export function Home() {
   )
   const cityName = places.data?.find((p) => String(p.id) === city)?.name
   const scope = cityName ?? (country ? (countryNames[country] ?? country) : undefined)
+  usePageTitle([scope, sector && sectorLabel(sector)].filter(Boolean).join(' · ') || undefined)
 
   const select = (next: Filters) => {
     const p = new URLSearchParams()
@@ -55,9 +59,7 @@ export function Home() {
     setParams(p)
   }
 
-  const heading = ['Latest', scope, sector && sectorLabel(sector)].filter(Boolean).join(' · ')
-  usePageTitle([scope, sector && sectorLabel(sector)].filter(Boolean).join(' · ') || undefined)
-  const emptyTitle = `Nothing from our sources${sector ? ` tagged ${sectorLabel(sector)}` : ''}${scope ? ` about ${scope}` : ''} right now`
+  const emptyTitle = `Nothing new from our sources${sector ? ` tagged ${sectorLabel(sector)}` : ''}${scope ? ` about ${scope}` : ''}`
   const emptyAction = sector ? (
     <Button onClick={() => select({ country, city })}>All sectors</Button>
   ) : scope ? (
@@ -66,17 +68,24 @@ export function Home() {
     </Button>
   ) : undefined
 
+  const countryOptions = [
+    { value: undefined, label: 'All' },
+    ...(countries.data ?? []).map((c) => ({ value: c.iso2, label: `${c.name} (${c.last24h} today)` })),
+  ]
+  const sectorOptions = [{ value: undefined, label: 'All' }, ...SECTORS.map((s) => ({ value: s.id, label: s.label }))]
+
   return (
     <div className={clsx('container', styles.page)}>
       <header className={styles.header}>
         <h1 className="visually-hidden">Latest news from China, India, South Korea and Japan</h1>
         <p className={styles.dateline}>
           <span className={styles.date}>{today()}</span>
-          <span className={styles.tagline}>China, India, South Korea and Japan, from sources that allow it</span>
+          <span className={styles.tagline}>China, India, South Korea and Japan, from sources whose terms allow it</span>
         </p>
       </header>
 
-      <div className={styles.filters}>
+      {/* Wide screens: text tabs. Phones: two pills that show the active choice and open every option. */}
+      <div className={styles.filtersWide}>
         <FilterTabs
           label="Filter by country"
           value={country}
@@ -88,10 +97,11 @@ export function Home() {
               label: c.name,
               leading: <Flag country={c.iso2} />,
               count: c.last24h,
-              countTitle: `${c.last24h} stories about ${c.name} in the last 24 hours`,
+              countTitle: `${c.last24h} news stories about ${c.name} in the last 24 hours`,
             })),
           ]}
         />
+        <p className={styles.countsNote}>Numbers: news stories about each country in the last 24 hours.</p>
         <FilterTabs
           quiet
           label="Filter by sector"
@@ -106,49 +116,49 @@ export function Home() {
             })),
           ]}
         />
-        {country && (places.data?.length ?? 0) > 0 && (
-          <label className={styles.cityPicker}>
-            <span>City</span>
-            <select value={city ?? ''} onChange={(e) => select({ country, city: e.target.value || undefined, sector })}>
-              <option value="">All of {countryNames[country] ?? country}</option>
-              {places.data?.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
       </div>
+      <div className={styles.filtersCompact} role="group" aria-label="Filters">
+        <FilterSelect label="Country" value={country} options={countryOptions} onChange={(c) => select({ country: c, sector })} />
+        <FilterSelect label="Sector" value={sector} options={sectorOptions} onChange={(s) => select({ country, city, sector: s })} />
+      </div>
+      {country && (places.data?.length ?? 0) > 0 && (
+        <label className={styles.cityPicker}>
+          <span>City</span>
+          <select value={city ?? ''} onChange={(e) => select({ country, city: e.target.value || undefined, sector })}>
+            <option value="">All of {countryNames[country] ?? country}</option>
+            {places.data?.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       {(status.data?.state === 'stale' || status.data?.state === 'outage') && status.data.lastSuccessAt && (
         <StaleBanner
           state={status.data.state}
-          detail={`Stories below were last refreshed ${relativeTime(status.data.lastSuccessAt)}.`}
+          detail={`Every source was last checked successfully ${relativeTime(status.data.lastSuccessAt)}.`}
         />
       )}
 
-      <div className={styles.layout}>
-        <div className={styles.main}>
-          <StoryFeed
-            layout="front"
-            filters={{ country, city, sector }}
-            heading={heading}
-            countryNames={countryNames}
-            emptyTitle={emptyTitle}
-            emptyAction={emptyAction}
-            onHighlight={setHighlighted}
-            highlightedPlace={highlighted}
-          />
-        </div>
-        <aside className={styles.rail} aria-label="Map, countries and social posts">
-          <MapCompanion data={map.data} countryNames={countryNames} country={country} highlightedId={highlighted} />
-          {countries.data && (
-            <CountryCounts countries={countries.data} selected={country} onSelect={(c) => select({ country: c, sector })} />
-          )}
-          <SocialPreview country={country} />
-        </aside>
-      </div>
+      <FrontPage
+        filters={{ country, city, sector }}
+        countryNames={countryNames}
+        emptyTitle={emptyTitle}
+        emptyAction={emptyAction}
+        onHighlight={setHighlighted}
+        highlightedPlace={highlighted}
+        rail={
+          <>
+            <MapCompanion data={map.data} countryNames={countryNames} country={country} highlightedId={highlighted} />
+            {countries.data && (
+              <CountryCounts countries={countries.data} selected={country} onSelect={(c) => select({ country: c, sector })} />
+            )}
+            <SocialPreview country={country} />
+          </>
+        }
+      />
     </div>
   )
 }
