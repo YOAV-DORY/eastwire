@@ -215,7 +215,9 @@ function Pins({
       markers.current.set(pin.id, marker)
       marker.on('click', () => onSelect?.(pin))
       marker.on('add', () => marker.getElement()?.style.setProperty('--i', String(Math.min(index, 12))))
-      group.addLayer(marker)
+      // The chosen city stays out of the clusters, so its pin is always distinct.
+      if (selected) map.addLayer(marker)
+      else group.addLayer(marker)
     })
     map.addLayer(group)
     groupRef.current = group
@@ -233,9 +235,11 @@ function Pins({
       }
     }
     container.addEventListener('click', onClick)
+    const selectedMarker = selectedId === undefined ? undefined : markers.current.get(selectedId)
     return () => {
       container.removeEventListener('click', onClick)
       map.removeLayer(group)
+      if (selectedMarker) map.removeLayer(selectedMarker)
     }
   }, [map, pins, selectedId, onSelect, reducedMotion])
 
@@ -245,7 +249,7 @@ function Pins({
     const marker = markers.current.get(highlightedId)
     const group = groupRef.current
     if (!marker || !group) return
-    const shown = (group.getVisibleParent(marker) ?? marker) as L.Marker
+    const shown = (group.hasLayer(marker) ? (group.getVisibleParent(marker) ?? marker) : marker) as L.Marker
     const element = shown.getElement()
     element?.classList.add('ew-hot')
     return () => element?.classList.remove('ew-hot')
