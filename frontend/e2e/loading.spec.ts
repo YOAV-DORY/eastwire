@@ -35,8 +35,10 @@ test('a snapshot baked into the page shows real stories at first paint while the
     )
     await route.fulfill({ response, body: html })
   })
+  // Timed from the start of navigation to the lead story on screen. Not to the "load" event,
+  // which also waits for every picture and font and is not what a reader waits for.
   const started = Date.now()
-  await page.goto('/')
+  await page.goto('/', { waitUntil: 'commit' })
   await expect(page.getByRole('article', { name: LEAD })).toBeVisible({ timeout: 2_000 })
   expect(Date.now() - started).toBeLessThan(2_000)
   await expect(page.locator('[aria-busy="true"]')).toHaveCount(0)
