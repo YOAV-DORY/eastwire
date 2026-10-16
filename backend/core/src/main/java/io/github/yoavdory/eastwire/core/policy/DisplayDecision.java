@@ -13,6 +13,8 @@ package io.github.yoavdory.eastwire.core.policy;
  * @param licenseUrl      link to that license, or null
  * @param excerptNote     added to the credit when an excerpt is shown, e.g. "excerpt, shortened"
  * @param label           extra fixed label, e.g. "Social post · not verified reporting"
+ * @param publisherLabel  who runs the publisher, when readers should know: "Chinese state media",
+ *                        "South Korean government" (from config, with a cited basis)
  */
 public record DisplayDecision(
         boolean visible,
@@ -24,10 +26,11 @@ public record DisplayDecision(
         String licenseName,
         String licenseUrl,
         String excerptNote,
-        String label) {
+        String label,
+        String publisherLabel) {
 
     public static DisplayDecision hidden(String reason) {
-        return new DisplayDecision(false, reason, 0, false, null, null, null, null, null, null);
+        return new DisplayDecision(false, reason, 0, false, null, null, null, null, null, null, null);
     }
 
     /**

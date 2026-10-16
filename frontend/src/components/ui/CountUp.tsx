@@ -1,44 +1,33 @@
 import { useEffect, useRef, useState } from 'react'
 
 /**
- * A number that counts up once when it first comes into view (about 0.8 s). The final value is
- * rendered from the start for screen readers and layout (tabular figures, so nothing shifts);
- * under reduced motion, or without IntersectionObserver, it simply shows the value.
+ * A live figure. It never counts up from zero (a "0" would be a false number): the first value
+ * shows as is, and when a newer value arrives (the live API replacing the snapshot) it rolls
+ * from the old one to the new one in about half a second. Tabular figures, so nothing shifts;
+ * under reduced motion it simply changes.
  */
+const reduced = () => typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+
 export function CountUp({ value, className }: { value: number; className?: string }) {
-  const ref = useRef<HTMLSpanElement>(null)
   const [shown, setShown] = useState(value)
-  const done = useRef(false)
+  const from = useRef(value)
   useEffect(() => {
-    const el = ref.current
-    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    if (!el || reduced || done.current || typeof IntersectionObserver === 'undefined' || value < 2) {
-      setShown(value)
-      return
-    }
+    const start = from.current
+    from.current = value
+    if (start === value || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
     let frame = 0
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry?.isIntersecting) return
-      observer.disconnect()
-      done.current = true
-      const start = performance.now()
-      const tick = (t: number) => {
-        const p = Math.min(1, (t - start) / 800)
-        setShown(Math.round(value * (1 - (1 - p) ** 3)))
-        if (p < 1) frame = requestAnimationFrame(tick)
-      }
-      setShown(0)
-      frame = requestAnimationFrame(tick)
-    })
-    observer.observe(el)
-    return () => {
-      observer.disconnect()
-      cancelAnimationFrame(frame)
+    const began = performance.now()
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - began) / 500)
+      setShown(Math.round(start + (value - start) * (1 - (1 - p) ** 3)))
+      if (p < 1) frame = requestAnimationFrame(tick)
     }
+    frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
   }, [value])
   return (
-    <span ref={ref} className={className} style={{ fontVariantNumeric: 'tabular-nums' }}>
-      <span aria-hidden="true">{shown}</span>
+    <span className={className} style={{ fontVariantNumeric: 'tabular-nums' }}>
+      <span aria-hidden="true">{reduced() ? value : shown}</span>
       <span className="visually-hidden">{value}</span>
     </span>
   )

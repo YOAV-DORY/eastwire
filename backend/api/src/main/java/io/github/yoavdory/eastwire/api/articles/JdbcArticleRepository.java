@@ -38,7 +38,8 @@ public class JdbcArticleRepository implements ArticleRepository {
         String sql = """
                 SELECT a.id, s.slug AS source_slug, a.title, a.canonical_url, a.domain, a.excerpt, a.author,
                        a.credit_line, a.attribution, a.license_name, a.license_url, a.published_at, a.discovered_at,
-                       COALESCE(c.size, 1) AS cluster_size, a.cluster_id, a.story_type, a.ingested_at
+                       COALESCE(c.size, 1) AS cluster_size, a.cluster_id, a.story_type, a.ingested_at,
+                       to_jsonb(a) ->> 'summary' AS summary
                 FROM article a
                 JOIN source s ON s.id = a.source_id
                 LEFT JOIN story_cluster c ON c.id = a.cluster_id
@@ -148,7 +149,8 @@ public class JdbcArticleRepository implements ArticleRepository {
                 rs.getString("credit_line"), rs.getString("attribution"), rs.getString("license_name"),
                 rs.getString("license_url"), instant(rs.getTimestamp("published_at")),
                 instant(rs.getTimestamp("discovered_at")), rs.getInt("cluster_size"), List.of(), List.of(),
-                (Long) rs.getObject("cluster_id"), rs.getString("story_type"), instant(rs.getTimestamp("ingested_at")));
+                (Long) rs.getObject("cluster_id"), rs.getString("story_type"), instant(rs.getTimestamp("ingested_at")),
+                rs.getString("summary"));
     }
 
     private static Instant instant(Timestamp ts) {

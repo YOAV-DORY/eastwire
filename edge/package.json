@@ -1,0 +1,9 @@
+{
+  "name": "eastwire-edge",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "deploy": "wrangler deploy"
+  }
+}

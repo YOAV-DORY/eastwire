@@ -8,6 +8,8 @@ import io.github.yoavdory.eastwire.core.sector.SectorClassifier;
 import io.github.yoavdory.eastwire.core.sector.SectorRules;
 import io.github.yoavdory.eastwire.core.social.SocialAccounts;
 import io.github.yoavdory.eastwire.ingest.http.HttpFetcher;
+import io.github.yoavdory.eastwire.ingest.summary.LocalModelSummarizer;
+import io.github.yoavdory.eastwire.ingest.summary.Summarizer;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
@@ -30,6 +32,15 @@ public class IngestApplication {
     @Bean
     ComplianceConfig complianceConfig(@Value("${eastwire.config-dir}") Path configDir) {
         return ComplianceConfig.load(configDir);
+    }
+
+    /**
+     * EastWire's own summaries come from a local open model served by llama.cpp on the ingest
+     * runner (docs/summaries.md). Without EASTWIRE_SUMMARY_URL no summary is written.
+     */
+    @Bean
+    Summarizer summarizer(@Value("${eastwire.summary.url:}") String url, @Value("${eastwire.summary.model}") String model) {
+        return url == null || url.isBlank() ? Summarizer.NONE : new LocalModelSummarizer(url, model);
     }
 
     @Bean

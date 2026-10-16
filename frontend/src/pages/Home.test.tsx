@@ -132,27 +132,32 @@ describe('home front page', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
-  it('shows the saved copy from an earlier visit, dated, when the server does not answer', async () => {
+  it('shows the saved copy from an earlier visit at once, with no alarming notice when the server fails', async () => {
     const twoHoursAgo = Date.now() - 2 * 3600_000
     localStorage.setItem('eastwire.saved.v1:["front",{}]', JSON.stringify({ data: front(STORIES), savedAt: twoHoursAgo }))
     const api: Record<string, unknown> = { ...BASE }
     stubApi(api)
     renderRoute('/')
 
-    // Real stories at once, never presented as live.
     expect(await screen.findByRole('article', { name: /Japan and the US agree/ })).toBeInTheDocument()
-    const notice = await screen.findByText(/The server did not answer/)
-    expect(notice).toHaveTextContent('Saved copy from 2 h ago, kept on this device.')
-
-    api['/api/v1/front'] = front([article({ id: 7, title: 'A fresher lead' })])
-    await userEvent.click(screen.getByRole('button', { name: 'Try again' }))
-    expect(await screen.findByRole('article', { name: /A fresher lead/ })).toBeInTheDocument()
-    await waitFor(() => expect(screen.queryByText(/Saved copy/)).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/^Updated/)).toBeInTheDocument())
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.queryByText(/Saved copy|did not answer|waking/i)).not.toBeInTheDocument()
   })
 
-  it('warns when source checks are behind', async () => {
-    stubApi({ ...BASE, '/api/v1/status': status('stale', '2026-10-13T06:00:00Z'), '/api/v1/front': front(STORIES) })
+  it('tells readers only when the news has not been refreshed for hours, in their words', async () => {
+    const hoursAgo = new Date(Date.now() - 7 * 3600_000).toISOString()
+    stubApi({ ...BASE, '/api/v1/status': status('stale', hoursAgo), '/api/v1/front': front(STORIES) })
     renderRoute('/')
-    expect(await screen.findByText(/Some source checks have not succeeded for over two hours/)).toBeInTheDocument()
+    expect(await screen.findByText(/Our news was last refreshed 7 h ago, so the newest stories may be missing/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Source details' })).toHaveAttribute('href', '/sources#health')
+  })
+
+  it('says nothing about a single source falling behind', async () => {
+    const behind = { ...status('stale', '2026-10-12T06:00:00Z'), updateState: 'fresh' as const, updatedAt: new Date().toISOString() }
+    stubApi({ ...BASE, '/api/v1/status': behind, '/api/v1/front': front(STORIES) })
+    renderRoute('/')
+    await screen.findByRole('article', { name: /Japan and the US agree/ })
+    expect(screen.queryByText(/refreshed|source checks|behind/i)).not.toBeInTheDocument()
   })
 })

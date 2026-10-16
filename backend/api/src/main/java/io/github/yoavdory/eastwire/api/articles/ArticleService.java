@@ -87,7 +87,8 @@ public class ArticleService {
                 r.locations().stream().map(l -> new ArticleView.LocationView(l.role(), l.precision(), l.confidence(),
                         l.method(), l.countryIso2(), l.placeId(), l.placeName(), l.evidence(), l.primary())).toList(),
                 r.sectors().stream().map(this::sectorTag).toList(), Math.max(0, r.clusterSize() - 1),
-                r.ingestedAt(), r.storyType() == null ? "news" : r.storyType());
+                r.ingestedAt(), r.storyType() == null ? "news" : r.storyType(), d.publisherLabel(),
+                r.summary());
     }
 
     private ArticleView.SectorTag sectorTag(ArticleRow.SectorRow row) {

@@ -38,6 +38,19 @@ export interface ArticleView {
   ingestedAt: string
   /** news: eligible for Latest. feature: analysis, essays, citizen media, for the reading section. */
   storyType: 'news' | 'feature'
+  /** Who runs the publisher, when readers should know: "Chinese state media", "South Korean government". */
+  publisherLabel?: string | null
+  /** EastWire's own automated one-line summary (docs/summaries.md), or null when none could be written reliably. */
+  summary?: string | null
+}
+
+/** GET /api/v1/mix: the last 24 hours by the country stories are about and by publisher. */
+export interface Mix {
+  windowHours: number
+  total: number
+  countries: { key: string; label: string; count: number }[]
+  noCountry: number
+  publishers: { key: string; label: string; count: number }[]
 }
 
 /** A cleared illustrative image: a Wikimedia Commons file with its full credit. Never a photo of the event. */
@@ -155,6 +168,11 @@ export interface SourceStatus {
 }
 
 export interface Status {
+  /** For readers: from {@link updatedAt}; stale only after 6 hours without any refresh. */
+  updateState: FreshnessState
+  /** When the news was last refreshed: the newest successful check of any source. */
+  updatedAt: string | null
+  /** Operator view for the Sources page: from the oldest source's last success. */
   state: FreshnessState
   lastSuccessAt: string | null
   sources: SourceStatus[]

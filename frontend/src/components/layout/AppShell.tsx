@@ -2,13 +2,15 @@ import clsx from 'clsx'
 import { Activity, BookOpen, Ellipsis, Keyboard, LayoutList, Map, MessagesSquare, Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router'
-import { useStatus } from '../../api/queries'
+import { useMix, useStatus } from '../../api/queries'
 import { useHotkeys, useShortcutsSetting } from '../../hooks/useShortcuts'
 import { Wordmark } from '../graphics/Wordmark'
 import { SEARCH_INPUT_ATTR } from '../search/SearchBar'
 import { ShortcutsDialog } from '../search/ShortcutsDialog'
 import { FreshnessIndicator } from '../status/FreshnessIndicator'
 import { ThemeToggle } from '../ui/ThemeToggle'
+import { CONTACT, REPO } from '../../lib/links'
+import { freshnessLabel } from '../../lib/freshness'
 import styles from './AppShell.module.css'
 
 /**
@@ -26,8 +28,8 @@ const NAV = [
 
 const BOTTOM = NAV
 const MORE = [
-  { to: '/about', label: 'About & sources', short: 'About', icon: BookOpen, match: '/about' },
-  { to: '/status', label: 'Status', short: 'Status', icon: Activity, match: '/status' },
+  { to: '/about', label: 'About EastWire', short: 'About', icon: BookOpen, match: '/about' },
+  { to: '/sources', label: 'Sources', short: 'Sources', icon: Activity, match: '/sources' },
 ] as const
 
 type NavItem = (typeof NAV)[number] | (typeof MORE)[number]
@@ -39,7 +41,7 @@ function isCurrent(item: NavItem, pathname: string) {
 
 /**
  * Masthead with the four sections on wide screens; on phones the same four in a bottom
- * bar, plus "More" for About and Status. One scroll for the whole page: no sidebar.
+ * bar, plus "More" for About and Sources. One scroll for the whole page: no sidebar.
  */
 export function AppShell() {
   const { pathname } = useLocation()
@@ -48,6 +50,21 @@ export function AppShell() {
   const shortcuts = useShortcutsSetting()
   const [helpOpen, setHelpOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
+  const outlets = useMix().data?.publishers.length ?? 0
+  const mainRef = useRef<HTMLElement>(null)
+  const section = pathname.split('/')[1] ?? ''
+  const firstSection = useRef(section)
+  useEffect(() => {
+    // Moving to another section: the new page settles in quickly (pages are already loaded,
+    // so this is all the "transition" there is). Not on first load, not under reduced motion.
+    if (section === firstSection.current) return
+    firstSection.current = '\u0000'
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    mainRef.current?.animate?.([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], {
+      duration: 200,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+    })
+  }, [section])
   const bindings = useMemo(
     () => ({
       // "/" focuses the search field on the page, or opens the search page.
@@ -92,7 +109,7 @@ export function AppShell() {
         </div>
       </header>
 
-      <main id="main" className={styles.main}>
+      <main id="main" className={styles.main} ref={mainRef}>
         <Outlet />
       </main>
 
@@ -101,18 +118,42 @@ export function AppShell() {
           <div className={styles.footerAbout}>
             <Wordmark />
             <p>
-              News from China, India, South Korea and Japan, from sources whose terms allow it, with every source shown.
-              Headlines link to the original; we never copy articles.
+              An independent, non-commercial project by Yoav Dory. Headlines from China, India, South Korea and Japan,
+              chosen by published rules and linked to the original; we never copy or translate articles. Summaries are
+              automated, and nothing here is verified reporting.
             </p>
           </div>
           <nav aria-label="Footer" className={styles.footerLinks}>
-            <Link to="/about">About &amp; sources</Link>
-            <Link to="/status">Status</Link>
-            <a href="https://github.com/YOAV-DORY/eastwire">Code on GitHub</a>
+            <Link to="/about">About EastWire</Link>
+            <Link to="/sources">Sources</Link>
+            <a href={CONTACT}>Contact</a>
+            <a href={REPO}>Code on GitHub</a>
             <button type="button" className={styles.linkButton} onClick={() => setHelpOpen(true)}>
               Keyboard shortcuts
             </button>
           </nav>
+          <dl className={styles.facts}>
+            <div>
+              <dt>Last update</dt>
+              <dd className="num">{freshnessLabel(status.data, status.isPending, undefined, status.isError)}</dd>
+            </div>
+            <div>
+              <dt>Sources</dt>
+              <dd>
+                <Link to="/sources">
+                  {outlets ? `${outlets} outlets in the last 24 hours, each with its terms` : 'Every source, with its terms'}
+                </Link>
+              </dd>
+            </div>
+            <div>
+              <dt>Licences</dt>
+              <dd>
+                Headlines and links only, except Global Voices text (
+                <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>). Photos: Wikimedia Commons, credited
+                on each.
+              </dd>
+            </div>
+          </dl>
           <p className={styles.credits}>
             Discovery data: <a href="https://www.gdeltproject.org/">The GDELT Project</a>. Maps: ©{' '}
             <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors. Cities:{' '}

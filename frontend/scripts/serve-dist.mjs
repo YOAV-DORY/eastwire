@@ -2,13 +2,13 @@
 // single-page-app fallback from _redirects. Used by the Playwright tests, so they run against
 // the production build with the real Content-Security-Policy.
 //
-// Usage: node scripts/serve-dist.mjs [port]
+// Usage: node scripts/serve-dist.mjs [port] [distDir]
 import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { extname, join, normalize } from 'node:path'
 
-const root = new URL('../dist/', import.meta.url).pathname
 const port = Number(process.argv[2] ?? 4173)
+const root = process.argv[3] ? `${process.argv[3].replace(/\/$/, '')}/` : new URL('../dist/', import.meta.url).pathname
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',

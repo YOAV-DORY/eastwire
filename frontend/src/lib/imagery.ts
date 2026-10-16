@@ -55,36 +55,48 @@ export function fromApi(image: IllustrativeImage): SlotImage {
   }
 }
 
-/** The city the story is about (its primary, city-precision place), if any. */
-function primaryCity(a: ArticleView): number | undefined {
-  return a.locations.find((l) => l.primary && l.placeId != null)?.placeId ?? undefined
+/** The city the story is about (its primary, city-precision place), with its name. */
+function primaryCity(a: ArticleView): { id: number; name: string } | undefined {
+  const l = a.locations.find((x) => x.primary && x.role !== 'publisher' && x.placeId != null && x.placeName)
+  return l ? { id: l.placeId!, name: l.placeName! } : undefined
 }
 
+const words = (text: string) => ` ${text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ')} `
+
 /**
- * A picture of the place or subject a story is about, never of the event: the photo of its
- * main city, else a subject photo for its country and sector; with `loose` (big slots: the
- * lead, the cards), else any photo from the same country, whose caption names the place it
- * shows. Each file is used once per page (`used` is shared by everything on the page).
- * No match: null, and the card shows EastWire's own illustrated tile instead.
+ * A photo only when the match is real, by the same rules as the API's image matcher
+ * (backend ImageMatcher, docs/images.md):
+ *   - a city photo when the story's main city is that city and the headline names it;
+ *   - a subject photo (e.g. Japan + geopolitics: the National Diet) when the story is about that
+ *     country and sector and the headline contains one of the photo's keywords.
+ * Each file at most once per page (`used` is shared by everything on the page). No match: null,
+ * and the card shows EastWire's graphic card instead. A story about a country we do not cover
+ * (North Korea datelined Beijing) gets no photo of the dateline city.
  */
-export function storyImage(
-  a: ArticleView,
-  country: string | undefined,
-  used: Set<string>,
-  loose = false,
-): SlotImage | null {
+export function storyImage(a: ArticleView, country: string | undefined, used: Set<string>): SlotImage | null {
+  const title = words(a.title)
+  const free = IMAGE_LIBRARY.filter((img) => !used.has(img.id))
   const city = primaryCity(a)
   const sector = a.sectors[0]?.slug
-  const free = IMAGE_LIBRARY.filter((img) => !used.has(img.id))
-  const match =
-    (city !== undefined && free.find((img) => img.cities.includes(city))) ||
-    (country && sector && free.find((img) => img.country === country && img.sectors.includes(sector))) ||
-    (loose && country && free.find((img) => img.country === country)) ||
-    null
-  if (!match) return null
+  const cityMatch =
+    city && title.includes(words(city.name)) ? free.find((img) => img.cities.includes(city.id)) : undefined
+  const topicMatch =
+    !cityMatch && country && sector
+      ? free.find(
+          (img) =>
+            img.country === country &&
+            img.sectors.includes(sector) &&
+            img.headlineWords.some((w) => title.includes(words(w))),
+        )
+      : undefined
+  const match = cityMatch ?? topicMatch
+  if (!match || OTHER_SUBJECT.test(a.title)) return null
   used.add(match.id)
   return fromLibrary(match)
 }
+
+/** Headlines about countries we do not cover: their dateline city is not what they are about. */
+const OTHER_SUBJECT = /\b(North Korea|N\. ?Korea|Pyongyang|KCNA|Pakistan|Russia|Ukraine|Iran|Israel|Gaza)\b/i
 
 /** A country's picture for its hero: its capital's, else any of its photos. */
 const CAPITALS: Record<string, number> = { CN: 1816670, IN: 1261481, JP: 1850147, KR: 1835848 }

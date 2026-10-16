@@ -25,16 +25,19 @@ const PAGES = {
   'map-list': city ? `/map/city/${city}?view=list` : '/map?view=list',
   'map-japan': '/map?country=JP',
   article: '/',
+  sources: '/sources',
+  about: '/about',
   search: '/search?q=Japan',
   'search-zero': '/search?q=zzzxq',
   sectors: '/sectors',
   'sector-economy': '/sector/economy',
   'sector-technology': '/sector/technology',
   social: '/social',
-  about: '/about',
-  status: '/status',
+  'search-empty': '/search',
 }
 // Sector pages open on a full-bleed hero, so only the front pages must show a headline on the first screen.
+// PAGES=home,map,... limits the run to those pages (default: all).
+if (process.env.PAGES) for (const key of Object.keys(PAGES)) if (!process.env.PAGES.split(',').includes(key)) delete PAGES[key]
 const FRONT_PAGES = new Set(['home', 'country-jp'])
 const VIEWPORTS = [
   { name: '1440', width: 1440, height: 900, mobile: false },
@@ -85,6 +88,11 @@ for (const theme of THEMES) {
                 .filter((el) => !el.matches('.leaflet-marker-icon'))
                 // Links inside running text and photo credits are exempt (WCAG 2.5.8 inline exception).
                 .filter((el) => !(el.tagName === 'A' && el.closest('p, h1, h2, h3, h4, dd, blockquote, figcaption')))
+                // A visibly smaller button may draw a 44px hit area around itself (::before).
+                .filter((el) => {
+                  const hit = getComputedStyle(el, '::before')
+                  return !(hit.content !== 'none' && hit.position === 'absolute' && el.getBoundingClientRect().height - 2 * parseFloat(hit.top) >= 44)
+                })
                 .map((el) => ({ el, r: el.getBoundingClientRect() }))
                 .filter(({ r }) => r.height < 44)
                 .map(({ el, r }) => `${el.tagName.toLowerCase()} "${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 30)}" ${Math.round(r.width)}x${Math.round(r.height)}`)

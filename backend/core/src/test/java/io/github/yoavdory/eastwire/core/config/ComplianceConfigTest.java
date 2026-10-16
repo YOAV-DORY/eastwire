@@ -84,7 +84,7 @@ class ComplianceConfigTest {
     @Test
     void refusesDuplicateDomainEntries() {
         DomainPolicy dup = new DomainPolicy("scmp.com", "dup", "HK", DomainDecision.ALLOW, "A1",
-                List.of(), List.of(), "https://example.org", LocalDate.of(2026, 10, 13), null);
+                List.of(), List.of(), "https://example.org", LocalDate.of(2026, 10, 13), null, null);
         List<DomainPolicy> domains = new java.util.ArrayList<>(config.domains());
         domains.add(dup);
         assertThatThrownBy(() -> new ComplianceConfig(config.sources(), domains, config.countries(), config.cities()))

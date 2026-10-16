@@ -29,7 +29,7 @@ describe('map page', () => {
     stubApi(API)
     renderRoute('/map')
     const map = await screen.findByTestId('news-map')
-    expect(within(map).getByText('Tokyo')).toBeInTheDocument()
+    expect(await within(map).findByText('Tokyo')).toBeInTheDocument()
     expect(screen.getByText(/About a country but no one city \(not pinned\): India 42/)).toBeInTheDocument()
   })
 

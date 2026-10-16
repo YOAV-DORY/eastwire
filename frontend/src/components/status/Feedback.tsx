@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { formatUtc, relativeTime } from '../../lib/time'
+import type { ReactNode } from 'react'
+import { Link } from 'react-router'
+import { formatDate, formatUtc, relativeTime } from '../../lib/time'
 import { Button } from '../ui/Button'
 import { Skeleton } from '../ui/Skeleton'
 import styles from './Feedback.module.css'
@@ -42,79 +43,33 @@ export function ErrorState({
   )
 }
 
-/** Seconds since {@code active} became true, ticking once a second; 0 when inactive. */
-function useElapsedSeconds(active: boolean): number {
-  const [seconds, setSeconds] = useState(0)
-  const start = useRef(0)
-  useEffect(() => {
-    if (!active) return
-    start.current = Date.now()
-    const timer = setInterval(() => setSeconds(Math.round((Date.now() - start.current) / 1000)), 1000)
-    return () => {
-      clearInterval(timer)
-      setSeconds(0)
-    }
-  }, [active])
-  return seconds
-}
-
 /**
- * Shown while the free-tier server wakes up (it sleeps after 15 idle minutes). Says how long
- * it has been and how long it can take; the request gives up and offers a retry at about 90 s.
+ * Shown only when there is nothing at all to show yet (no snapshot, no saved copy) and the live
+ * request is taking a while. Neutral wording: the reader needs to know stories are coming, not
+ * how the hosting works.
  */
 export function ColdStart() {
-  const seconds = useElapsedSeconds(true)
   return (
     <p className={styles.cold} role="status">
       <span className={styles.coldDot} aria-hidden="true" />
-      <span>
-        Waking the free-tier server. This can take up to a minute and a half.{' '}
-        <span className={styles.elapsed} aria-hidden="true">
-          {seconds} s
-        </span>
-      </span>
+      <span>Loading the latest stories. This can take a little longer than usual.</span>
     </p>
   )
 }
 
 /**
- * Real data from an earlier visit is on screen, with its time, while a fresh copy loads or
- * after the fresh request failed. Never presented as live.
+ * "Updated 25 min ago": when the stories on screen were fetched. Neutral and small; it is the
+ * only sign that a snapshot is showing because the live request has not answered (yet).
  */
-export function SavedCopyNotice({
-  savedAt,
-  refreshing,
-  failed,
-  onRetry,
-  now,
-}: {
-  savedAt: number
-  refreshing: boolean
-  failed: boolean
-  onRetry: () => void
-  now?: Date
-}) {
-  const iso = new Date(savedAt).toISOString()
+export function UpdatedLabel({ at, now, className }: { at: number | string; now?: Date; className?: string }) {
+  const iso = typeof at === 'number' ? new Date(at).toISOString() : at
   return (
-    <div className={styles.saved} role="status" data-state={failed ? 'failed' : 'refreshing'}>
-      <p>
-        <strong>Saved copy</strong> from{' '}
-        <time dateTime={iso} title={formatUtc(iso)}>
-          {relativeTime(iso, now)}
-        </time>
-        , kept on this device.{' '}
-        {failed
-          ? 'The server did not answer, so these may not be the latest stories.'
-          : refreshing
-            ? 'Checking for newer stories…'
-            : null}
-      </p>
-      {failed && (
-        <Button size="md" onClick={onRetry}>
-          Try again
-        </Button>
-      )}
-    </div>
+    <span className={className}>
+      Updated{' '}
+      <time dateTime={iso} title={formatUtc(iso)} className="num">
+        {relativeTime(iso, now)}
+      </time>
+    </span>
   )
 }
 
@@ -134,13 +89,17 @@ export function FeedSkeleton({ count = 3 }: { count?: number }) {
   )
 }
 
-export function StaleBanner({ state, detail }: { state: 'stale' | 'outage'; detail: string }) {
+/**
+ * Shown on the home page only when the news was not refreshed for six hours or more, in a
+ * reader's words; which source is behind, and why, is on the Sources page.
+ */
+export function StaleBanner({ state, since, now }: { state: 'stale' | 'outage'; since: string; now?: Date }) {
   return (
     <div className={styles.banner} role="status" data-state={state}>
       {state === 'stale'
-        ? 'Some source checks have not succeeded for over two hours. '
-        : 'Source checks have failed for over a day. '}
-      <span className="muted">{detail}</span>
+        ? `Our news was last refreshed ${relativeTime(since, now)}, so the newest stories may be missing. `
+        : `Our news has not been refreshed since ${formatDate(since)}. `}
+      <Link to="/sources#health">Source details</Link>
     </div>
   )
 }

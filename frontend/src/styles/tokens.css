@@ -151,6 +151,7 @@
   --radius-lg: 6px;
   --radius-xl: 10px;
   --radius-pill: 999px;
+  --radius-media: 8px; /* photos and graphic cards: soft, never round */
 
   /* motion: short and calm */
   --dur-fast: 150ms;
@@ -158,6 +159,8 @@
   --dur-enter: 420ms;
   --dur-pin: 320ms;
   --dur-pulse: 2000ms;
+  --dur-zoom: 220ms; /* card hover: picture zoom and lift */
+  --dur-reveal: 320ms; /* a photo sharpening in, live data replacing the saved copy */
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -198,5 +201,7 @@
     --dur-base: 0.01ms;
     --dur-enter: 0.01ms;
     --dur-pin: 0.01ms;
+    --dur-zoom: 0.01ms;
+    --dur-reveal: 0.01ms;
   }
 }

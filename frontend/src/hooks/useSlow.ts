@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-/** Show the cold-start note if a load takes longer than this (free-tier server waking up). */
+/** Show the neutral loading note if a load with nothing on screen takes longer than this. */
 export const COLD_START_AFTER_MS = 3_000
 
 /** True once a load has been running for longer than {@link COLD_START_AFTER_MS}. */

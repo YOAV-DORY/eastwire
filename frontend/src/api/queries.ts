@@ -8,6 +8,7 @@ import type {
   LocationRole,
   MapData,
   MapWindow,
+  Mix,
   PlaceView,
   SectorsView,
   SocialPage,
@@ -70,6 +71,8 @@ export function useFront(filters: FrontFilters) {
     queryFn: (ctx) => getAndSave<FrontPage>('/api/v1/front', { ...filters }, ctx),
     ...savedCopy<FrontPage>(queryKey),
     staleTime: 0,
+    // If the live request gave up while a snapshot is on screen, try again quietly each minute.
+    refetchInterval: (query) => (query.state.status === 'error' ? 60_000 : false),
     ...retryPolicy,
   })
 }
@@ -127,6 +130,16 @@ export function usePlaces(country: string | undefined) {
     queryFn: (ctx) => get<PlaceView[]>('/api/v1/places', { country }, ctx),
     enabled: Boolean(country),
     staleTime: 24 * 60 * 60_000,
+    ...retryPolicy,
+  })
+}
+
+/** Today's mix for the Sources page: stories of the last 24 hours by country and by publisher. */
+export function useMix() {
+  return useQuery({
+    queryKey: ['mix'],
+    queryFn: (ctx) => get<Mix>('/api/v1/mix', {}, ctx),
+    staleTime: 5 * 60_000,
     ...retryPolicy,
   })
 }

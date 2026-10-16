@@ -5,7 +5,7 @@ import { mockApi } from './api'
  * The screenshot checklist from docs/PLAN.md section 17.6, automated where a rule can be
  * measured. Screenshots for the human pass land in test-results/screens/ (not committed).
  */
-const PAGES = ['/', '/?country=JP', '/?country=KR', '/map', '/map/city/1853909', '/search?q=metro', '/search?q=zzzxq', '/sectors', '/sector/economy', '/sector/technology', '/social', '/about', '/status']
+const PAGES = ['/', '/?country=JP', '/?country=KR', '/map', '/map/city/1853909', '/search', '/search?q=metro', '/search?q=zzzxq', '/sectors', '/sector/economy', '/sector/technology', '/social', '/about', '/sources']
 
 for (const theme of ['dark', 'light'] as const) {
   test(`every page fits the width and is screenshotted (${theme})`, async ({ page }, info) => {
@@ -84,7 +84,7 @@ test('every main page is reachable from the phone navigation', async ({ page }, 
     await bottom.getByRole('link', { name }).click()
     await expect(page).toHaveURL(new RegExp(`${path}$`))
   }
-  for (const [name, path] of [['About & sources', '/about'], ['Status', '/status']] as const) {
+  for (const [name, path] of [['About EastWire', '/about'], ['Sources', '/sources']] as const) {
     await bottom.getByRole('button', { name: 'More' }).click()
     await page.getByRole('dialog', { name: 'More' }).getByRole('link', { name }).click()
     await expect(page).toHaveURL(new RegExp(`${path}$`))
@@ -104,7 +104,7 @@ test('real news is visible on the first screen', async ({ page }) => {
 test('controls on phones are at least 44px tall', async ({ page }, info) => {
   test.skip(info.project.name !== 'phone', 'Phone layout only.')
   await mockApi(page)
-  for (const path of ['/', '/map', '/search?q=metro', '/social', '/status']) {
+  for (const path of ['/', '/map', '/search', '/search?q=metro', '/social', '/sources', '/about']) {
     await page.goto(path)
     await expect(page.getByRole('heading', { level: 1 })).toBeAttached()
     await page.waitForLoadState('networkidle')
@@ -118,6 +118,11 @@ test('controls on phones are at least 44px tall', async ({ page }, info) => {
         // Links in running text and photo credits are exempt (WCAG 2.5.8); Leaflet's attribution is third-party; pins get a CSS hit area.
         .filter((el) => !(el.tagName === 'A' && el.closest('p, h1, h2, h3, h4, dd, blockquote, figcaption')))
         .filter((el) => !el.closest('.leaflet-control-attribution') && !el.matches('.leaflet-marker-icon'))
+        // A visibly smaller button may draw a 44px hit area around itself (::before).
+        .filter((el) => {
+          const hit = getComputedStyle(el, '::before')
+          return !(hit.content !== 'none' && hit.position === 'absolute' && el.getBoundingClientRect().height + 2 * -parseFloat(hit.top) >= 44)
+        })
         .filter((el) => el.getBoundingClientRect().height < 44)
         .map((el) => `${el.tagName} "${(el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 30)}"`),
     )

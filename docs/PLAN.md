@@ -1296,7 +1296,22 @@ Snags on the way, now in docs/database.md and docs/deploy.md:
 - Loading: requests give up within about 90 s; a dated saved copy covers return visits.
 - Map: readable tiles, English country labels, framing and selection context.
 
+**Review fixes (branch `review-fixes`, 2026-10-16, not deployed):** a US reader's review, nine items.
+- First load: a snapshot baked into index.html and refreshed by an edge Worker (docs/edge.md);
+  `stale-while-revalidate` on the API; no "waking" notice and no zero counters.
+- Freshness: readers are warned only after six hours without any refresh; per-source health
+  moved to the Sources page.
+- Sources: six more (Korea.net, BusinessKorea, China Digital Times, Dialogue Earth, China Media
+  Project, What's on Weibo); a live country and publisher split on the Sources page; front
+  page capped at about 40% per country and 25% per publisher.
+- Ranking by importance (coverage, security, markets, policy, recency); our own automated
+  one-line summaries where terms allow (docs/summaries.md).
+- Images only on a real match, else EastWire's graphic card (docs/images.md).
+- About page with a masthead; footer with last update, sources and licences.
+- English map labels from OpenFreeMap (docs/map.md); ticker cut only between words.
+
 **Next:**
-1. Owner: ask Hankyoreh (copyright@hani.co.kr) about headline links; read a Korea.net KOGL mark in a
-   browser; request a CARTO key if a basemap with English labels is wanted.
-2. The "Later" list (section 3): Japan Times and NHK once their checks clear, journalists, more countries. Optional `YOUTUBE_API_KEY`.
+1. Owner: deploy the edge Worker and set `VITE_SNAPSHOT_URL` (docs/edge.md); ask Hankyoreh
+   (copyright@hani.co.kr) about headline links.
+2. Southeast Asia and Taiwan (not started), Japan Today and East Asia Forum (pending review).
+3. The "Later" list (section 3): Japan Times and NHK once their checks clear, journalists. Optional `YOUTUBE_API_KEY`.

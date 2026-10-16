@@ -5,28 +5,25 @@ import { useFront, type FrontFilters } from '../../api/queries'
 import type { ArticleView, FrontStory } from '../../api/types'
 import { useSlow } from '../../hooks/useSlow'
 import { fromApi, storyImage, type SlotImage } from '../../lib/imagery'
-import { isSavedCopy } from '../../lib/savedCopy'
 import { Flag } from '../graphics/Flag'
 import { SectorIcon } from '../graphics/SectorIcon'
 import { StoryCard } from '../news/StoryCard'
-import { ColdStart, EmptyState, ErrorState, SavedCopyNotice } from '../status/Feedback'
+import { ColdStart, EmptyState, ErrorState } from '../status/Feedback'
 import { Skeleton } from '../ui/Skeleton'
+import { FEATURED, TOP_LATEST } from '../../lib/frontLayout'
 import { isCleared } from './cleared'
 import { LeadStory } from './LeadStory'
 import { ReadingList } from './ReadingList'
 import { mainCountry } from './storyCountry'
 import styles from './FrontPage.module.css'
 
-/** Latest stories beside the rail; the next ones become the In focus cards; the rest are grouped. */
-const TOP_LATEST = 6
-const FEATURED = 4
-
 /**
  * A ranked front page on one 12-column grid: the split lead (lead story over eight columns,
  * the next two over four), Latest beside the rail, In focus cards, an optional block (sector
  * tiles), the rest of Latest grouped, and Reading. Every picture is assigned here, once per
- * page. Every state is bounded: a saved copy with its time while refreshing, a cold-start note,
- * and an error with a retry after ~90 s.
+ * page. The page starts from the newest "last good" copy (snapshot or saved), which the live API
+ * replaces in the background; a neutral loading note appears only when there is nothing to show
+ * yet, and an error with a retry only when there is still nothing after ~90 s.
  */
 export function FrontPage({
   filters,
@@ -39,6 +36,7 @@ export function FrontPage({
   after,
   between,
   reservedImages = [],
+  elsewhere,
 }: {
   filters: FrontFilters
   /** Full-width content between In focus and the grouped stories (e.g. sector tiles). */
@@ -53,33 +51,25 @@ export function FrontPage({
   highlightedPlace?: number | null
   /** Commons files used elsewhere on the page, so stories do not repeat them. */
   reservedImages?: string[]
+  /** Stories already shown elsewhere on the page (the ticker), left out of the groups so none appears twice. */
+  elsewhere?: Set<number>
 }) {
   const front = useFront(filters)
   const data = front.data
   const loading = front.isPending
   const slow = useSlow(loading)
-  const saved = data !== undefined && isSavedCopy(front.dataUpdatedAt)
 
   const highlighted = (a: ArticleView) =>
     highlightedPlace != null && a.locations.some((l) => l.primary && l.placeId === highlightedPlace)
   const top = data?.latest.slice(0, TOP_LATEST) ?? []
   const featured = data?.latest.slice(TOP_LATEST, TOP_LATEST + FEATURED) ?? []
-  const more = data?.latest.slice(TOP_LATEST + FEATURED) ?? []
+  const more = (data?.latest.slice(TOP_LATEST + FEATURED) ?? []).filter((a) => !elsewhere?.has(a.id))
   const groups = groupStories(more, filters.country ? 'sector' : 'country', countryNames)
   const nothingNew = data !== undefined && !data.lead && data.latest.length === 0
   const images = useStoryImages(data, top, featured, reservedImages)
 
   return (
     <>
-      {saved && (front.isFetching || front.isError) && (
-        <SavedCopyNotice
-          savedAt={front.dataUpdatedAt}
-          refreshing={front.isFetching}
-          failed={front.isError && !front.isFetching}
-          onRetry={() => void front.refetch()}
-        />
-      )}
-
       {loading && (
         <div aria-busy="true">
           {slow && <ColdStart />}
@@ -88,7 +78,7 @@ export function FrontPage({
       )}
       {front.isError && !data && (
         <ErrorState
-          message="The server did not answer within about 90 seconds. It may be waking up or temporarily down."
+          message="The stories did not load. Please try again in a moment."
           onRetry={() => void front.refetch()}
           retrying={front.isFetching}
         />
@@ -100,70 +90,67 @@ export function FrontPage({
         </EmptyState>
       )}
 
-      {data && (data.lead || data.secondary.length > 0) && (
-        <section className={clsx(styles.grid, styles.split)} aria-label="Top stories">
-          {data.lead && (
-            <div className={styles.leadCol}>
-              <LeadStory story={data.lead} image={images.get(data.lead.article.id) ?? null} countryNames={countryNames} onHighlight={onHighlight} />
-            </div>
-          )}
-          {data.secondary.length > 0 && (
-            <ol className={styles.secondary} aria-label="Also leading">
-              {data.secondary.map((s, i) => (
-                <li key={s.article.id} className="reveal">
-                  <StoryCard
-                    article={s.article}
-                    variant="standard"
-                    image={images.get(s.article.id) ?? null}
-                    countryNames={countryNames}
-                    onHighlight={onHighlight}
-                    highlighted={highlighted(s.article)}
-                    index={i}
-                    sizes="(min-width: 1024px) 380px, 100vw"
-                  />
-                </li>
-              ))}
-            </ol>
-          )}
-        </section>
-      )}
-
-      {data && between}
-
-      {data && (top.length > 0 || rail) && (
-        <div className={clsx(styles.grid, styles.latestRow)}>
-          <section aria-labelledby="latest-title" className={styles.latest}>
-            {(top.length > 0 || data.lead) && (
-              <>
-                <SectionHead id="latest-title" title="Latest">
-                  <span className="num">
-                    {data.latestCount} {data.latestCount === 1 ? 'story' : 'stories'} from the last {data.latestWindowHours} hours
-                  </span>{' '}
-                  · ordered by <Link to="/about#ranking">our ranking rules</Link>
-                </SectionHead>
-                <ol className={styles.list}>
-                  {top.map((a, i) => (
-                    <li key={a.id}>
-                      <StoryCard
-                        article={a}
-                        variant="row"
-                        image={images.get(a.id)}
-                        countryNames={countryNames}
-                        onHighlight={onHighlight}
-                        highlighted={highlighted(a)}
-                        index={i}
-                      />
-                    </li>
-                  ))}
-                </ol>
-              </>
+      {data && (data.lead || data.secondary.length > 0 || top.length > 0) && (
+        // Two columns that each fill on their own (no gap under a short lead): the lead then
+        // Latest on the left, the next two then the rail on the right. On phones the wrappers
+        // dissolve and the order is lead, the next two, (sector chips), Latest, rail.
+        <div className={styles.front}>
+          <div className={styles.colMain}>
+            {data.lead && (
+              <section className={styles.leadBlock} aria-label="Lead story">
+                <LeadStory story={data.lead} image={images.get(data.lead.article.id) ?? null} countryNames={countryNames} onHighlight={onHighlight} />
+              </section>
             )}
-          </section>
-          {rail && (
-            <aside className={styles.rail} aria-label="Map and live figures">
-              {rail}
-            </aside>
-          )}
+            {between && <div className={styles.betweenBlock}>{between}</div>}
+            <section aria-labelledby="latest-title" className={styles.latest}>
+              <SectionHead id="latest-title" title="Latest">
+                <span className="num">
+                  {data.latestCount} {data.latestCount === 1 ? 'story' : 'stories'} from the last {data.latestWindowHours} hours
+                </span>{' '}
+                · ordered by <Link to="/about#ranking">our ranking rules</Link>
+              </SectionHead>
+              <ol className={styles.list}>
+                {top.map((a, i) => (
+                  <li key={a.id}>
+                    <StoryCard
+                      article={a}
+                      variant="row"
+                      image={images.get(a.id)}
+                      countryNames={countryNames}
+                      onHighlight={onHighlight}
+                      highlighted={highlighted(a)}
+                      index={i}
+                    />
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </div>
+          <div className={styles.colSide}>
+            {data.secondary.length > 0 && (
+              <ol className={styles.secondary} aria-label="Also leading">
+                {data.secondary.map((s, i) => (
+                  <li key={s.article.id}>
+                    <StoryCard
+                      article={s.article}
+                      variant="standard"
+                      image={images.get(s.article.id) ?? null}
+                      countryNames={countryNames}
+                      onHighlight={onHighlight}
+                      highlighted={highlighted(s.article)}
+                      index={i}
+                      sizes="(min-width: 1024px) 380px, 100vw"
+                    />
+                  </li>
+                ))}
+              </ol>
+            )}
+            {rail && (
+              <aside className={styles.rail} aria-label="Map and live figures">
+                {rail}
+              </aside>
+            )}
+          </div>
         </div>
       )}
 
@@ -246,10 +233,10 @@ export function SectionHead({ id, title, children }: { id: string; title: ReactN
 }
 
 /**
- * Pictures for the page, each Commons file at most once: the API's cleared image first, else
- * a photo of the story's city or of its country and sector. Lead, secondaries, In focus and
- * Reading may also take another photo of the same country; anything left gets EastWire's tile (null).
- * Latest rows show a picture only when one fits.
+ * Pictures for the page, each Commons file at most once, and only on a real match: the API's
+ * cleared image, else a photo of the story's city or subject by the same rules (lib/imagery.ts).
+ * Lead, the next two, In focus and Reading otherwise get EastWire's graphic card (null); Latest
+ * rows show a picture only when one matches (undefined: no picture area).
  */
 function useStoryImages(
   data: ReturnType<typeof useFront>['data'],
@@ -261,27 +248,18 @@ function useStoryImages(
     const used = new Set(reserved)
     const out = new Map<number, SlotImage | null | undefined>()
     if (!data) return out
-    const pick = (a: ArticleView, loose: boolean, story?: FrontStory) => {
+    const pick = (a: ArticleView, story?: FrontStory) => {
       if (story && isCleared(story.image) && !used.has(story.image.id)) {
         used.add(story.image.id)
         return fromApi(story.image)
       }
-      return storyImage(a, mainCountry(a), used, loose)
+      return storyImage(a, mainCountry(a), used)
     }
-    // Strict matches first (city, then country and sector), so the closest pictures go where they fit best.
-    if (data.lead) out.set(data.lead.article.id, pick(data.lead.article, false, data.lead))
-    for (const s of data.secondary) out.set(s.article.id, pick(s.article, false, s))
-    for (const a of top) out.set(a.id, pick(a, false) ?? undefined)
-    for (const a of featured) out.set(a.id, pick(a, false))
-    // Then the big slots still without one may take another photo of the same country.
-    const loosen = (id: number, a: ArticleView) => {
-      if (!out.get(id)) out.set(id, pick(a, true))
-    }
-    if (data.lead) loosen(data.lead.article.id, data.lead.article)
-    for (const s of data.secondary) loosen(s.article.id, s.article)
-    for (const a of featured) loosen(a.id, a)
-    for (const a of data.reading) out.set(a.id, pick(a, false))
-    for (const a of data.reading) loosen(a.id, a)
+    if (data.lead) out.set(data.lead.article.id, pick(data.lead.article, data.lead))
+    for (const s of data.secondary) out.set(s.article.id, pick(s.article, s))
+    for (const a of top) out.set(a.id, pick(a) ?? undefined)
+    for (const a of featured) out.set(a.id, pick(a))
+    for (const a of data.reading) out.set(a.id, pick(a))
     return out
     // eslint-disable-next-line react-hooks/exhaustive-deps -- recomputed when the page data changes
   }, [data, reserved.join(',')])
@@ -318,29 +296,17 @@ function groupStories(items: ArticleView[], by: 'country' | 'sector', countryNam
 /** The page's own shape while loading: split lead, then Latest beside the rail, then cards. */
 function FrontSkeleton() {
   return (
-    <div className={styles.skeleton} aria-hidden="true">
-      <div className={clsx(styles.grid, styles.split)}>
-        <div className={clsx(styles.leadCol, styles.skelStack)}>
+    <div className={clsx(styles.front, styles.skeleton)} aria-hidden="true">
+      <div className={styles.colMain}>
+        <div className={clsx(styles.leadBlock, styles.skelStack)}>
           <Skeleton width="100%" height="auto" className={styles.skelLeadImage} />
           <Skeleton width="30%" height="0.8em" />
           <Skeleton width="95%" height="2.2em" />
           <Skeleton width="70%" height="2.2em" />
           <Skeleton width="45%" height="0.9em" />
         </div>
-        <div className={clsx(styles.secondary, styles.skelStack)}>
-          {[0, 1].map((i) => (
-            <div key={i} className={styles.skelStack}>
-              <Skeleton width="100%" height="auto" className={styles.skelCardImage} />
-              <Skeleton width="40%" height="0.8em" />
-              <Skeleton width="90%" height="1.3em" />
-              <Skeleton width="60%" height="1.3em" />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className={clsx(styles.grid, styles.latestRow)}>
         <div className={styles.latest}>
-          {Array.from({ length: 5 }, (_, i) => (
+          {Array.from({ length: 4 }, (_, i) => (
             <div key={i} className={styles.skelRow}>
               <div className={styles.skelStack}>
                 <Skeleton width="30%" height="0.8em" />
@@ -351,9 +317,16 @@ function FrontSkeleton() {
             </div>
           ))}
         </div>
-        <div className={clsx(styles.rail, styles.skelStack)}>
-          <Skeleton width="100%" height="280px" />
-          <Skeleton width="60%" height="1em" />
+      </div>
+      <div className={styles.colSide}>
+        <div className={clsx(styles.secondary, styles.skelStack)}>
+          {[0, 1].map((i) => (
+            <div key={i} className={styles.skelStack}>
+              <Skeleton width="100%" height="auto" className={styles.skelCardImage} />
+              <Skeleton width="40%" height="0.8em" />
+              <Skeleton width="90%" height="1.3em" />
+            </div>
+          ))}
         </div>
       </div>
     </div>

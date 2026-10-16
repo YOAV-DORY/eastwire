@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { ArrowUpRight, X } from 'lucide-react'
 import { useEffect, useRef } from 'react'
+import { Link } from 'react-router'
 import type { ArticleView, LocationView } from '../../api/types'
 import type { SlotImage } from '../../lib/imagery'
 import { formatUtc } from '../../lib/time'
@@ -78,6 +79,7 @@ export function StoryDialog({
           image={image}
           country={mainCountry(a)}
           sector={a.sectors[0]?.slug}
+          source={a.publisher}
           seed={a.id}
           ratio="16 / 9"
           sizes="(min-width: 720px) 560px, 100vw"
@@ -89,13 +91,23 @@ export function StoryDialog({
           </h2>
           <p className={styles.meta}>
             <strong>{a.publisher}</strong>
+            {a.publisherLabel && <span>{a.publisherLabel}</span>}
             <StoryTime article={a} now={now} />
           </p>
-          {a.excerpt ? (
-            <p className={styles.summary}>{a.excerpt}</p>
-          ) : (
+          {a.summary && (
+            <div className={styles.ours}>
+              <p className={styles.summary}>{a.summary}</p>
+              <p className={styles.note}>
+                Summary written automatically by EastWire from the publisher&apos;s description, and checked so it adds no
+                name or number the publisher did not state. <Link to="/about#summaries">How summaries work</Link>
+              </p>
+            </div>
+          )}
+          {a.excerpt && <p className={styles.summary}>{a.excerpt}</p>}
+          {!a.summary && !a.excerpt && (
             <p className={styles.noSummary}>
-              {a.publisher}&apos;s terms allow us the headline and link only, so there is no summary here.
+              No summary: {a.publisher}&apos;s terms allow us the headline and link only, or its feed gave nothing more to
+              work from.
             </p>
           )}
           {licensed && (

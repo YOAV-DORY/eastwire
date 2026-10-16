@@ -2,25 +2,19 @@ import L from 'leaflet'
 import 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet/dist/leaflet.css'
-import { useEffect, useRef } from 'react'
-import { CircleMarker, MapContainer, TileLayer, useMap } from 'react-leaflet'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { CircleMarker, MapContainer, useMap } from 'react-leaflet'
 import type { CityPin, PlaceView } from '../../api/types'
 import { PIN_PIXELS, pinLabel, pinSize, pinSvg, popupHtml, populationRadius } from '../../lib/map'
+import { Basemap } from './Basemap'
 import './NewsMap.css'
 
 /**
  * Interactive Leaflet map: red city pins (clustered when zoomed out), optional population
  * circles. Loaded lazily (see LazyNewsMap) so Leaflet stays out of the main bundle.
  *
- * Tiles: OpenStreetMap's standard tiles (usage policy checked; attribution always shown), only
- * lightly desaturated so their own labels stay readable. OSM names places in local scripts, so
- * English country and city labels are drawn on top. A different provider can be set at build
- * time (VITE_TILE_URL, VITE_TILE_ATTRIBUTION), e.g. CARTO once the owner has its API key.
+ * Base map: see Basemap (English-labelled vector tiles, OpenStreetMap raster as a fallback).
  */
-const TILE_URL: string = import.meta.env.VITE_TILE_URL ?? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-const TILE_ATTRIBUTION: string =
-  import.meta.env.VITE_TILE_ATTRIBUTION ??
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 
 /** English names for the covered countries, placed where city pins rarely are (Japan's and Korea's over the sea). */
 const COUNTRY_LABELS: { name: string; at: [number, number] }[] = [
@@ -57,6 +51,8 @@ export default function NewsMap({
   reducedMotion,
 }: NewsMapProps) {
   const touch = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches
+  const [mode, setMode] = useState<'vector' | 'raster'>('vector')
+  const onMode = useCallback((m: 'vector' | 'raster') => setMode(m), [])
   return (
     <MapContainer
       bounds={COVERED}
@@ -71,8 +67,8 @@ export default function NewsMap({
       markerZoomAnimation={!reducedMotion}
       worldCopyJump
     >
-      <TileLayer url={TILE_URL} attribution={TILE_ATTRIBUTION} className="ew-tiles" maxZoom={19} />
-      <CountryLabels pins={pins} />
+      <Basemap onMode={onMode} />
+      {mode === 'raster' && <CountryLabels pins={pins} />}
       <FrameStories pins={pins} />
       <ShowSelected pins={pins} selectedId={selectedId} />
       {population?.map((p) => (
@@ -90,7 +86,7 @@ export default function NewsMap({
 }
 
 /**
- * English country names over the tiles' local-script labels; not interactive, hidden from
+ * Raster fallback only: English country names over the tiles' local-script labels; not interactive, hidden from
  * screen readers. A label steps aside (hides) while a pin or cluster sits on it.
  */
 function CountryLabels({ pins }: { pins: CityPin[] }) {

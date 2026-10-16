@@ -63,6 +63,9 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+      - name: Edge Worker tests
+        working-directory: edge
+        run: npm test
 
   e2e:
     name: End-to-end (Playwright, axe)

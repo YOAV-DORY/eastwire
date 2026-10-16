@@ -1,0 +1,23 @@
+# EastWire edge Worker (docs/edge.md). Free plan: one Cron Trigger, one KV namespace.
+name = "eastwire-edge"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[triggers]
+# Every 10 minutes: keeps the Render API awake (it sleeps after 15 idle minutes); the code
+# decides when to also dispatch the ingest workflow and refresh the snapshot.
+crons = ["*/10 * * * *"]
+
+[vars]
+API_BASE = "https://eastwire-api.onrender.com"
+GITHUB_REPO = "YOAV-DORY/eastwire"
+INGEST_WORKFLOW = "ingest.yml"
+
+# Created with `npx wrangler kv namespace create SNAPSHOT`; paste the id it prints here.
+[[kv_namespaces]]
+binding = "SNAPSHOT"
+id = "258608abdcf949a3b36abaea78a9c91d"
+
+[observability]
+enabled = true

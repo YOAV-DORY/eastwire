@@ -33,11 +33,36 @@ public record SourceConfig(
         String publisher,
         String coversCountry,
         String storyType,
-        List<String> featureCategories) {
+        List<String> featureCategories,
+        String publisherLabel,
+        String publisherLabelEvidence,
+        List<String> skipCategories,
+        boolean summaries,
+        String feedTimezone,
+        String feedTimePrecision) {
 
     public SourceConfig {
         feeds = feeds == null ? List.of() : List.copyOf(feeds);
         featureCategories = featureCategories == null ? List.of() : List.copyOf(featureCategories);
+        skipCategories = skipCategories == null ? List.of() : List.copyOf(skipCategories);
+    }
+
+    /**
+     * The zone a feed's dates are written in when they carry none (BusinessKorea, Korea.net:
+     * Seoul time), or null for feeds whose dates are complete.
+     */
+    public java.time.ZoneId feedZone() {
+        return feedTimezone == null || feedTimezone.isBlank() ? null : java.time.ZoneId.of(feedTimezone);
+    }
+
+    /** True when the feed gives only the day of publication, not the time (Korea.net). */
+    public boolean datesAreDaysOnly() {
+        return "day".equals(feedTimePrecision);
+    }
+
+    /** True when an item filed under one of these feed categories is not news for EastWire (e.g. readers' posts). */
+    public boolean isSkipped(java.util.Collection<String> itemCategories) {
+        return itemCategories.stream().anyMatch(c -> skipCategories.stream().anyMatch(f -> f.equalsIgnoreCase(c.strip())));
     }
 
     /**
@@ -66,7 +91,8 @@ public record SourceConfig(
         return new SourceConfig(slug, name, kind, connector, status, enabled, displayMode,
                 maxExcerptChars, images, attribution, excerptNote, label, wireCreditMode, partnerReprints,
                 retentionDays, publisherCountry, publisherCityGeonamesId, newFeeds, license, evidence, publisher,
-                coversCountry, storyType, featureCategories);
+                coversCountry, storyType, featureCategories, publisherLabel, publisherLabelEvidence, skipCategories,
+                summaries, feedTimezone, feedTimePrecision);
     }
 
     /** A copy with a different {@code enabled} flag; used when a conditional source is turned on. */
@@ -74,6 +100,7 @@ public record SourceConfig(
         return new SourceConfig(slug, name, kind, connector, status, newEnabled, displayMode,
                 maxExcerptChars, images, attribution, excerptNote, label, wireCreditMode, partnerReprints,
                 retentionDays, publisherCountry, publisherCityGeonamesId, feeds, license, evidence, publisher,
-                coversCountry, storyType, featureCategories);
+                coversCountry, storyType, featureCategories, publisherLabel, publisherLabelEvidence, skipCategories,
+                summaries, feedTimezone, feedTimePrecision);
     }
 }

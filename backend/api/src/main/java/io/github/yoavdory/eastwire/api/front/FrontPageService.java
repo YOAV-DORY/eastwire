@@ -58,7 +58,16 @@ public class FrontPageService {
             views.put(r.id(), v);
             publishers.put(r.id(), v.publisher());
         }
-        FrontRanker.Selection selection = FrontRanker.select(news, publishers, now);
+        // The unfiltered front page does not lead with the same country twice in a row: the lead
+        // it would have chosen an hour ago (from the stories it had then) sets the country to avoid.
+        String previousLeadCountry = null;
+        if (country == null && city == null && sector == null) {
+            Instant hourAgo = now.minus(Duration.ofHours(1));
+            List<ArticleRow> earlier = news.stream().filter(r -> !r.referenceTime().isAfter(hourAgo)).toList();
+            FrontRanker.Selection previous = FrontRanker.select(earlier, publishers, hourAgo);
+            previousLeadCountry = previous.lead() == null ? null : previous.lead().country();
+        }
+        FrontRanker.Selection selection = FrontRanker.select(news, publishers, now, previousLeadCountry);
 
         Set<String> used = new HashSet<>();
         FrontPage.Story lead = selection.lead() == null ? null : story(selection.lead(), views, used);

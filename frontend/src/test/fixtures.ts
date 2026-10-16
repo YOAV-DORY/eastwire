@@ -71,7 +71,7 @@ export const COUNTRIES: CountryView[] = [
 ]
 
 export function status(state: Status['state'], lastSuccessAt: string | null = new Date().toISOString()): Status {
-  return { state, lastSuccessAt, sources: [] }
+  return { updateState: state, updatedAt: lastSuccessAt, state, lastSuccessAt, sources: [] }
 }
 
 export const ECONOMY_TAG: SectorTag = {

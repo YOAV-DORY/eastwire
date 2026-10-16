@@ -14,16 +14,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Freshness for the site's "Updated 12 min ago" indicator and the /status page.
+ * Freshness, in two views.
  *
- * <p>The overall time is the <em>oldest</em> last success among enabled sources, so one
- * failing source can't hide behind a fresh one. States: fresh (under 2 h), stale (under
- * 24 h), outage (24 h or more), unknown (never ran).
+ * <p><b>For readers</b> ({@code updatedAt}, {@code updateState}): when EastWire last refreshed
+ * its news, i.e. the <em>newest</em> successful source check. Ingestion runs about hourly but
+ * schedulers can delay a run, so this only turns "stale" after {@link READER_STALE_AFTER}
+ * (several missed runs in a row) and "outage" after a day. That is the only freshness the home
+ * page shows.
+ *
+ * <p><b>Per source</b> ({@code sources[].state}, {@code state}, {@code lastSuccessAt}): the
+ * Sources page's health detail. The overall operator time is the <em>oldest</em> last success,
+ * so one failing source can't hide behind a fresh one. A source is "fresh" for
+ * {@link SOURCE_STALE_AFTER}, allowing one late hourly run.
  */
 @RestController
 class StatusController {
 
-    static final Duration STALE_AFTER = Duration.ofHours(2);
+    static final Duration SOURCE_STALE_AFTER = Duration.ofHours(3);
+    static final Duration READER_STALE_AFTER = Duration.ofHours(6);
     static final Duration OUTAGE_AFTER = Duration.ofHours(24);
 
     record SourceStatus(
@@ -43,7 +51,13 @@ class StatusController {
     record Database(long sizeBytes, long limitBytes, String state) {
     }
 
-    record Status(String state, Instant lastSuccessAt, List<SourceStatus> sources, Database database) {
+    /**
+     * @param updateState reader view: fresh, stale, outage or unknown, from {@code updatedAt}
+     * @param updatedAt   newest successful check of any enabled source
+     * @param state       operator view, from the oldest last success ({@code lastSuccessAt})
+     */
+    record Status(String updateState, Instant updatedAt, String state, Instant lastSuccessAt, List<SourceStatus> sources,
+            Database database) {
     }
 
     private final StatusRepository repository;
@@ -76,9 +90,11 @@ class StatusController {
         Instant oldest = sources.stream().map(SourceStatus::lastSuccessAt).filter(Objects::nonNull)
                 .min(Comparator.naturalOrder()).orElse(null);
         String overall = anyNeverRan && oldest == null ? "unknown" : state(anyNeverRan ? null : oldest, now);
+        Instant newest = sources.stream().map(SourceStatus::lastSuccessAt).filter(Objects::nonNull)
+                .max(Comparator.naturalOrder()).orElse(null);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(Duration.ofSeconds(30)).cachePublic())
-                .body(new Status(overall, anyNeverRan ? null : oldest, sources, database()));
+                .body(new Status(readerState(newest, now), newest, overall, anyNeverRan ? null : oldest, sources, database()));
     }
 
     private Database database() {
@@ -86,12 +102,22 @@ class StatusController {
         return new Database(size, databaseLimit, size >= databaseWarn ? "warn" : "ok");
     }
 
+    /** One source's (or the oldest) check: fresh for {@link SOURCE_STALE_AFTER}. */
     static String state(Instant lastSuccess, Instant now) {
-        if (lastSuccess == null) {
+        return classify(lastSuccess, now, SOURCE_STALE_AFTER);
+    }
+
+    /** What a reader is told: stale only after {@link READER_STALE_AFTER} without any refresh. */
+    static String readerState(Instant lastUpdate, Instant now) {
+        return classify(lastUpdate, now, READER_STALE_AFTER);
+    }
+
+    private static String classify(Instant at, Instant now, Duration staleAfter) {
+        if (at == null) {
             return "unknown";
         }
-        Duration age = Duration.between(lastSuccess, now);
-        if (age.compareTo(STALE_AFTER) < 0) {
+        Duration age = Duration.between(at, now);
+        if (age.isNegative() || age.compareTo(staleAfter) < 0) {
             return "fresh";
         }
         return age.compareTo(OUTAGE_AFTER) < 0 ? "stale" : "outage";

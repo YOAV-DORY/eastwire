@@ -46,6 +46,13 @@ class ApiControllersTest {
     }
 
     @Test
+    void readsMayBeReusedBrieflyAndShownStaleWhileRefreshingButHealthNeverIs() throws Exception {
+        mvc.perform(get("/api/v1/sources"))
+                .andExpect(header().string("Cache-Control", "public, max-age=60, stale-while-revalidate=600"));
+        mvc.perform(get("/api/v1/health")).andExpect(header().string("Cache-Control", "no-store"));
+    }
+
+    @Test
     void theApiIsReadOnly() throws Exception {
         mvc.perform(post("/api/v1/sources")).andExpect(status().isMethodNotAllowed());
     }

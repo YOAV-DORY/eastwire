@@ -28,16 +28,21 @@ photograph of the city or institution the story is about, from Wikimedia Commons
   story's main subject is that city and the headline or dateline names it; a topic image (e.g.
   Japan + geopolitics: the National Diet) only when the headline also contains one of its
   `headline_words`. Never for a story about a country we do not cover.
-- **Relevance, page layout (`frontend/src/lib/imagery.ts`, design round 4):** so most stories
-  carry a picture, the frontend also picks from the same checked files, in this order: the
-  API's cleared image; the photo of the story's main city; a topic photo for its country and
-  sector; and, for the large slots only (lead, secondaries, In focus and Reading cards), any photo from the
-  story's own country. The caption always names the place shown ("India Gate, New Delhi") and
-  the label says "Illustrative image", so a picture is never presented as the event. Each file
-  appears at most once per page. Rows in lists show a picture only for a city or topic match.
-  With no match a card shows EastWire's own tile (below), never a blank frame.
+- **Relevance, page layout (`frontend/src/lib/imagery.ts`, review fixes 2026-10-16):** strict.
+  A story gets a photo only on a real match: the API's cleared image; a photo of a city the
+  **headline names** (in the story's own country); or a topic photo for its country and sector
+  whose `headline_words` appear in the headline. There is no "any photo of the country" step any
+  more: a generic Delhi photo on a story about a court ruling elsewhere read as a claim about
+  the event. Stories about North Korea, KCNA or other places we do not cover never get a photo
+  of a covered country. Each file appears at most once per page (page heroes included), and the
+  caption always names the place shown, labelled "Illustrative image".
+- **Otherwise, the graphic card:** EastWire's own `FallbackTile`, the same design for every
+  story: a quiet grid surface, the sector's icon in brand red, the country as a small colour
+  marker (the only place country colours appear), the sector and the source's name; on large
+  slots the country's name is also set big in outline type. Drawn in code, so no third-party
+  rights, and plainly not a photograph, so it carries no "illustrative" label.
 - **Hosting:** loaded from Wikimedia's image servers (`thumb.wikimedia.org`), named in the CSP
-  and in the privacy note on About & sources.
+  and in the privacy note on the About page.
 
 ## Accepted (file pages read 2026-10-15)
 
@@ -91,9 +96,8 @@ sector photos below, and stories on the home page never repeat them.
 | Business sector | Tokyo Stock Exchange | Kakidai | CC BY-SA 4.0 |
 | Society sector | Gyedong-gil, Seoul | Basile Morin | CC BY-SA 4.0 |
 
-Story cards without a matching photo use EastWire's own tile (`FallbackTile`: brand red or
-ink, the rising disc from the wordmark, the country code and the sector icon, drawn in code),
-always labelled "Illustration". `frontend/src/lib/imageLibrary.ts` is generated from
+Story cards without a matching photo use the graphic card described under Rules.
+`frontend/src/lib/imageLibrary.ts` is generated from
 `config/images.yaml` by `frontend/scripts/build_image_library.py`; rerun it after adding an image.
 
 ## Rejected candidates (2026-10-15)

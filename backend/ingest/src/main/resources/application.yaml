@@ -21,6 +21,10 @@ eastwire:
     run-on-startup: true
     # pg_try_advisory_lock keeps two runs (cron + manual) from overlapping.
     advisory-lock: true
+  summary:
+    # llama.cpp's server on the runner (ingest.yml starts it); empty means no summaries.
+    url: ${EASTWIRE_SUMMARY_URL:}
+    model: phi-3-mini-4k-instruct-q4
   http:
     user-agent: "EastWireBot/0.1 (+https://github.com/YOAV-DORY/eastwire)"
     # Slow sites (Global Voices took 20 s to answer on 2026-10-13) need more than a few seconds.

@@ -98,6 +98,15 @@
   color: var(--text);
 }
 
+.ownership {
+  align-self: center;
+  padding: 0 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+}
+
 .meta strong::after {
   content: "·";
   margin-left: var(--space-2);
@@ -164,9 +173,37 @@
   }
 }
 
+.readShort {
+  display: none;
+}
+
 @media (max-width: 399px) {
+  .readShort {
+    display: inline;
+  }
+
   .lead {
     --lead-ratio: 2 / 1;
+  }
+
+  .readLong {
+    display: none;
+  }
+
+  /* The narrowest phones: Details shrinks to its icon so it stays beside "Read at …". */
+  .details {
+    justify-content: center;
+    width: var(--tap);
+    padding: 0;
+  }
+
+  .detailsLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 

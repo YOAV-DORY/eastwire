@@ -18,9 +18,9 @@ const ICON = {
 } as const
 
 /**
- * "Sources checked 12 min ago": when EastWire last checked its sources successfully, in a
- * health colour with an icon and words (never the brand red). Not how old any story is:
- * each story shows its own date. Links to /status, which separates checks from story times.
+ * "Updated 12 min ago": when EastWire last refreshed its news, with an icon and words in a
+ * health colour (never the brand red). Calm unless nothing was refreshed for six hours. Links
+ * to the Sources page's health section, where each source's own checks are listed.
  */
 export function FreshnessIndicator({
   status,
@@ -33,13 +33,13 @@ export function FreshnessIndicator({
   failed?: boolean
   now?: Date
 }) {
-  const state: Shown = status ? status.state : failed ? 'unavailable' : loading ? 'loading' : 'unknown'
+  const state: Shown = status ? status.updateState : failed ? 'unavailable' : loading ? 'loading' : 'unknown'
   const Icon = ICON[state]
   return (
     <Link
-      to="/status"
+      to="/sources#health"
       className={clsx(styles.pill, styles[state])}
-      title={status?.lastSuccessAt ? `Every source checked successfully by ${formatUtc(status.lastSuccessAt)}` : undefined}
+      title={status?.updatedAt ? `News last refreshed ${formatUtc(status.updatedAt)}. Source details` : undefined}
       aria-live="polite"
     >
       <Icon className={styles.icon} size={16} strokeWidth={2} aria-hidden="true" />

@@ -81,6 +81,18 @@ def check_sources(sources, city_ids, country_codes, report):
             report.error(where, f"story_type must be one of {sorted(STORY_TYPES)}")
         if s.get("covers_country") is not None and s.get("covers_country") not in country_codes:
             report.error(where, f"covers_country {s.get('covers_country')} is not a country in countries.yaml")
+        if s.get("publisher_label") and not str(s.get("publisher_label_evidence", "")).startswith("https://"):
+            report.error(where, "publisher_label needs publisher_label_evidence (a cited basis)")
+        if s.get("feed_time_precision") not in (None, "day"):
+            report.error(where, "feed_time_precision must be 'day' or absent")
+        if s.get("feed_timezone") is not None:
+            try:
+                import zoneinfo
+                zoneinfo.ZoneInfo(s["feed_timezone"])
+            except Exception:
+                report.error(where, f"feed_timezone {s['feed_timezone']!r} is not a time zone")
+        if s.get("summaries") and s.get("display_mode") not in ("headline_only", "headline_excerpt"):
+            report.error(where, "summaries apply to news sources only")
         if s.get("connector") == "headline_rss":
             # Direct publisher feeds are headline links only: no excerpt, no images, a named publisher.
             if not s.get("feeds") or not s.get("publisher"):

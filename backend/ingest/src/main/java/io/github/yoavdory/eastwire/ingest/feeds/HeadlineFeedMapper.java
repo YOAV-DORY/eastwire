@@ -32,15 +32,17 @@ import java.util.stream.Collectors;
  * Maps one item of a publisher's headline feed to a candidate.
  *
  * <ul>
- *   <li>Stored: headline, link, publication time. Never the summary: these sources allow
- *       headline links only.</li>
+ *   <li>Stored: headline, link, publication time. Never the feed's own summary: these sources
+ *       allow headline links only. For sources marked {@code summaries: true} the summary is
+ *       passed on so EastWire can write its own one-line summary from it (docs/summaries.md).</li>
  *   <li>Places: a country the source covers as a whole ({@code covers_country}, e.g. Sixth Tone
  *       covers China), countries and cities the headline names, and the dateline at the start
  *       of the summary ("TOKYO (Kyodo) --"). The summary is read for that and then dropped.</li>
  *   <li>An item with no main-subject place in a covered country is skipped: Mainichi's feed
  *       also carries world wire copy (e.g. US baseball) that is not about our countries.</li>
  *   <li>Publisher location from the source registry, never a main subject.</li>
- *   <li>Feature or news: the source's {@code story_type} or its {@code feature_categories}.</li>
+ *   <li>Feature or news: the source's {@code story_type} or its {@code feature_categories};
+ *       items in its {@code skip_categories} are not stored at all.</li>
  *   <li>An item without a readable publication date is skipped, never dated "now".</li>
  * </ul>
  */
@@ -70,6 +72,10 @@ final class HeadlineFeedMapper {
                 .filter(n -> n != null && !n.isBlank())
                 .map(String::strip)
                 .collect(Collectors.toCollection(TreeSet::new));
+        if (source.isSkipped(categories)) {
+            // e.g. Korea.net's "Honorary Reporters" (readers' posts) and photo galleries: not news.
+            return Optional.empty();
+        }
 
         List<Location> locations = new ArrayList<>();
         Country covered = source.coversCountry() == null ? null : byIso.get(source.coversCountry());
@@ -102,15 +108,44 @@ final class HeadlineFeedMapper {
         }
         ArticleCandidate.StoryType type = source.isFeature(categories)
                 ? ArticleCandidate.StoryType.FEATURE : ArticleCandidate.StoryType.NEWS;
-        Instant published = entry.getPublishedDate() != null ? entry.getPublishedDate().toInstant()
-                : entry.getUpdatedDate() != null ? entry.getUpdatedDate().toInstant() : null;
+        Instant published = publishedAt(source, entry);
         if (published == null) {
             // A feed item's discovery time is just when we first read the feed: storing it as the
             // story's time would make a week-old item look new. Without a date it is not stored.
             return Optional.empty();
         }
-        return Optional.of(new ArticleCandidate(source.slug(), link, title, null, null, null, false,
+        if (source.datesAreDaysOnly()) {
+            // Only the day is known: keep items from today and yesterday (Seoul time), with no
+            // publication time, so cards say "found 2 h ago" instead of inventing an hour.
+            java.time.ZoneId zone = source.feedZone() == null ? java.time.ZoneOffset.UTC : source.feedZone();
+            java.time.LocalDate day = published.atZone(zone).toLocalDate();
+            if (day.isBefore(now.atZone(zone).toLocalDate().minusDays(1))) {
+                return Optional.empty();
+            }
+            published = null;
+        }
+        // The feed's description is kept on the candidate only for sources whose terms let us write
+        // our own summary from it; it is never stored or shown as an excerpt (headline_only).
+        String summarySource = source.summaries() && !summary.isBlank() ? summary : null;
+        return Optional.of(new ArticleCandidate(source.slug(), link, title, summarySource, null, null, false,
                 ArticleCandidate.ExcerptKind.NONE, published, now, "en", marked, SectorSignals.categories(categories), type));
+    }
+
+    /**
+     * The item's publication time. Rome reads dates without a zone ("2026-10-15 16:44:03") in the
+     * JVM's own zone; for a source whose feed is written in another zone ({@code feed_timezone}),
+     * the same wall-clock time is re-read in that zone.
+     */
+    static Instant publishedAt(SourceConfig source, SyndEntry entry) {
+        java.util.Date date = entry.getPublishedDate() != null ? entry.getPublishedDate() : entry.getUpdatedDate();
+        if (date == null) {
+            return null;
+        }
+        Instant parsed = date.toInstant();
+        if (source.feedZone() == null) {
+            return parsed;
+        }
+        return java.time.LocalDateTime.ofInstant(parsed, java.time.ZoneId.systemDefault()).atZone(source.feedZone()).toInstant();
     }
 
     /**
