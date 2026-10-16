@@ -105,7 +105,11 @@ describe('StoryCard', () => {
 
   it('shows a credited picture, or EastWire\'s own labelled tile, never a bare frame', () => {
     const { rerender, container } = render(<StoryCard article={article()} image={null} now={NOW} />)
-    expect(screen.getByText('Illustration')).toBeInTheDocument()
+    // No matching photo: EastWire's graphic card, naming the source, and no photo credit.
+    const card = container.querySelector('figure [data-country]')!
+    expect(card).not.toBeNull()
+    expect(within(card as HTMLElement).getByText(article().publisher)).toBeInTheDocument()
+    expect(screen.queryByText('Illustrative image')).toBeNull()
     rerender(
       <StoryCard
         article={article()}

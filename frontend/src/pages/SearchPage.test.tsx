@@ -47,7 +47,7 @@ describe('search', () => {
     const router = renderRoute('/search?q=rail&page=2')
 
     expect(await screen.findByText('45 results · page 2')).toBeInTheDocument()
-    await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Country' }), 'JP')
+    await userEvent.click(within(screen.getByRole('group', { name: 'Filter by country' })).getByRole('button', { name: /Japan/ }))
 
     await waitFor(() => expect(router.state.location.search).toBe('?q=rail&country=JP'))
     await waitFor(() =>
@@ -66,10 +66,12 @@ describe('search', () => {
   it('without a query it offers searches that return stories now, and explains the syntax', async () => {
     stubApi({ ...BASE, '/api/v1/search/suggestions': SUGGESTIONS })
     renderRoute('/search')
-    const tries = await screen.findByRole('region', { name: 'Try a search' })
-    expect(await within(tries).findByRole('link', { name: 'bank 7' })).toHaveAttribute('href', '/search?q=bank')
-    expect(within(tries).getAllByRole('link')).toHaveLength(4)
-    expect(within(tries).getByText('"heat wave"')).toBeInTheDocument()
+    const trending = await screen.findByRole('region', { name: 'Trending in our sources' })
+    expect(await within(trending).findByRole('link', { name: 'bank 7' })).toHaveAttribute('href', '/search?q=bank')
+    expect(within(trending).getAllByRole('link')).toHaveLength(4)
+    // Never an empty page: the latest stories follow, and the syntax is explained beside them.
+    expect(screen.getByRole('region', { name: 'Latest stories' })).toBeInTheDocument()
+    expect(screen.getByText('"heat wave"')).toBeInTheDocument()
   })
 
   it('a search with no results says so and offers three that work', async () => {

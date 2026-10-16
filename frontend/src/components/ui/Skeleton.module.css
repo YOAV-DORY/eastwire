@@ -1,7 +1,20 @@
+/* A soft light sweeps across the placeholder, left to right; the shapes match what will arrive. */
 .skeleton {
   display: block;
-  background: var(--bg-elev-2);
-  animation: pulse 1.6s var(--ease-standard) infinite;
+  background-color: var(--bg-elev-2);
+  background-image: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--bg-hover) 85%, var(--text) 4%) 50%, transparent 70%);
+  background-size: 300% 100%;
+  background-repeat: no-repeat;
+  animation: sweep 1.5s linear infinite;
+}
+
+@keyframes sweep {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
 }
 
 .text {
@@ -10,16 +23,6 @@
 
 .block {
   border-radius: var(--radius-lg);
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

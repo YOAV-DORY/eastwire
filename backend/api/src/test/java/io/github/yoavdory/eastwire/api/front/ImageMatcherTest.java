@@ -58,8 +58,10 @@ class ImageMatcherTest {
     @Test
     void noImageForAStoryAboutACountryWeDoNotCoverEvenWithACoveredDateline() {
         var nk = row("North Korea says it test-fired cruise missiles", List.of(city(1816670, "Beijing", "CN", "dateline")), "geopolitics");
+        // No Beijing photo on a North Korea story, even though it may now lead as Korean Peninsula security news.
         assertThat(matcher.match(nk, Set.of())).isEmpty();
-        assertThat(FrontRanker.score(nk, "The Mainichi", T).eligible()).isFalse();
+        assertThat(FrontRanker.score(nk, "The Mainichi", T).eligible()).isTrue();
+        assertThat(FrontRanker.score(nk, "The Mainichi", T).country()).isEqualTo("KR");
     }
 
     @Test

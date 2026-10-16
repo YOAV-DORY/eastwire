@@ -20,8 +20,14 @@ test('a shared search link opens the same results and filters', async ({ page })
   await page.goto('/search?q=rupee&country=IN&sort=date')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Results for “rupee”')
   await expect(page.getByRole('link', { name: /Rupee steadies after central bank move/ })).toBeVisible()
-  await expect(page.getByLabel('Country')).toHaveValue('IN')
-  await expect(page.getByLabel('Order')).toHaveValue('date')
+  // The filters are chips (folded behind "Filters" on phones, which says how many are on).
+  const toggle = page.getByRole('button', { name: /^Filters/ })
+  if (await toggle.isVisible()) {
+    await expect(toggle).toHaveText(/Filters\s*2/)
+    await toggle.click()
+  }
+  await expect(page.getByRole('group', { name: 'Filter by country' }).getByRole('button', { name: /India/ })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('group', { name: 'Order' }).getByRole('button', { name: 'Newest' })).toHaveAttribute('aria-pressed', 'true')
 })
 
 test('sector filters narrow the front page and every tag explains itself', async ({ page }) => {
@@ -106,7 +112,9 @@ test('on phones the map leaves room for the selection and its stories, with a Ma
 test('search suggestions all return stories, and a dead end offers three', async ({ page }) => {
   await mockApi(page)
   await page.goto('/search')
-  const tries = page.getByRole('region', { name: 'Try a search' })
+  // Never an empty page: searches that return stories now, then the latest stories.
+  await expect(page.getByRole('region', { name: 'Latest stories' })).toBeVisible()
+  const tries = page.getByRole('region', { name: 'Trending in our sources' })
   await expect(tries.getByRole('link')).toHaveCount(3)
   await tries.getByRole('link', { name: /Osaka/ }).click()
   await expect(page.getByRole('link', { name: /Port expansion approved in Osaka/ })).toBeVisible()

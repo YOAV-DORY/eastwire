@@ -57,6 +57,7 @@ class StatusControllerTest {
         mvc.perform(get("/api/v1/status"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.state").value("stale"))
+                .andExpect(jsonPath("$.updateState").value("fresh"))
                 .andExpect(jsonPath("$.lastSuccessAt").value("2026-10-13T07:00:00Z"))
                 .andExpect(jsonPath("$.sources[0].state").value("fresh"))
                 .andExpect(jsonPath("$.sources[1].name").value("Global Voices"))
@@ -95,10 +96,33 @@ class StatusControllerTest {
     }
 
     @Test
-    void classifiesAge() {
-        assertThat(StatusController.state(NOW.minus(Duration.ofMinutes(119)), NOW)).isEqualTo("fresh");
-        assertThat(StatusController.state(NOW.minus(Duration.ofHours(2)), NOW)).isEqualTo("stale");
+    void classifiesASourceAllowingOneLateHourlyRun() {
+        assertThat(StatusController.state(NOW.minus(Duration.ofMinutes(179)), NOW)).isEqualTo("fresh");
+        assertThat(StatusController.state(NOW.minus(Duration.ofHours(3)), NOW)).isEqualTo("stale");
         assertThat(StatusController.state(NOW.minus(Duration.ofHours(24)), NOW)).isEqualTo("outage");
         assertThat(StatusController.state(null, NOW)).isEqualTo("unknown");
+    }
+
+    @Test
+    void readersAreWarnedOnlyAfterSeveralMissedRefreshes() {
+        // A scheduler running a few hours late is not news for readers.
+        assertThat(StatusController.readerState(NOW.minus(Duration.ofHours(5).plusMinutes(59)), NOW)).isEqualTo("fresh");
+        assertThat(StatusController.readerState(NOW.minus(Duration.ofHours(6)), NOW)).isEqualTo("stale");
+        assertThat(StatusController.readerState(NOW.minus(Duration.ofHours(24)), NOW)).isEqualTo("outage");
+        assertThat(StatusController.readerState(null, NOW)).isEqualTo("unknown");
+        // A clock a little behind the database's is not "stale" either.
+        assertThat(StatusController.readerState(NOW.plusSeconds(30), NOW)).isEqualTo("fresh");
+    }
+
+    @Test
+    void readersSeeTheNewestRefreshWhileOneSlowSourceShowsOnlyInTheDetail() throws Exception {
+        when(repository.enabledSources()).thenReturn(List.of(
+                source("gdelt-gkg", Duration.ofMinutes(20), 0),
+                source("global-voices", Duration.ofHours(30), 5)));
+        mvc.perform(get("/api/v1/status"))
+                .andExpect(jsonPath("$.updateState").value("fresh"))
+                .andExpect(jsonPath("$.updatedAt").value("2026-10-13T11:40:00Z"))
+                .andExpect(jsonPath("$.state").value("outage"))
+                .andExpect(jsonPath("$.sources[1].state").value("outage"));
     }
 }

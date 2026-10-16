@@ -41,7 +41,7 @@ class ArticlesControllerTest {
         mvc.perform(get("/api/v1/articles").param("country", "JP").param("city", "1850147").param("sector", "economy")
                         .param("from", "2026-10-01").param("to", "2026-10-13").param("page", "2").param("size", "10"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Cache-Control", "max-age=60, public"))
+                .andExpect(header().string("Cache-Control", "max-age=60, public, stale-while-revalidate=600"))
                 .andExpect(jsonPath("$.items").isArray());
 
         ArgumentCaptor<ArticleQuery> query = ArgumentCaptor.forClass(ArticleQuery.class);

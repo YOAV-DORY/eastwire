@@ -3,39 +3,55 @@ import { SectorIcon } from '../graphics/SectorIcon'
 import styles from './FallbackTile.module.css'
 
 const NAMES: Record<string, string> = { CN: 'China', IN: 'India', JP: 'Japan', KR: 'South Korea' }
-const TONES = ['red', 'ink', 'deep'] as const
+const SECTOR_LABEL: Record<string, string> = {
+  economy: 'Economy',
+  geopolitics: 'Geopolitics',
+  technology: 'Technology',
+  business: 'Business',
+  society: 'Society',
+  environment: 'Environment',
+}
 
 /**
- * EastWire's own artwork for a story or page with no cleared photo: a brand-coloured tile with
- * the rising disc from the wordmark, the country's code and the sector's icon. Drawn here, so
- * no third-party rights; always labelled "Illustration", so it is never read as a photo.
+ * EastWire's graphic card for a story with no photo that truly matches it: one consistent
+ * design, never a stand-in photograph. A neutral surface with a faint grid, the sector's icon,
+ * the source's name, and the country as a small colour marker (the only place country colours
+ * appear). Drawn here, so no third-party rights, and plainly not a photo of anything.
  */
 export function FallbackTile({
   country,
   sector,
-  seed = 0,
-  label = true,
+  source,
   className,
 }: {
   country?: string
   sector?: string
+  /** The publisher's name, shown at the foot of the card. */
+  source?: string
+  /** Kept for older call sites; the card is the same for every story. */
   seed?: number
-  /** Show the "Illustration" tag (off only where a caption already says so). */
   label?: boolean
   className?: string
 }) {
-  const tone = TONES[Math.abs(seed) % TONES.length]
   return (
-    <div className={clsx(styles.tile, styles[tone], className)} aria-hidden="true">
-      <svg className={styles.disc} viewBox="0 0 100 100" preserveAspectRatio="xMaxYMax meet">
-        <circle cx="70" cy="78" r="46" />
-        {[0, 1, 2, 3].map((i) => (
-          <line key={i} x1="0" x2="100" y1={86 + i * 4} y2={86 + i * 4} />
-        ))}
-      </svg>
-      <SectorIcon sector={sector} className={styles.icon} strokeWidth={1.5} size={48} />
-      {country && NAMES[country] && <span className={styles.code}>{country}</span>}
-      {label && <span className={styles.label}>Illustration</span>}
+    <div className={clsx(styles.tile, className)} data-country={country} aria-hidden="true">
+      {country && NAMES[country] && <span className={styles.word}>{NAMES[country]}</span>}
+      <span className={styles.ghost}>
+        <SectorIcon sector={sector} strokeWidth={0.75} />
+      </span>
+      <span className={styles.icon}>
+        <SectorIcon sector={sector} strokeWidth={1.25} />
+      </span>
+      <span className={styles.foot}>
+        {country && NAMES[country] && (
+          <span className={styles.country}>
+            <span className={styles.marker} />
+            {NAMES[country]}
+          </span>
+        )}
+        {sector && SECTOR_LABEL[sector] && <span className={styles.sector}>{SECTOR_LABEL[sector]}</span>}
+        {source && <span className={styles.source}>{source}</span>}
+      </span>
     </div>
   )
 }

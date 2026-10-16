@@ -1,22 +1,65 @@
 /*
  * One 12-column grid with one gutter for the whole front page. Phones: one column.
- * Tablets: lead full width, secondaries side by side. Wide: lead 8 + secondaries 4,
- * Latest 8 + rail 4, cards 4 × 3, groups 2 × 6, sector tiles 6 × 2.
+ * Wide: the lead and Latest over 8 columns, the next two stories and the rail over 4, each
+ * column filling on its own; cards 4 × 3, groups 2 × 6, sector tiles 6 × 2.
  */
+.front {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  margin-bottom: var(--space-12);
+}
+
+/* Phones and tablets: the column wrappers dissolve and the blocks take a reading order. */
+.colMain,
+.colSide {
+  display: contents;
+}
+
+.leadBlock { order: 1; }
+.secondary { order: 2; }
+.betweenBlock { order: 3; }
+.latest { order: 4; }
+.rail { order: 5; }
+
+@media (min-width: 1024px) {
+  .front {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--grid-gap);
+  }
+
+  .colMain,
+  .colSide {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    min-width: 0;
+  }
+
+  .colMain {
+    grid-column: 1 / span 8;
+  }
+
+  .colSide {
+    grid-column: 9 / span 4;
+    padding-left: var(--grid-gap);
+    border-left: 1px solid var(--rule);
+  }
+
+  .betweenBlock {
+    display: none;
+  }
+}
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--grid-gap);
 }
 
-.split,
-.latestRow,
 .block {
   margin-bottom: var(--space-12);
-}
-
-.leadCol {
-  min-width: 0;
 }
 
 .secondary {
@@ -168,11 +211,7 @@
   aspect-ratio: 4 / 3;
 }
 
-@media (max-width: 1023px) {
-  .rail {
-    padding-top: var(--space-8);
-  }
-}
+
 
 @media (min-width: 720px) {
   .secondary {
@@ -197,35 +236,13 @@
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
-  .leadCol,
-  .latest {
-    grid-column: 1 / span 8;
-  }
-
-  .secondary,
-  .rail {
-    grid-column: 9 / span 4;
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .secondary {
-    padding-left: var(--grid-gap);
-    border-left: 1px solid var(--rule);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .secondary > li + li {
     padding-top: var(--grid-gap);
     border-top: 1px solid var(--rule);
-  }
-
-  .latestRow {
-    align-items: start;
-  }
-
-  /* The rail is shorter than the stories: it stays in view instead of leaving a hole. */
-  .rail {
-    position: sticky;
-    top: calc(var(--header-h) + var(--space-6));
   }
 
   .cards {

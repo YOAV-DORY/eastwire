@@ -1,76 +1,152 @@
-/* Brand tiles: deep red, near-black ink, or a darker red; white marks; the sun disc is tonal. */
+/* One graphic card for every story without a matching photo: calm, themed, consistent. */
 .tile {
+  --marker: var(--text-faint);
   position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
   overflow: hidden;
   width: 100%;
   height: 100%;
   min-height: 100%;
-  color: #fff;
+  padding: 10% 8% 7%;
+  background-color: var(--bg-elev-2);
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+  color: var(--text);
   container-type: size;
 }
 
-.red {
-  background: linear-gradient(135deg, #c8102e 0%, #8f0b20 100%);
-  --disc: rgba(255, 255, 255, 0.14);
-}
+/* The only country colours on the site: a small marker. */
+.tile[data-country="CN"] { --marker: #de2910; }
+.tile[data-country="IN"] { --marker: #ff9933; }
+.tile[data-country="JP"] { --marker: #bc002d; }
+.tile[data-country="KR"] { --marker: #0047a0; }
 
-.ink {
-  background: linear-gradient(135deg, #1b1c20 0%, #0a0a0b 100%);
-  --disc: #c8102e;
-}
-
-.deep {
-  background: linear-gradient(135deg, #5c0714 0%, #2a0309 100%);
-  --disc: rgba(255, 107, 107, 0.4);
-}
-
-.disc {
+.ghost {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  right: -6%;
+  bottom: -14%;
+  color: var(--text);
+  opacity: 0.05;
+  pointer-events: none;
 }
 
-.disc circle {
-  fill: var(--disc);
-}
-
-.disc line {
-  stroke: rgba(255, 255, 255, 0.16);
-  stroke-width: 1;
+.ghost svg {
+  width: 78cqmin;
+  height: 78cqmin;
 }
 
 .icon {
-  position: absolute;
-  left: 8%;
-  top: 12%;
-  width: clamp(20px, 26cqmin, 72px);
-  height: clamp(20px, 26cqmin, 72px);
-  opacity: 0.95;
+  position: relative;
+  display: grid;
+  place-items: center start;
+  color: var(--accent-text);
 }
 
-.code {
-  position: absolute;
-  left: 8%;
-  bottom: 9%;
-  font-family: var(--font-headline);
-  font-stretch: var(--headline-stretch);
-  font-size: clamp(1rem, 22cqmin, 4rem);
-  font-weight: var(--weight-black);
-  line-height: 0.8;
-  letter-spacing: -0.02em;
+.icon svg {
+  width: clamp(28px, 34cqmin, 96px);
+  height: clamp(28px, 34cqmin, 96px);
 }
 
-.label {
-  position: absolute;
-  right: 6px;
-  top: 6px;
-  padding: 1px 6px;
-  border-radius: var(--radius-sm);
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
+.foot {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+  min-width: 0;
   font-family: var(--font-secondary);
-  font-size: var(--text-micro);
+  font-size: clamp(0.75rem, 7cqmin, 0.875rem);
+  line-height: 1.3;
+}
+
+.country {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-weight: var(--weight-semibold);
-  line-height: 1.5;
+}
+
+.marker {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--marker);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.sector {
+  color: var(--text-muted);
+}
+
+.source {
+  flex-basis: 100%;
+  overflow: hidden;
+  color: var(--text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Large cards only: the country's name set big and hollow across the card, like a poster. */
+.word {
+  display: none;
+}
+
+@container (min-width: 420px) {
+  .word {
+    position: absolute;
+    right: 5%;
+    bottom: 4%;
+    display: block;
+    color: transparent;
+    font-family: var(--font-headline);
+    font-size: clamp(56px, 19cqw, 200px);
+    font-stretch: var(--headline-stretch);
+    font-weight: var(--weight-black);
+    letter-spacing: -0.04em;
+    line-height: 0.8;
+    text-align: right;
+    text-transform: uppercase;
+    white-space: nowrap;
+    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--text) 18%, transparent);
+    pointer-events: none;
+  }
+
+  .icon {
+    place-items: start start;
+  }
+
+  .ghost {
+    display: none;
+  }
+}
+
+/* Large cards (the lead): a bolder foot line, so the card reads at a glance. */
+@container (min-width: 520px) {
+  .foot {
+    font-size: 1rem;
+  }
+
+  .country {
+    font-family: var(--font-headline);
+    font-stretch: var(--headline-stretch);
+    font-size: 1.25rem;
+    font-weight: var(--weight-black);
+  }
+
+  .marker {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Small thumbnails: the icon alone and the marker. */
+@container (max-width: 160px) {
+  .foot .sector,
+  .foot .source {
+    display: none;
+  }
 }

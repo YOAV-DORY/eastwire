@@ -30,6 +30,7 @@ export function StoryFeed({
   hideHeading = false,
   onHighlight,
   highlightedPlace,
+  reservedImages = [],
 }: {
   filters: FeedFilters
   /** Section label, e.g. "Latest · Japan"; the story count is appended. */
@@ -41,6 +42,8 @@ export function StoryFeed({
   hideHeading?: boolean
   onHighlight?: (placeId: number | null) => void
   highlightedPlace?: number | null
+  /** Photos already on the page (e.g. the hero), so the list never repeats them. */
+  reservedImages?: string[]
 }) {
   const feed = useArticleFeed(filters)
   const slow = useSlow(feed.isLoading)
@@ -50,10 +53,11 @@ export function StoryFeed({
 
   // A photo of the story's city or subject where one fits, each file once in the list.
   const images = useMemo(() => {
-    const used = new Set<string>()
+    const used = new Set<string>(reservedImages)
     const all = feed.data?.pages.flatMap((p) => p.items) ?? []
     return new Map(all.map((a) => [a.id, storyImage(a, mainCountry(a), used) ?? undefined]))
-  }, [feed.data])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recomputed when the stories or the page's photos change
+  }, [feed.data, reservedImages.join(',')])
 
   const card = (a: ArticleView, variant: 'lead' | 'standard' | 'compact') => (
     <StoryCard
@@ -82,7 +86,7 @@ export function StoryFeed({
 
       {feed.isError && !feed.data && (
         <ErrorState
-          message="The server did not answer. It may be waking up or temporarily down."
+          message="The stories did not load. Please try again in a moment."
           onRetry={() => void feed.refetch()}
         />
       )}

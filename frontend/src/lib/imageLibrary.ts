@@ -18,6 +18,8 @@ export interface LibraryImage {
   country: string | null
   cities: number[]
   sectors: string[]
+  /** A topic photo is used only when the headline contains one of these. */
+  headlineWords: string[]
 }
 
 export const IMAGE_LIBRARY: LibraryImage[] = [
@@ -37,7 +39,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
       1273294,
       1261481
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "mumbai-gateway",
@@ -54,7 +57,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1275339
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "bengaluru-vidhana-soudha",
@@ -71,7 +75,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1277333
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "kolkata-howrah-bridge",
@@ -88,7 +93,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1275004
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "chennai-ripon-building",
@@ -105,7 +111,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1264527
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "hyderabad-char-kaman",
@@ -122,7 +129,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1269843
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "ahmedabad-houses",
@@ -139,7 +147,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1279233
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "tokyo-marunouchi",
@@ -156,7 +165,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1850147
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "osaka-dotonbori",
@@ -173,7 +183,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1853909
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "seoul-gyedong-gil",
@@ -190,7 +201,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1835848
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "busan-gamcheon",
@@ -207,7 +219,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1838524
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "beijing-qianmen",
@@ -224,7 +237,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1816670
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "shanghai-yu-garden",
@@ -241,7 +255,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1796236
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "guangzhou-canton-tower",
@@ -258,7 +273,8 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [
       1809858
     ],
-    "sectors": []
+    "sectors": [],
+    "headlineWords": []
   },
   {
     "id": "japan-diet",
@@ -275,6 +291,24 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [],
     "sectors": [
       "geopolitics"
+    ],
+    "headlineWords": [
+      "parliament",
+      "diet",
+      "lawmakers",
+      "minister",
+      "prime minister",
+      "cabinet",
+      "election",
+      "government",
+      "policy",
+      "law",
+      "bill",
+      "ruling party",
+      "opposition",
+      "defence",
+      "defense",
+      "diplomacy"
     ]
   },
   {
@@ -293,6 +327,20 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "sectors": [
       "economy",
       "business"
+    ],
+    "headlineWords": [
+      "stock",
+      "stocks",
+      "shares",
+      "nikkei",
+      "topix",
+      "market",
+      "markets",
+      "investors",
+      "listing",
+      "ipo",
+      "exchange",
+      "yen"
     ]
   },
   {
@@ -310,6 +358,23 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [],
     "sectors": [
       "geopolitics"
+    ],
+    "headlineWords": [
+      "parliament",
+      "lok sabha",
+      "rajya sabha",
+      "mps",
+      "minister",
+      "cabinet",
+      "election",
+      "government",
+      "policy",
+      "law",
+      "bill",
+      "opposition",
+      "modi",
+      "congress",
+      "bjp"
     ]
   },
   {
@@ -328,6 +393,21 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "sectors": [
       "economy",
       "business"
+    ],
+    "headlineWords": [
+      "stock",
+      "stocks",
+      "shares",
+      "sensex",
+      "nifty",
+      "market",
+      "markets",
+      "investors",
+      "listing",
+      "ipo",
+      "sebi",
+      "exchange",
+      "rupee"
     ]
   },
   {
@@ -345,6 +425,21 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [],
     "sectors": [
       "geopolitics"
+    ],
+    "headlineWords": [
+      "assembly",
+      "lawmakers",
+      "parliament",
+      "minister",
+      "president",
+      "election",
+      "government",
+      "policy",
+      "law",
+      "bill",
+      "ruling party",
+      "opposition",
+      "impeachment"
     ]
   },
   {
@@ -362,6 +457,21 @@ export const IMAGE_LIBRARY: LibraryImage[] = [
     "cities": [],
     "sectors": [
       "geopolitics"
+    ],
+    "headlineWords": [
+      "congress",
+      "npc",
+      "party",
+      "communist",
+      "xi",
+      "premier",
+      "minister",
+      "government",
+      "policy",
+      "law",
+      "beijing summit",
+      "leadership",
+      "politburo"
     ]
   }
 ]

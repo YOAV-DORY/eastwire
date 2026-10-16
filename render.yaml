@@ -1,5 +1,6 @@
 # Render Blueprint for the public API (docs/deploy.md). Free plan: the service sleeps after
-# 15 idle minutes and takes about a minute to wake; the frontend shows a "waking up" note.
+# 15 idle minutes and takes about a minute to wake. The edge Worker (docs/edge.md) pings it every
+# 10 minutes so it stays awake, and the site shows a "last good" snapshot first either way.
 services:
   - type: web
     name: eastwire-api

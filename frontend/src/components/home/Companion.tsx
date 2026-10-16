@@ -2,7 +2,7 @@ import { ArrowRight, ArrowUpRight, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { Link } from 'react-router'
 import { useArticleFeed, useSocial } from '../../api/queries'
-import type { CityPin, MapData, Status } from '../../api/types'
+import type { CityPin, MapData } from '../../api/types'
 import { cityImage } from '../../lib/imagery'
 import { cleanPostText, initials } from '../../lib/postText'
 import { postTopic, TOPIC_LABEL } from '../../lib/postTopic'
@@ -114,13 +114,12 @@ function CityPreview({ pin, countryNames, onClose }: { pin: CityPin; countryName
   )
 }
 
-/** Three live figures from the API, counted up when they come into view. */
-export function LiveStats({ stories, cities, status }: { stories?: number; cities?: number; status?: Status }) {
-  const fresh = status?.sources.filter((s) => s.state === 'fresh').length
+/** Three live figures from the API; a figure appears only once there is a real one. */
+export function LiveStats({ stories, cities, outlets }: { stories?: number; cities?: number; outlets?: number }) {
   const stats = [
     { value: stories, label: 'stories in the last 24 hours' },
     { value: cities, label: 'cities on the map this week' },
-    { value: fresh, label: `of ${status?.sources.length ?? '…'} sources checked in the last 2 hours` },
+    { value: outlets, label: 'news outlets in the last 24 hours' },
   ]
   return (
     <section className={styles.panel} aria-labelledby="live-stats">
@@ -135,8 +134,8 @@ export function LiveStats({ stories, cities, status }: { stories?: number; citie
           </div>
         ))}
       </dl>
-      <Link to="/status" className={styles.more}>
-        Source status <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+      <Link to="/sources" className={styles.more}>
+        Where the news comes from <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
       </Link>
     </section>
   )

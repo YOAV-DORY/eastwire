@@ -109,6 +109,37 @@ source-matrix.md rows 8a–8f):
 South Korea is still the largest gap: no Korean outlet checked allows headline display without
 permission. The site says so on Sources & method.
 
+## Fourth batch (2026-10-15/16): closing the China and Korea gaps
+
+Requested after a review found the front page 77% India. Candidates were checked for terms of use
+or copyright pages, robots.txt, and whether their RSS feed answers an automated request from a
+plain user agent (a feed behind bot protection could not be read by the hourly job, and getting
+around it is not allowed). Pages behind bot protection were read in a normal browser.
+
+| Publisher | Country | Decision | Rule | Basis (paraphrased) | Evidence |
+|---|---|---|---|---|---|
+| Korea.net | KR | **allow** (feed) | A1 | Government portal; no terms page, only a ministry copyright line; feeds offered for subscription; robots.txt allows all but search. Labelled "South Korean government". | [RSS page](https://www.korea.net/Others/Subscribe-to-Koreanet/RSS-Service) |
+| BusinessKorea | KR | **allow** (feed) | A1 | Generic no-reproduction clause; nothing on links or automated reading; its RSS page describes sites showing titles and links. | [copyright](https://www.businesskorea.co.kr/com/copyright.html) |
+| China Digital Times | CN | **allow** (feed) | A2 | Reposting excerpts welcome with credit and link. | [permissions](https://chinadigitaltimes.net/about/sources-and-permissions/) |
+| Dialogue Earth | CN | **allow** (feed) | A2 | CC BY-NC-ND 4.0 with attribution and a link back; no summaries (ND). | [republishing](https://dialogue.earth/en/republishing/) |
+| China Media Project | CN | **allow** (feed) | A1 | No terms or licence on the site. | [about](https://chinamediaproject.org/about/) |
+| What's on Weibo | CN | **allow** (feed) | A1 | Terms cover subscriptions only. | [terms](https://www.whatsonweibo.com/terms-conditions/) |
+| Xinhua (news.cn, xinhuanet.com) | CN | **allow** (GDELT only) | A1 | No terms page, copyright line only; its RSS feeds stopped in 2017. Labelled "Chinese state media" (basis: the official state press agency of the PRC). | [about](https://english.news.cn/20260610/3dc340f2e64d43c9bc6e48d9ec939aac/c.html) |
+| KED Global | KR | deny | D3 | Bars robots, crawlers and scrapers. | [policy](https://support.kedglobal.com/en/support/solutions/articles/156000367939-copyright-policy) |
+| Kyunghyang Shinmun | KR | deny | D2 | RSS for personal reading only; sharing with many needs permission. | [RSS page](https://www.khan.co.kr/help/help_rss.html) |
+| Seoul Economic Daily | KR | deny | D3 | Bars automated data extraction. | [terms](https://en.sedaily.com/terms) |
+| Aju Press | KR | deny | D2 | No use without written permission. | [terms](https://www.ajupress.com/company/intro) |
+| Korea IT Times | KR | deny | D1 | Bars quoting and linking to a page without consent. | [terms](https://www.koreaittimes.com/com/service.html) |
+| The Diplomat | regional | deny | D2 | Bars displaying any content in whole or in part. Its curated Bluesky and YouTube accounts were removed too. | [terms](https://thediplomat.com/terms-of-service/) |
+| CGTN | CN | deny | D1/D3 | Links need prior written permission; robots barred. | [terms](https://www.cgtn.com/terms-of-use) |
+| Japan Forward | JP | deny | D2 | Bars displaying any part of the content. | [terms](https://japan-forward.com/terms-of-use/) |
+| Japan Today | JP | pending | P1 | Terms page blocked (Akamai) even in a browser. | — |
+| East Asia Forum | regional | pending | P1 | Site and feed answer 403 to automated requests. | — |
+| Global Times | CN | not added | — | No public feed (only one built for an ad partner). | — |
+
+Southeast Asia and Taiwan need new countries in `config/countries.yaml` (cities, gazetteer, map,
+filters) before any of their outlets can be placed; not started in this batch.
+
 ## What this means for coverage
 
 - **Allowed now** (7, plus direct headline feeds from Mainichi, Sixth Tone and Nippon.com since 2026-10-15):

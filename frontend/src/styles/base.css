@@ -128,10 +128,29 @@ svg {
   flex-shrink: 0;
 }
 
-/* One focus style everywhere; outlines follow border-radius in current browsers. */
+/* One focus style everywhere: a red ring that settles into place a few pixels out (outlines
+   follow border-radius in current browsers). */
 :focus-visible {
   outline: 2px solid var(--accent-text);
-  outline-offset: 2px;
+  outline-offset: 3px;
+}
+
+/* Pressed: controls give a little under the finger. */
+:where(button, [role="button"], [role="tab"]):not(:disabled):active {
+  transform: translateY(1px) scale(0.98);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :focus-visible {
+    animation: focus-ring var(--dur-fast) var(--ease-out);
+  }
+
+  @keyframes focus-ring {
+    from {
+      outline-offset: 0;
+      outline-color: transparent;
+    }
+  }
 }
 
 .skip-link {

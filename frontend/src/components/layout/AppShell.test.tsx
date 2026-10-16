@@ -19,7 +19,7 @@ describe('app shell', () => {
     expect(within(bottom).getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('"More" reaches About and Status on phones', async () => {
+  it('"More" reaches About and Sources on phones', async () => {
     stubApi(API)
     const router = renderRoute('/')
     const bottom = (await screen.findAllByRole('navigation', { name: 'Primary' }))[1]
@@ -30,9 +30,9 @@ describe('app shell', () => {
 
     const sheet = document.querySelector<HTMLElement>('dialog[aria-labelledby="more-title"]')!
     const links = within(sheet).getAllByRole('link', { hidden: true })
-    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/about', '/status'])
-    await userEvent.click(within(sheet).getByRole('link', { name: 'Status', hidden: true }))
-    await waitFor(() => expect(router.state.location.pathname).toBe('/status'))
+    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/about', '/sources'])
+    await userEvent.click(within(sheet).getByRole('link', { name: 'Sources', hidden: true }))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/sources'))
   })
 
   it('counts a sector page, entered from the home page, as part of Home', async () => {

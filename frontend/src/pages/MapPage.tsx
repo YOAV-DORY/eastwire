@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { SlidersHorizontal, X } from 'lucide-react'
+import { Picker } from '../components/ui/Picker'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useAllPlaces, useArticleFeed, useCountries, useMapCities, type FeedFilters } from '../api/queries'
@@ -58,7 +59,15 @@ export function MapPage() {
   const query = writeMapState(state).toString()
   const suffix = query ? `?${query}` : ''
   const cityHref = useCallback((id: number) => `/map/city/${id}${suffix}`, [suffix])
-  const onSelect = useCallback((pin: CityPin) => navigate(cityHref(pin.id)), [navigate, cityHref])
+  const contextRef = useRef<HTMLDivElement>(null)
+  const revealContext = useRef(false)
+  const onSelect = useCallback(
+    (pin: CityPin) => {
+      revealContext.current = true
+      navigate(cityHref(pin.id))
+    },
+    [navigate, cityHref],
+  )
   const set = (patch: Partial<MapState>) => setParams(writeMapState({ ...state, ...patch }))
   const closeCity = () => navigate(`/map${suffix}`)
 
@@ -69,6 +78,18 @@ export function MapPage() {
   const selectedPlace = places.data?.find((p) => p.id === selectedId)
   const selectedPin = pins.find((p) => p.id === selectedId)
   usePageTitle(selectedPlace ? `${selectedPlace.name} on the map` : 'Map')
+  // Phones: after a pin is tapped, scroll just enough that the city's name, Reset and its first
+  // story show under the map (they sit below it, often off screen). Wide screens show them beside.
+  useEffect(() => {
+    const el = contextRef.current
+    if (!revealContext.current || !selectedPlace || !el || el.offsetParent === null) return
+    revealContext.current = false
+    const bottomBar = 64 + 12
+    const overflow = el.getBoundingClientRect().top + 240 - (window.innerHeight - bottomBar)
+    if (overflow <= 0) return
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    window.scrollBy({ top: overflow, behavior: reduce ? 'auto' : 'smooth' })
+  }, [selectedPlace])
   const days = WINDOWS.find((w) => w.value === state.window)?.days ?? 7
   const windowLabel = WINDOWS.find((w) => w.value === state.window)?.label ?? '7 days'
 
@@ -82,28 +103,22 @@ export function MapPage() {
 
   const filters = (
     <>
-      <label className={styles.field}>
-        <span>Country</span>
-        <select value={state.country ?? ''} onChange={(e) => set({ country: e.target.value || undefined })}>
-          <option value="">All four</option>
-          {(countries.data ?? []).map((c) => (
+      <Picker label="Country" value={state.country ?? ''} onChange={(v) => set({ country: v || undefined })}>
+        <option value="">All four</option>
+        {(countries.data ?? []).map((c) => (
             <option key={c.iso2} value={c.iso2}>
               {c.name}
             </option>
           ))}
-        </select>
-      </label>
-      <label className={styles.field}>
-        <span>Sector</span>
-        <select value={state.sector ?? ''} onChange={(e) => set({ sector: e.target.value || undefined })}>
-          <option value="">All sectors</option>
-          {SECTORS.map((s) => (
+      </Picker>
+      <Picker label="Sector" value={state.sector ?? ''} onChange={(v) => set({ sector: v || undefined })}>
+        <option value="">All sectors</option>
+        {SECTORS.map((s) => (
             <option key={s.id} value={s.id}>
               {s.label}
             </option>
           ))}
-        </select>
-      </label>
+      </Picker>
       <div className={styles.segmented} role="group" aria-label="Time window">
         {WINDOWS.map((w) => (
           <button key={w.value} type="button" aria-pressed={state.window === w.value} onClick={() => set({ window: w.value })}>
@@ -211,7 +226,7 @@ export function MapPage() {
             </div>
           )}
           {/* Phones: what is selected and its first stories, right under the map. */}
-          <div className={styles.phoneContext} aria-live="polite">
+          <div className={styles.phoneContext} aria-live="polite" ref={contextRef}>
             {selectedId !== undefined && selectedPlace ? (
               <>
                 <div className={styles.contextHead}>
@@ -260,6 +275,7 @@ export function MapPage() {
             emptyTitle={scope ? `Nothing about ${scope} in the last ${windowLabel}` : `Nothing in the last ${windowLabel}`}
             onHighlight={setHighlighted}
             highlightedPlace={highlighted}
+            reservedImages={[heroImage.id]}
           />
         </div>
       </div>

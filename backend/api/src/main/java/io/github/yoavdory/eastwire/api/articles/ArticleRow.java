@@ -23,7 +23,17 @@ public record ArticleRow(
         List<SectorRow> sectors,
         Long clusterId,
         String storyType,
-        Instant ingestedAt) {
+        Instant ingestedAt,
+        String summary) {
+
+    /** A row without EastWire's own summary (tests and older call sites). */
+    public ArticleRow(long id, String sourceSlug, String title, String url, String domain, String excerpt, String author,
+            String creditLine, String attribution, String licenseName, String licenseUrl, Instant publishedAt,
+            Instant discoveredAt, int clusterSize, List<LocationRow> locations, List<SectorRow> sectors, Long clusterId,
+            String storyType, Instant ingestedAt) {
+        this(id, sourceSlug, title, url, domain, excerpt, author, creditLine, attribution, licenseName, licenseUrl,
+                publishedAt, discoveredAt, clusterSize, locations, sectors, clusterId, storyType, ingestedAt, null);
+    }
 
     /** A news row without cluster or ingestion details (tests and older call sites). */
     public ArticleRow(long id, String sourceSlug, String title, String url, String domain, String excerpt, String author,
@@ -57,6 +67,7 @@ public record ArticleRow(
 
     public ArticleRow withDetails(List<LocationRow> newLocations, List<SectorRow> newSectors) {
         return new ArticleRow(id, sourceSlug, title, url, domain, excerpt, author, creditLine, attribution, licenseName,
-                licenseUrl, publishedAt, discoveredAt, clusterSize, newLocations, newSectors, clusterId, storyType, ingestedAt);
+                licenseUrl, publishedAt, discoveredAt, clusterSize, newLocations, newSectors, clusterId, storyType, ingestedAt,
+                summary);
     }
 }

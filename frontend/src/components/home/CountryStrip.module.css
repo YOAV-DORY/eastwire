@@ -79,6 +79,26 @@
   cursor: default;
 }
 
+/* While loading: a flag-sized block and a name-length bar, in the tile's real place. */
+.placeholder::before,
+.placeholder::after {
+  content: "";
+  display: block;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elev-2);
+}
+
+.placeholder::before {
+  width: 26px;
+  height: 18px;
+}
+
+.placeholder::after {
+  width: 60%;
+  max-width: 96px;
+  height: 12px;
+}
+
 
 
 /* Phones and small tablets: two columns, every name and count whole. */

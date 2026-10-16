@@ -17,7 +17,8 @@ public record DomainPolicy(
         List<String> conditions,
         String evidenceUrl,
         LocalDate checkedOn,
-        String nextAction) {
+        String nextAction,
+        String publisherLabel) {
 
     public DomainPolicy {
         domain = domain.toLowerCase(Locale.ROOT);

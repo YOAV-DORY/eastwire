@@ -13,6 +13,7 @@ export function ImageSlot({
   image,
   country,
   sector,
+  source,
   seed,
   ratio = '16 / 9',
   sizes = '100vw',
@@ -23,6 +24,8 @@ export function ImageSlot({
   image: SlotImage | null | undefined
   country?: string
   sector?: string
+  /** Publisher name for the graphic card. */
+  source?: string
   seed?: number
   /** CSS aspect-ratio, e.g. "3 / 2"; "fill" takes the parent's height. */
   ratio?: string
@@ -33,13 +36,19 @@ export function ImageSlot({
   className?: string
 }) {
   const [failed, setFailed] = useState(false)
+  const [loaded, setLoaded] = useState<string | null>(null)
   const photo = image && !failed ? image : null
   const style = (ratio === 'fill' ? {} : { aspectRatio: ratio }) as CSSProperties
   return (
     <figure className={clsx(styles.slot, ratio === 'fill' && styles.fill, credit === 'overlay' && styles.overlay, className)}>
-      <div className={styles.frame} style={style}>
+      <div className={clsx(styles.frame, photo && loaded !== photo.src && styles.loading)} style={style}>
         {photo ? (
           <img
+            // A cached photo may be complete before React listens for "load".
+            ref={(img) => {
+              if (img?.complete && img.naturalWidth > 0 && loaded !== photo.src) setLoaded(photo.src)
+            }}
+            onLoad={() => setLoaded(photo.src)}
             src={photo.src}
             srcSet={photo.srcSet}
             sizes={sizes}
@@ -50,7 +59,7 @@ export function ImageSlot({
             style={{ objectPosition: photo.position }}
           />
         ) : (
-          <FallbackTile country={country} sector={sector} seed={seed} />
+          <FallbackTile country={country} sector={sector} source={source} seed={seed} />
         )}
       </div>
       {photo && <Credit image={photo} short={credit === 'short'} />}

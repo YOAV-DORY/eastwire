@@ -15,6 +15,7 @@
 
 .body {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: var(--space-2);
   min-width: 0;
@@ -105,6 +106,7 @@
 }
 
 .summary {
+  max-width: 68ch;
   color: var(--text-muted);
   font-family: var(--font-body);
   font-size: var(--text-dek);
@@ -122,19 +124,25 @@
   color: inherit;
 }
 
+/* Source and time, then Read and Details on the same line; the source line wraps inside its
+   own space first, and only a very narrow card moves the buttons to a line of their own. */
 .foot {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: var(--space-1) var(--space-3);
+  gap: var(--space-2) var(--space-3);
   margin-top: var(--space-1);
+  container-type: inline-size;
 }
 
 .meta {
+  flex: 1 1 10rem;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0 var(--space-2);
+  align-items: center;
+  gap: 2px var(--space-2);
   color: var(--text-muted);
   font-family: var(--font-secondary);
   font-size: var(--text-small);
@@ -144,6 +152,24 @@
 .publisher {
   color: var(--text);
   font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.meta > :global(time),
+.meta > span {
+  white-space: nowrap;
+}
+
+.ownership {
+  align-self: center;
+  padding: 0 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: 1.6;
+  white-space: nowrap;
 }
 
 .publisher::after {
@@ -154,6 +180,8 @@
 }
 
 .actions {
+  flex: none;
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -193,12 +221,23 @@
 
 /* ---------------------------------------------------------------- pictures */
 
-.media :global(img) {
-  transition: transform 600ms var(--ease-out);
-}
+/* Hover (mouse only): the card lifts a touch and its picture zooms; pressing settles it. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .card {
+    transition: transform var(--dur-zoom) var(--ease-out);
+  }
 
-.card:hover .media :global(img) {
-  transform: scale(1.03);
+  .card:hover {
+    transform: translateY(-2px);
+  }
+
+  .card:hover .media :global(img) {
+    transform: scale(1.04);
+  }
+
+  .card:active {
+    transform: translateY(0);
+  }
 }
 
 /* ---------------------------------------------------------------- variants */
@@ -213,6 +252,11 @@
   align-items: start;
   column-gap: var(--space-4);
   padding-block: var(--space-4);
+}
+
+/* A row without a picture uses the full width (no empty picture column). */
+.row:not(:has(> .media)) {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .row .media {
@@ -257,9 +301,33 @@
   }
 }
 
-/* Phones: Details keeps a full touch target. */
-@media (pointer: coarse) {
+/* A 44 px touch target around the smaller visible button, so it never needs its own row. */
+.details::before {
+  content: "";
+  position: absolute;
+  inset: -6px -6px;
+}
+
+/* Narrow cards and phones: "Read at source" goes (the whole card is the link), Details stays. */
+@container (max-width: 380px) {
+  .read {
+    display: none;
+  }
+}
+
+@media (max-width: 599px) {
   .details {
-    min-height: var(--tap);
+    justify-content: center;
+    width: 32px;
+    padding: 0;
+  }
+
+  .detailsLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }

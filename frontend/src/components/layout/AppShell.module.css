@@ -150,6 +150,40 @@
   color: var(--text);
 }
 
+/* Last update, sources and licences: the facts a reader may want to check, on every page. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-4) var(--space-8);
+  margin: 0;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+.facts dt {
+  margin-bottom: var(--space-1);
+  font-family: var(--font-secondary);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--text);
+}
+
+.facts a {
+  color: var(--text);
+}
+
+/* A link that is the whole value gets a full touch target. */
+.facts dd > a:only-child {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+}
+
 @media (max-width: 1023px) {
   .footer {
     padding-bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom));
@@ -162,7 +196,8 @@
     align-items: start;
   }
 
-  .credits {
+  .credits,
+  .facts {
     grid-column: 1 / -1;
   }
 }

@@ -5,11 +5,13 @@
 # Content-Security-Policy, by directive:
 #   script-src   our bundle and theme-init.js, plus Bluesky's official embed script (loaded on click)
 #   style-src    'unsafe-inline' because Leaflet and the embeds set style attributes; scripts stay locked
-#   img-src      map tiles (OpenStreetMap), YouTube API thumbnails and the cleared illustrative
-#                photos from Wikimedia Commons (thumb./upload.wikimedia.org)
+#   img-src      raster map tiles (OpenStreetMap, the fallback), YouTube API thumbnails and the cleared
+#                illustrative photos from Wikimedia Commons (thumb./upload.wikimedia.org)
+#   connect-src  the API, and OpenFreeMap's vector map style, tiles, fonts and sprites
+#   worker-src   MapLibre's map worker, served from our own origin
 #   frame-src    the two official embeds, loaded only when the reader asks
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://embed.bsky.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org https://i.ytimg.com https://thumb.wikimedia.org https://upload.wikimedia.org; font-src 'self'; connect-src 'self' __API_ORIGIN__; frame-src https://embed.bsky.app https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://embed.bsky.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org https://tiles.openfreemap.org https://i.ytimg.com https://thumb.wikimedia.org https://upload.wikimedia.org; font-src 'self'; connect-src 'self' __API_ORIGIN__ https://tiles.openfreemap.org; worker-src 'self'; frame-src https://embed.bsky.app https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

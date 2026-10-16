@@ -78,6 +78,32 @@ class HeadlineFeedConnectorTest {
             </channel></rss>
             """;
 
+    /** BusinessKorea's shape: Seoul wall-clock times with no zone. */
+    private static final String SEOUL_TIMES = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <rss version="2.0"><channel><title>Test</title><link>https://example.test</link><description>Test</description>
+              <item><title>Invented chipmaker expands a Pyeongtaek plant</title>
+                <link>https://www.businesskorea.co.kr/news/articleView.html?idxno=1</link>
+                <pubDate>2026-10-15 16:44:03</pubDate></item>
+            </channel></rss>
+            """;
+
+    /** Korea.net's shape: a day without a time, and readers' posts filed under their own category. */
+    private static final String DAYS_ONLY = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <rss version="2.0"><channel><title>Test</title><link>https://example.test</link><description>Test</description>
+              <item><title>Invented ministry announces a new export record</title>
+                <link>https://www.korea.net/NewsFocus/Business/view?articleId=1</link>
+                <pubDate>2026-10-15 00:00:00.0</pubDate><category>Business</category></item>
+              <item><title>An invented reader visits a palace</title>
+                <link>https://www.korea.net/NewsFocus/HonoraryReporters/view?articleId=2</link>
+                <pubDate>2026-10-15 00:00:00.0</pubDate><category>Honorary Reporters</category></item>
+              <item><title>An invented policy item from last week</title>
+                <link>https://www.korea.net/NewsFocus/policies/view?articleId=3</link>
+                <pubDate>2026-10-08 00:00:00.0</pubDate><category>Policies</category></item>
+            </channel></rss>
+            """;
+
     private final TestHttpServer site = new TestHttpServer();
     private final List<ArticleCandidate> written = new ArrayList<>();
     private final HeadlineFeedConnector connector = new HeadlineFeedConnector(
@@ -114,7 +140,9 @@ class HeadlineFeedConnectorTest {
                 .containsExactly("Ferry service resumes after typhoon closes port", "Japan and India sign an invented research pact");
 
         ArticleCandidate ferry = written.getFirst();
-        assertThat(ferry.summary()).as("headline-only source: no summary is kept").isNull();
+        // Mainichi allows EastWire's own summaries (summaries: true), so the description travels on
+        // to the summarizer; it is never an excerpt (headline-only display, ExcerptKind.NONE).
+        assertThat(ferry.summary()).startsWith("OSAKA (Kyodo)");
         assertThat(ferry.excerptKind()).isEqualTo(ArticleCandidate.ExcerptKind.NONE);
         assertThat(ferry.publishedAt()).isEqualTo(Instant.parse("2026-10-15T07:30:09Z"));
         assertThat(ferry.discoveredAt()).isEqualTo(NOW);
@@ -175,5 +203,28 @@ class HeadlineFeedConnectorTest {
         @Override
         public void save(String url, String etag, String lastModified, int status, Instant at) {
         }
+    }
+
+    @Test
+    void readsZonelessFeedTimesInTheFeedsOwnZone() {
+        site.on("/seoul", Reply.ok(SEOUL_TIMES, "application/xml"));
+
+        connector.run(context("businesskorea", "/seoul"));
+
+        assertThat(written).singleElement().satisfies(c ->
+                assertThat(c.publishedAt()).as("16:44 in Seoul is 07:44 UTC").isEqualTo(Instant.parse("2026-10-15T07:44:03Z")));
+    }
+
+    @Test
+    void dayOnlyFeedsKeepRecentItemsWithoutInventingATimeAndSkipReadersPosts() {
+        site.on("/days", Reply.ok(DAYS_ONLY, "application/xml"));
+
+        connector.run(context("korea-net", "/days"));
+
+        assertThat(written).singleElement().satisfies(c -> {
+            assertThat(c.title()).isEqualTo("Invented ministry announces a new export record");
+            assertThat(c.publishedAt()).as("only the day is known: the card says when it was found").isNull();
+            assertThat(c.discoveredAt()).isEqualTo(NOW);
+        });
     }
 }

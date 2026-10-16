@@ -10,6 +10,7 @@ import io.github.yoavdory.eastwire.core.policy.DisplayPolicy;
 import io.github.yoavdory.eastwire.core.policy.DisplayRequest;
 import io.github.yoavdory.eastwire.core.policy.Excerpts;
 import io.github.yoavdory.eastwire.ingest.pipeline.ArticleSink.WriteResult.Kind;
+import io.github.yoavdory.eastwire.ingest.summary.Summarizer;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -18,6 +19,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -42,9 +44,17 @@ public class ArticleWriter implements ArticleSink {
     private final QualityRules quality;
     private final Clock clock;
     private final Map<String, Short> sourceIds = new ConcurrentHashMap<>();
+    private final Summarizer summarizer;
 
     public ArticleWriter(JdbcClient jdbc, TransactionTemplate tx, ComplianceConfig config, DisplayPolicy policy,
             SectorTagger sectors, QualityRules quality, Clock clock) {
+        this(jdbc, tx, config, policy, sectors, quality, clock, Summarizer.NONE);
+    }
+
+    @Autowired
+    public ArticleWriter(JdbcClient jdbc, TransactionTemplate tx, ComplianceConfig config, DisplayPolicy policy,
+            SectorTagger sectors, QualityRules quality, Clock clock, Summarizer summarizer) {
+        this.summarizer = summarizer;
         this.jdbc = jdbc;
         this.tx = tx;
         this.config = config;
@@ -91,7 +101,7 @@ public class ArticleWriter implements ArticleSink {
         }
         String finalExcerpt = excerpt;
 
-        return tx.execute(status -> {
+        WriteResult result = tx.execute(status -> {
             if (isSuppressed(hash)) {
                 return WriteResult.of(Kind.SUPPRESSED, "taken down");
             }
@@ -104,6 +114,36 @@ public class ArticleWriter implements ArticleSink {
             cluster(id.get(), c.title(), now);
             return WriteResult.created(id.get());
         });
+        if (result != null && (result.kind() == Kind.NEW || result.kind() == Kind.DUPLICATE)
+                && source.summaries() && c.summary() != null && !c.partnerReprint()) {
+            summarize(hash, c);
+        }
+        return result;
+    }
+
+    /**
+     * EastWire's own summary for a story still in its source's feed, written once: on the run that
+     * stores it, or on the first later run for stories stored before summaries existed. A
+     * rejected attempt is recorded (summary_method "rejected:...") so it is not retried every hour.
+     * Only from text this source lets us work from, and stored only if it passed SummaryCheck.
+     */
+    private void summarize(byte[] hash, ArticleCandidate c) {
+        if (summarizer == Summarizer.NONE) {
+            return;
+        }
+        Optional<Long> id = jdbc.sql("SELECT id FROM article WHERE url_hash = :hash AND summary IS NULL AND summary_method IS NULL")
+                .param("hash", hash)
+                .query(Long.class)
+                .optional();
+        if (id.isEmpty()) {
+            return;
+        }
+        Optional<String> summary = summarizer.summarize(c.title(), Text.plain(c.summary()));
+        jdbc.sql("UPDATE article SET summary = :summary, summary_method = :method WHERE id = :id")
+                .param("summary", summary.orElse(null))
+                .param("method", summary.isPresent() ? summarizer.method() : "rejected:" + summarizer.method())
+                .param("id", id.get())
+                .update();
     }
 
     private Optional<Long> insertArticle(ArticleCandidate c, DisplayDecision decision, String canonical,

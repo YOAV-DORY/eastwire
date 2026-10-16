@@ -16,31 +16,38 @@ import java.util.regex.Pattern;
 
 /**
  * Chooses the front page from the news of the last {@link #LATEST_WINDOW}: a lead, two
- * secondary stories and an ordered list. The rules are fixed and explained to readers
- * (docs/ranking.md, the "Why this story" line on each lead):
+ * secondary stories and an ordered list, ranked by importance for a reader outside the region.
+ * The rules are fixed and explained to readers (docs/ranking.md, the "Why it leads" line):
  *
  * <ol>
- *   <li><b>Freshness</b>: up to 3 points, halving about every 12 hours from publication (or from
- *       when the story was found, if the source gives no time; such stories lose 0.2).</li>
- *   <li><b>Significance</b>: the sector (geopolitics 1, economy and technology 0.8, environment
- *       0.6, society 0.5, business 0.4) and up to 1.2 for other outlets reporting the same story.</li>
- *   <li><b>Broader relevance</b>: 0.8 when the headline names an actor or issue beyond the
- *       country (another government, trade, climate, AI and chips...), 0.5 when the story is about
- *       two or more of the countries we cover.</li>
- *   <li><b>Routine items</b> (index moves, results tables, "stocks to watch") lose 1.5.</li>
- *   <li>A story with no main-subject place loses 1 and can be neither lead nor secondary.</li>
- *   <li><b>Novelty</b>: one story per event (same cluster, or headlines sharing most of their
- *       words); the second and third picks lose 0.8 per earlier pick from the same publisher and
- *       0.4 if they are about the lead's country; no publisher fills more than 40% of the list
- *       or appears three times in a row while others wait.</li>
+ *   <li><b>Coverage</b>: +0.6 per other outlet reporting the same event, up to +1.8.</li>
+ *   <li><b>Impact</b>: security (missiles, troops, sanctions...) +1.2; a big market move (an
+ *       index's record or largest drop, a currency's slide) +1.0; macro policy (rates, tariffs,
+ *       export controls, trade deals) +0.8.</li>
+ *   <li><b>Recency</b>: up to 2 points, halving about every 12 hours (stories with no
+ *       publication time lose 0.2).</li>
+ *   <li><b>Sector and reach</b>: the sector (geopolitics 1 ... business 0.4); +0.8 when the
+ *       headline names an actor or issue beyond the country, +0.4 more for the United States;
+ *       +0.5 when it is about two of our countries.</li>
+ *   <li><b>Lower</b>: routine market items −1.5; soft company news (training, hiring, launches,
+ *       awards, donations) −0.8 unless it has impact; a story with no main-subject place −1 and
+ *       never lead.</li>
+ *   <li><b>Diversity</b>: one story per event; the lead avoids the previous lead's country (−1);
+ *       the next two picks lose 0.8 per earlier pick from the same publisher and 0.6 for the
+ *       lead's country; in the ordered list no country takes more than 40% and no publisher more
+ *       than 25% of any stretch from the top, while others wait.</li>
  * </ol>
  *
+ * North Korea's missiles and nuclear tests are Korean Peninsula security news and count as about
+ * South Korea; other stories about countries we do not cover rank lower.
  * Nothing here changes a headline or invents a story; it only orders what the sources published.
  */
 public final class FrontRanker {
 
     public static final Duration LATEST_WINDOW = Duration.ofHours(48);
-    static final double FRESH_POINTS = 3.0;
+    static final double FRESH_POINTS = 2.0;
+    static final double COUNTRY_SHARE = 0.4;
+    static final double PUBLISHER_SHARE = 0.25;
     static final double HALF_LIFE_HOURS = 12.0;
 
     static final Map<String, Double> SECTOR_WEIGHT = Map.of(
@@ -51,6 +58,40 @@ public final class FrontRanker {
             + "Europe|European|EU|Britain|British|UK|Russia|Russian|Ukraine|NATO|United Nations|UN|G7|G20|BRICS|"
             + "Pentagon|White House|global|world|tariffs?|trade|exports?|imports?|sanctions?|climate|AI|chips?|"
             + "semiconductors?|nuclear|missiles?|Taiwan|Pakistan|Bangladesh|Middle East|Gaza|Iran)\\b");
+
+    /** Security and defence: what a reader abroad most needs to know. */
+    static final Pattern SECURITY = Pattern.compile("(?i)\\b(missiles?|ballistic|nuclear (test|tests|weapons?|arsenal|"
+            + "threat)|warheads?|troops|warships?|fighter jets?|military (drills?|exercises?|buildup|threat|strike)|war games|"
+            + "clash(es|ed)?|border (clash|clashes|tension|tensions|standoff)|attack(s|ed)? on|sanctions?|espionage|spy|spies|"
+            + "cyberattacks?|war(?!\\s+(criminals?|crimes?|memorial|museum|dead|veterans?|history))|ceasefire|invasion|coast guard (vessels?|ships?)|defen[cs]e (minister|ministry|spending|pact|budget))\\b");
+
+    /** A market move big enough to matter outside the country: a record, the largest move, a crash. */
+    static final Pattern MARKET_MOVE = Pattern.compile("(?i)\\b(Nikkei|Topix|Sensex|Nifty|Kospi|Kosdaq|Hang Seng|"
+            + "Shanghai Composite|CSI 300|yen|yuan|rupee|won|stocks?|shares|markets?)\\b.{0,60}\\b(record (high|low)|"
+            + "all-time (high|low)|largest|biggest|worst|steepest|crash(es|ed)?|black (monday|tuesday|wednesday|thursday|friday))\\b"
+            + "|\\b(record|largest|biggest|worst|steepest)\\b.{0,40}\\b(drop|fall|decline|loss|gain|rally|sell-?off|plunge)\\b");
+
+    /** Macro policy: rates, trade and export rules. */
+    static final Pattern POLICY = Pattern.compile("(?i)\\b(interest rates?|rate (hike|cut)|central bank|Bank of Japan|BOJ|"
+            + "Reserve Bank|RBI|PBOC|People's Bank|Bank of Korea|inflation|GDP|recession|tariffs?|export controls?|"
+            + "trade (deal|pact|war|talks|surplus|deficit)|stimulus|budget)\\b");
+
+    /** The United States named in the headline: the reader this site is written for. */
+    static final Pattern UNITED_STATES = Pattern.compile("(?<![\\w.])(U\\.S\\.|US|USA|United States|America|American|"
+            + "Washington|Trump|White House|Pentagon)(?![\\w])");
+
+    /** Company housekeeping: real, but rarely what matters most that day. */
+    static final Pattern SOFT = Pattern.compile("(?i)\\b(to train|trains?|training|to hire|hires?|hiring|recruit(s|ing)?|"
+            + "appoints?|names new|partnership|MoU|memorandum|ties up|launch(es)? (an? )?(app|service|campaign|program)|"
+            + "opens? (a |its )?(store|office|showroom)|celebrat(es|ing)|awards?|festival|ceremony|exhibition|"
+            + "donat(es|ion)|scholarships?|charity|anniversary)\\b");
+
+    /** North Korea's weapons: Korean Peninsula security, so about South Korea for our purposes. */
+    static final Pattern NORTH_KOREA = Pattern.compile("(?i)\\b(North Korea|N\\. ?Korea|Pyongyang|DPRK|Kim Jong[- ]Un)\\b");
+
+    /** Opinion, columns, reviews and lifestyle, by the publisher's own URL section or headline label: never the lead. */
+    static final Pattern OPINION = Pattern.compile("(?i)(/(opinion|opinions|columns?|columnists?|editorials?|blogs?|"
+            + "op-?eds?|commentary|views|letters|books?|book-reviews?|reviews?|lifestyle|travel|food|horoscopes?|puzzles?)/)|^\\s*(Editorial|Opinion|Column|Commentary|Op-ed|Yoroku|Analysis|View)\\s*[:：|]");
 
     /** Routine market and results items: useful, but not front-page news. */
     static final Pattern ROUTINE = Pattern.compile("(?i)(\\bSensex\\b|\\bNifty\\b|stocks? to (buy|watch)|share price|"
@@ -80,6 +121,15 @@ public final class FrontRanker {
     }
 
     public static Selection select(List<ArticleRow> news, Map<Long, String> publishers, Instant now) {
+        return select(news, publishers, now, null);
+    }
+
+    /**
+     * @param previousLeadCountry the country the front page led with an hour earlier, or null: the
+     *                            lead avoids leading with the same country twice in a row
+     */
+    public static Selection select(List<ArticleRow> news, Map<Long, String> publishers, Instant now,
+            String previousLeadCountry) {
         List<Scored> scored = news.stream()
                 .map(r -> score(r, publishers.getOrDefault(r.id(), r.sourceSlug()), now))
                 .sorted(Comparator.comparingDouble(Scored::score).reversed().thenComparing(s -> -s.row().id()))
@@ -87,7 +137,10 @@ public final class FrontRanker {
         List<Scored> events = oneStoryPerEvent(scored);
 
         List<Scored> pool = new ArrayList<>(events);
-        Scored lead = pool.stream().filter(Scored::eligible).findFirst().orElse(null);
+        Scored lead = pool.stream().filter(Scored::eligible)
+                .max(Comparator.comparingDouble((Scored s) -> leadScore(s, previousLeadCountry))
+                        .thenComparing(s -> s.row().id()))
+                .orElse(null);
         List<Scored> secondary = new ArrayList<>();
         if (lead != null) {
             pool.remove(lead);
@@ -104,13 +157,18 @@ public final class FrontRanker {
                 pool.remove(next);
             }
         }
-        return new Selection(lead, List.copyOf(secondary), capPublishers(pool), events.size());
+        return new Selection(lead, List.copyOf(secondary), balance(pool), events.size());
+    }
+
+    /** The lead's score: its own, less 1 if the previous lead was about the same country. */
+    static double leadScore(Scored s, String previousLeadCountry) {
+        return s.score() - (previousLeadCountry != null && previousLeadCountry.equals(s.country()) ? 1.0 : 0);
     }
 
     static double diversified(Scored s, List<Scored> picked, Scored lead) {
         double penalty = 0.8 * picked.stream().filter(p -> p.publisher().equals(s.publisher())).count();
         if (lead != null && !s.country().isEmpty() && s.country().equals(lead.country())) {
-            penalty += 0.4;
+            penalty += 0.6;
         }
         return s.score() - penalty;
     }
@@ -118,6 +176,28 @@ public final class FrontRanker {
     static Scored score(ArticleRow r, String publisher, Instant now) {
         List<String> why = new ArrayList<>();
         double score = 0;
+        String title = r.title();
+
+        int others = Math.max(0, r.clusterSize() - 1);
+        if (others > 0) {
+            score += 0.6 * Math.min(others, 3);
+            why.add("Reported by " + (others + 1) + " outlets");
+        }
+
+        boolean security = SECURITY.matcher(title).find();
+        boolean market = MARKET_MOVE.matcher(title).find();
+        boolean policy = POLICY.matcher(title).find();
+        if (security) {
+            score += 1.2;
+            why.add("Security");
+        }
+        if (market) {
+            score += 1.0;
+            why.add("Market move");
+        } else if (policy) {
+            score += 0.8;
+            why.add("Economic policy");
+        }
 
         Instant reference = r.referenceTime();
         double hours = Math.max(0, Duration.between(reference, now).toMinutes() / 60.0);
@@ -135,38 +215,52 @@ public final class FrontRanker {
         r.sectors().stream().max(Comparator.comparingDouble(t -> SECTOR_WEIGHT.getOrDefault(t.sector(), 0.0)))
                 .ifPresent(t -> why.add(capitalize(t.sector())));
 
-        int others = Math.max(0, r.clusterSize() - 1);
-        if (others > 0) {
-            score += 0.4 * Math.min(others, 3);
-            why.add("Also reported by " + others + (others == 1 ? " other outlet" : " other outlets"));
-        }
-
         Set<String> countries = mainCountries(r);
-        var international = INTERNATIONAL.matcher(r.title());
+        boolean northKoreaSecurity = security && NORTH_KOREA.matcher(title).find();
+        if (northKoreaSecurity && countries.isEmpty()) {
+            countries = Set.of("KR");
+        }
+        var international = INTERNATIONAL.matcher(title);
         if (international.find()) {
             score += 0.8;
             why.add("Reaches beyond one country (“" + international.group() + "”)");
+            if (UNITED_STATES.matcher(title).find()) {
+                score += 0.4;
+            }
         } else if (countries.size() >= 2) {
             score += 0.5;
             why.add("Involves " + countries.size() + " of the countries we cover");
         }
 
-        boolean routine = ROUTINE.matcher(r.title()).find();
+        boolean routine = ROUTINE.matcher(title).find() && !market;
         if (routine) {
             score -= 1.5;
             why.add("Routine market item, ranked lower");
+        }
+        if (!security && !market && !policy && SOFT.matcher(title).find()) {
+            score -= 0.8;
+            why.add("Company news, ranked lower");
+        }
+        boolean opinion = OPINION.matcher(r.url()).find() || OPINION.matcher(title).find();
+        if (opinion) {
+            score -= 1.5;
+            why.add("Opinion or review, ranked lower");
         }
         boolean placed = !countries.isEmpty();
         if (!placed) {
             score -= 1.0;
         }
         String country = countries.isEmpty() ? "" : countries.iterator().next();
-        boolean foreign = foreignSubject(r);
+        if (northKoreaSecurity) {
+            country = "KR";
+            why.add("Korean Peninsula security");
+        }
+        boolean foreign = !northKoreaSecurity && foreignSubject(r);
         if (foreign) {
             score -= 0.5;
             why.add("About a country we do not cover, ranked lower");
         }
-        return new Scored(r, score, List.copyOf(why), publisher, country, placed && !routine && !foreign);
+        return new Scored(r, score, List.copyOf(why), publisher, country, placed && !routine && !foreign && !opinion);
     }
 
     /**
@@ -225,20 +319,33 @@ public final class FrontRanker {
         return out;
     }
 
-    /** Best first, but no publisher above 40% of the list or three times in a row while others wait. */
-    static List<Scored> capPublishers(List<Scored> bestFirst) {
-        int cap = Math.max(2, (int) Math.ceil(bestFirst.size() * 0.4));
+    /**
+     * Best first, but balanced: at every point from the top, no country holds more than
+     * {@link #COUNTRY_SHARE} of the stories so far and no publisher more than
+     * {@link #PUBLISHER_SHARE} (rounded up), and no publisher appears
+     * three times in a row while others wait. When only one country or publisher is left, it
+     * follows. Nothing is dropped: the order changes, every story stays.
+     */
+    static List<Scored> balance(List<Scored> bestFirst) {
         List<Scored> waiting = new ArrayList<>(bestFirst);
         List<Scored> out = new ArrayList<>();
-        Map<String, Integer> counts = new HashMap<>();
+        Map<String, Integer> byCountry = new HashMap<>();
+        Map<String, Integer> byPublisher = new HashMap<>();
         while (!waiting.isEmpty()) {
+            int n = out.size() + 1;
+            int countryCap = Math.max(1, (int) Math.ceil(n * COUNTRY_SHARE));
+            int publisherCap = Math.max(1, (int) Math.ceil(n * PUBLISHER_SHARE));
             Scored next = waiting.stream()
-                    .filter(s -> counts.getOrDefault(s.publisher(), 0) < cap && !thirdInARow(out, s.publisher()))
+                    .filter(s -> s.country().isEmpty() || byCountry.getOrDefault(s.country(), 0) < countryCap)
+                    .filter(s -> byPublisher.getOrDefault(s.publisher(), 0) < publisherCap)
+                    .filter(s -> !thirdInARow(out, s.publisher()))
                     .findFirst()
-                    .orElse(waiting.getFirst());
+                    .orElseGet(() -> waiting.stream().filter(s -> !thirdInARow(out, s.publisher())).findFirst()
+                            .orElse(waiting.getFirst()));
             waiting.remove(next);
             out.add(next);
-            counts.merge(next.publisher(), 1, Integer::sum);
+            byCountry.merge(next.country(), 1, Integer::sum);
+            byPublisher.merge(next.publisher(), 1, Integer::sum);
         }
         return out;
     }

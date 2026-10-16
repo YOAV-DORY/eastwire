@@ -13,6 +13,8 @@ import java.util.List;
  * @param discoveredAt   when the source first listed it (GDELT's crawl time, or the feed)
  * @param ingestedAt     when EastWire stored it
  * @param storyType      news, or feature (analysis, essays, citizen media: the reading section)
+ * @param publisherLabel who runs the publisher, when readers should know ("Chinese state media"), or null
+ * @param summary        EastWire's own automated one-line summary (docs/summaries.md), or null
  */
 public record ArticleView(
         long id,
@@ -32,7 +34,9 @@ public record ArticleView(
         List<SectorTag> sectors,
         int alsoReportedBy,
         Instant ingestedAt,
-        String storyType) {
+        String storyType,
+        String publisherLabel,
+        String summary) {
 
     public record Source(String slug, String name) {
     }

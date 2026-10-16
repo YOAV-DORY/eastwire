@@ -49,7 +49,7 @@ class FrontRankerTest {
     void freshnessHalvesAboutEveryTwelveHours() {
         var today = FrontRanker.score(story(1, "Port opens a new terminal", "A", 0, "KR", null), "A", NOW);
         var yesterday = FrontRanker.score(story(2, "Port opens a new terminal", "A", 12, "KR", null), "A", NOW);
-        assertThat(today.score() - yesterday.score()).isCloseTo(1.5, org.assertj.core.data.Offset.offset(0.01));
+        assertThat(today.score() - yesterday.score()).isCloseTo(1.0, org.assertj.core.data.Offset.offset(0.01));
     }
 
     @Test
@@ -87,13 +87,13 @@ class FrontRankerTest {
         selection.secondary().forEach(s -> shown.add(s.row().id()));
         selection.rest().forEach(s -> shown.add(s.row().id()));
         assertThat(shown).containsExactlyInAnyOrder(1L, 4L);
-        assertThat(FrontRanker.score(a, "A", NOW).why()).contains("Also reported by 1 other outlet");
+        assertThat(FrontRanker.score(a, "A", NOW).why()).contains("Reported by 2 outlets");
     }
 
     @Test
     void secondaryStoriesPreferOtherPublishersAndCountries() {
         var lead = story(1, "Japan and the US agree on chip export controls", "A", 1, "JP", "geopolitics");
-        var sameEverything = story(2, "Japan cabinet approves a defence budget", "A", 1, "JP", "geopolitics");
+        var sameEverything = story(2, "Japan cabinet holds its regular weekly meeting", "A", 1, "JP", "geopolitics");
         var other = story(3, "Seoul subway extends night service", "B", 2, "KR", "society");
         var third = story(4, "Delhi court rules on air pollution measures", "C", 3, "IN", "environment");
         var selection = FrontRanker.select(List.of(lead, sameEverything, other, third), publishers, NOW);
@@ -124,6 +124,92 @@ class FrontRankerTest {
             assertThat(threeInARow && othersWaiting).as("three in a row at %d in %s", i, order).isFalse();
         }
         assertThat(order).contains("Small", "Other");
+    }
+
+    @Test
+    void importanceBeatsNewnessForTheLead() {
+        // The case from the review: a minor company item led while bigger stories waited.
+        var minor = story(1, "Mizuho to train sales, office staff as AI engineers in 3 months", "A", 0.5, "JP", "technology");
+        var market = story(2, "Nikkei marks 3rd largest single-day point drop on AI, chip concerns", "B", 6, "JP", "economy");
+        var missile = story(3, "North Korea says it test-fired submarine-launched cruise missiles", "C", 5, null, "geopolitics");
+        var selection = FrontRanker.select(List.of(minor, market, missile), publishers, NOW);
+
+        assertThat(selection.lead().row().id()).isIn(2L, 3L);
+        assertThat(selection.secondary()).extracting(s -> s.row().id()).contains(selection.lead().row().id() == 2L ? 3L : 2L);
+        assertThat(FrontRanker.score(minor, "A", NOW).why()).contains("Company news, ranked lower");
+        assertThat(FrontRanker.score(market, "B", NOW).why()).contains("Market move");
+        var missileScore = FrontRanker.score(missile, "C", NOW);
+        assertThat(missileScore.why()).contains("Security", "Korean Peninsula security");
+        assertThat(missileScore.country()).isEqualTo("KR");
+        assertThat(missileScore.eligible()).isTrue();
+    }
+
+    @Test
+    void opinionNeverLeads() {
+        var column = new ArticleRow(1, "test", "The world beyond war and peace",
+                "https://www.business-standard.com/opinion/columns/the-world-beyond-war-and-peace-1.html", "business-standard.com",
+                null, null, null, null, null, null, NOW, NOW, 1,
+                List.of(new LocationRow("mentioned", "country", "high", "gazetteer", "IN", null, null, "x", true)),
+                List.of(new SectorRow("geopolitics", 4, "[]")));
+        publishers.put(1L, "Business Standard");
+        var news = story(2, "City council approves a new metro line", "B", 6, "IN", "society");
+        var selection = FrontRanker.select(List.of(column, news), publishers, NOW);
+        assertThat(selection.lead().row().id()).isEqualTo(2);
+        assertThat(FrontRanker.score(column, "Business Standard", NOW).why()).contains("Opinion or review, ranked lower");
+        // A book review from the same publisher's /book/ section, as seen on 2026-10-16.
+        assertThat(FrontRanker.OPINION.matcher("https://www.business-standard.com/book/the-world-beyond-war-and-peace-1.html").find())
+                .isTrue();
+    }
+
+    @Test
+    void impactWordsNeedTheirContext() {
+        assertThat(FrontRanker.SECURITY.matcher("China urges Japan to face history over war criminals").find()).isFalse();
+        assertThat(FrontRanker.SECURITY.matcher("Navy hospital ship arrives on a medical mission").find()).isFalse();
+        assertThat(FrontRanker.SECURITY.matcher("Japan scrambles fighter jets as Chinese warships pass").find()).isTrue();
+        assertThat(FrontRanker.MARKET_MOVE.matcher("IT, private banks lift Nifty 1.7% as Asian AI stocks tumble").find()).isFalse();
+        assertThat(FrontRanker.MARKET_MOVE.matcher("Nikkei marks 3rd largest single-day point drop on AI, chip concerns").find()).isTrue();
+        assertThat(FrontRanker.MARKET_MOVE.matcher("Kospi hits record high as chip stocks rally").find()).isTrue();
+    }
+
+    @Test
+    void storiesCoveredByMoreOutletsRankHigher() {
+        var single = FrontRanker.score(story(1, "Port expansion approved", "A", 2, "KR", "economy"), "A", NOW);
+        var widely = FrontRanker.score(story(2, "Port expansion approved", "A", 2, "KR", "economy", 9L, 4, true), "A", NOW);
+        assertThat(widely.score() - single.score()).isCloseTo(1.8, org.assertj.core.data.Offset.offset(0.01));
+    }
+
+    @Test
+    void theLeadAvoidsThePreviousLeadsCountryWhenAnotherStoryIsClose() {
+        var japan = story(1, "Japan and the US agree on chip export controls", "A", 1, "JP", "geopolitics");
+        var korea = story(2, "South Korea and the US hold talks on chip export controls", "B", 2, "KR", "geopolitics");
+        assertThat(FrontRanker.select(List.of(japan, korea), publishers, NOW, null).lead().row().id()).isEqualTo(1);
+        assertThat(FrontRanker.select(List.of(japan, korea), publishers, NOW, "JP").lead().row().id()).isEqualTo(2);
+        // With nothing else eligible, the same country may lead again.
+        assertThat(FrontRanker.select(List.of(japan), publishers, NOW, "JP").lead().row().id()).isEqualTo(1);
+    }
+
+    @Test
+    void noCountryOrPublisherDominatesTheOrderWhileOthersWait() {
+        List<ArticleRow> rows = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            rows.add(story(100 + i, "India story " + i + " on " + (char) ('a' + i) + " affairs", i % 2 == 0 ? "BigWire" : "OtherIndia",
+                    0.1 * i, "IN", "economy"));
+        }
+        for (int i = 0; i < 4; i++) {
+            rows.add(story(200 + i, "Japan item " + i + " about " + (char) ('m' + i) + " matters", "JapanDaily", 8 + i, "JP", "society"));
+            rows.add(story(300 + i, "China item " + i + " about " + (char) ('q' + i) + " issues", "ChinaPaper", 9 + i, "CN", "society"));
+            rows.add(story(400 + i, "Korea item " + i + " about " + (char) ('u' + i) + " plans", "KoreaWire", 10 + i, "KR", "society"));
+        }
+        List<FrontRanker.Scored> order = FrontRanker.balance(rows.stream()
+                .map(r -> FrontRanker.score(r, publishers.get(r.id()), NOW))
+                .sorted(java.util.Comparator.comparingDouble(FrontRanker.Scored::score).reversed())
+                .toList());
+        // In the first 15 (what a reader sees), India holds at most 40% and BigWire at most 25%.
+        List<FrontRanker.Scored> top = order.subList(0, 15);
+        assertThat(top.stream().filter(s -> s.country().equals("IN")).count()).isLessThanOrEqualTo(6);
+        assertThat(top.stream().filter(s -> s.publisher().equals("BigWire")).count()).isLessThanOrEqualTo(4);
+        // Nothing is dropped.
+        assertThat(order).hasSize(rows.size());
     }
 
     @Test

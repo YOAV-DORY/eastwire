@@ -79,6 +79,9 @@ public class HttpFetcher {
         this.client = HttpClient.newBuilder()
                 .connectTimeout(connectTimeout)
                 .followRedirects(HttpClient.Redirect.NORMAL)
+                // Some feeds (Korea.net) set a session cookie on a redirect and expect it back;
+                // without one they redirect forever. Kept in memory for this run only.
+                .cookieHandler(new java.net.CookieManager(null, java.net.CookiePolicy.ACCEPT_ORIGINAL_SERVER))
                 .build();
         this.userAgent = userAgent;
         this.requestTimeout = requestTimeout;

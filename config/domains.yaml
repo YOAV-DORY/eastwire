@@ -471,27 +471,41 @@ domains:
       Site footer (also on the RSS page): no copy, distribution or use of the content without
       permission, AI learning included.
   - domain: korea.net
-    publisher: Korea.net (KOCIS)
+    publisher: Korea.net
     country: KR
-    decision: pending
-    rule: P1
+    decision: allow
+    rule: A1
+    publisher_label: South Korean government
+    evidence_url: https://www.korea.net/Others/Subscribe-to-Koreanet/RSS-Service
     checked_on: 2026-10-15
     notes: >-
-      Government news site that may publish under the Korea Open Government License, but every
-      automated request was redirected in a loop, so no page, license mark or feed could be read.
-    next_action: Read an article's license mark (KOGL type) in a normal browser; only KOGL Type 1 would allow headline and excerpt use.
+      Re-read with a cookie-keeping client (the redirect loop was a session cookie). No terms page
+      exists; articles carry no KOGL mark, only "Copyright © Ministry of Culture, Sports and
+      Tourism" (R1). RSS feeds are published for subscription; robots.txt allows all but search.
+      Headline links only; no excerpt, because no open license mark was found.
   - domain: news.cn
-    publisher: Xinhua (English)
+    publisher: Xinhua
     country: CN
-    decision: pending
-    rule: P1
-    next_action: Review copyright terms. If allowed, label as state media with a citation.
+    decision: allow
+    rule: A1
+    publisher_label: Chinese state media
+    # Basis for the label: Xinhua is the official state press agency of the People's Republic of
+    # China, under the State Council (https://en.wikipedia.org/wiki/Xinhua_News_Agency).
+    evidence_url: https://english.news.cn/20260610/3dc340f2e64d43c9bc6e48d9ec939aac/c.html
+    checked_on: 2026-10-15
+    notes: >-
+      No terms of use or copyright page on the English site; the footer says only "Copyright ©
+      2000- news.cn All rights reserved" (R1), and there is no robots.txt. Its public RSS feeds
+      stopped in 2017, so items arrive only through GDELT. Every card says "Chinese state media".
   - domain: xinhuanet.com
     publisher: Xinhua
     country: CN
-    decision: pending
-    rule: P1
-    next_action: Same as news.cn.
+    decision: allow
+    rule: A1
+    publisher_label: Chinese state media
+    evidence_url: https://english.news.cn/20260610/3dc340f2e64d43c9bc6e48d9ec939aac/c.html
+    checked_on: 2026-10-15
+    notes: Older Xinhua domain; same publisher, same terms and label as news.cn.
   - domain: nikkei.com
     publisher: Nikkei Asia
     country: JP
@@ -529,3 +543,126 @@ domains:
     decision: pending
     rule: P1
     next_action: Terms page not found.
+
+  # ---------------------------------------------------------------- third batch (2026-10-15)
+  # Read to close the China and South Korea gaps; details in docs/domain-review.md.
+  - domain: businesskorea.co.kr
+    publisher: BusinessKorea
+    country: KR
+    decision: allow
+    rule: A1
+    evidence_url: https://www.businesskorea.co.kr/com/copyright.html
+    checked_on: 2026-10-15
+    notes: Generic no-reproduction clause only (R1); no clause on links or automated reading.
+  - domain: chinadigitaltimes.net
+    publisher: China Digital Times
+    country: CN
+    decision: allow
+    rule: A2
+    conditions: [credit_by_name]
+    evidence_url: https://chinadigitaltimes.net/about/sources-and-permissions/
+    checked_on: 2026-10-15
+    notes: Reposting excerpts is welcome with credit and a link; full text needs contact.
+  - domain: dialogue.earth
+    publisher: Dialogue Earth
+    country: CN
+    decision: allow
+    rule: A2
+    conditions: [credit_by_name, non_commercial]
+    evidence_url: https://dialogue.earth/en/republishing/
+    checked_on: 2026-10-15
+    notes: Written content is CC BY-NC-ND 4.0, with attribution and a link back.
+  - domain: chinamediaproject.org
+    publisher: China Media Project
+    country: CN
+    decision: allow
+    rule: A1
+    evidence_url: https://chinamediaproject.org/about/
+    checked_on: 2026-10-15
+    notes: No terms or license on the site; no robots.txt restriction.
+  - domain: whatsonweibo.com
+    publisher: What's on Weibo
+    country: CN
+    decision: allow
+    rule: A1
+    evidence_url: https://www.whatsonweibo.com/terms-conditions/
+    checked_on: 2026-10-15
+    notes: Terms cover subscriptions only; robots.txt disallows nothing.
+  - domain: kedglobal.com
+    publisher: KED Global (The Korea Economic Daily)
+    country: KR
+    decision: deny
+    rule: D3
+    evidence_url: https://support.kedglobal.com/en/support/solutions/articles/156000367939-copyright-policy
+    checked_on: 2026-10-15
+    notes: Bars robots, crawlers and scrapers that collect or reuse content, and reproduction without consent.
+  - domain: khan.co.kr
+    publisher: The Kyunghyang Shinmun
+    country: KR
+    decision: deny
+    rule: D2
+    evidence_url: https://www.khan.co.kr/help/help_rss.html
+    checked_on: 2026-10-15
+    notes: Its RSS is for personal subscription only; sharing it with many people through a website needs permission.
+  - domain: en.sedaily.com
+    publisher: Seoul Economic Daily
+    country: KR
+    decision: deny
+    rule: D3
+    evidence_url: https://en.sedaily.com/terms
+    checked_on: 2026-10-15
+    notes: Bars automated systems that extract data from the site without permission.
+  - domain: ajupress.com
+    publisher: Aju Press (AJP)
+    country: KR
+    decision: deny
+    rule: D2
+    evidence_url: https://www.ajupress.com/company/intro
+    checked_on: 2026-10-15
+    notes: No content may be used without prior written permission; no publishing or distribution in part.
+  - domain: koreaittimes.com
+    publisher: Korea IT Times
+    country: KR
+    decision: deny
+    rule: D1
+    evidence_url: https://www.koreaittimes.com/com/service.html
+    checked_on: 2026-10-15
+    notes: Bars quoting part of an article and linking to its page without prior consent.
+  - domain: thediplomat.com
+    publisher: The Diplomat
+    country: null
+    decision: deny
+    rule: D2
+    evidence_url: https://thediplomat.com/terms-of-service/
+    checked_on: 2026-10-15
+    notes: Bars displaying or publishing any of the content, in whole or in part.
+  - domain: cgtn.com
+    publisher: CGTN
+    country: CN
+    decision: deny
+    rule: D1
+    evidence_url: https://www.cgtn.com/terms-of-use
+    checked_on: 2026-10-15
+    notes: Linking to any page needs prior written permission; robots and scrapers are barred.
+  - domain: japan-forward.com
+    publisher: Japan Forward
+    country: JP
+    decision: deny
+    rule: D2
+    evidence_url: https://japan-forward.com/terms-of-use/
+    checked_on: 2026-10-15
+    notes: Bars displaying or republishing any part of the content without written permission.
+  - domain: japantoday.com
+    publisher: Japan Today
+    country: JP
+    decision: pending
+    rule: P1
+    checked_on: 2026-10-15
+    next_action: The terms page is behind an Akamai block even in a browser; ask the publisher or read it from another network.
+  - domain: eastasiaforum.org
+    publisher: East Asia Forum
+    country: null
+    decision: pending
+    rule: P1
+    checked_on: 2026-10-15
+    next_action: Site and feed answer 403 to automated requests; read the terms in a browser and test the feed from GitHub Actions.

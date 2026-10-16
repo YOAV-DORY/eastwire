@@ -65,7 +65,7 @@ export const ESSAY: ArticleView = article({
   publishedAt: '2026-10-08T06:00:00Z',
 })
 
-function frontFor(url: URL) {
+export function frontFor(url: URL) {
   const items = articlesFor(url).items
   const page = front(items, [ESSAY])
   // The lead's illustrative image is served from this test server, not from Wikimedia.

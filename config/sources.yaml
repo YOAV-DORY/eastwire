@@ -88,6 +88,7 @@ sources:
     display_mode: headline_excerpt
     max_excerpt_chars: 300     # from the feed <description>, cut at a sentence boundary
     images: false              # media can be licensed differently from the text
+    summaries: true            # CC BY 3.0 allows adaptations with credit (docs/summaries.md)
     license:
       name: CC BY 3.0
       url: https://creativecommons.org/licenses/by/3.0/
@@ -125,6 +126,7 @@ sources:
     display_mode: headline_only
     max_excerpt_chars: 0
     images: false
+    summaries: true          # use is restricted only for commercial purposes; EastWire is non-commercial
     attribution: "The Mainichi"
     retention_days: 30
     evidence:
@@ -154,6 +156,7 @@ sources:
     display_mode: headline_only
     max_excerpt_chars: 0
     images: false
+    summaries: true          # citing is allowed with credit by name
     attribution: "Sixth Tone"
     retention_days: 30
     evidence:
@@ -189,6 +192,195 @@ sources:
       note: >-
         Users may link directly to pages without permission or notice; links must say they go to
         Nippon.com, and framing is not allowed (rule A2). robots.txt does not cover the feed.
+
+  # Third batch (terms and robots.txt read on 2026-10-15, docs/domain-review.md "Third batch"),
+  # chosen to close the China and South Korea gaps. Same rules: headline, link, publisher and time.
+  - slug: korea-net
+    name: Korea.net (KOCIS) News Focus RSS
+    kind: news_feed
+    connector: headline_rss
+    feeds:
+      - https://www.korea.net/koreanet/rss/news/2
+    publisher: Korea.net
+    publisher_label: South Korean government
+    publisher_label_evidence: https://www.korea.net/   # footer: "KOREA.net Copyright © Ministry of Culture, Sports and Tourism"
+    publisher_country: KR
+    publisher_city_geonames_id: 1835848            # Seoul
+    covers_country: KR       # a Korea-only publication
+    story_type: news
+    skip_categories: ["Honorary Reporters", "Korea in photos"]   # readers' posts and galleries, not news
+    feed_timezone: Asia/Seoul
+    feed_time_precision: day # "2026-10-15 00:00:00.0": the day only
+    auth: none
+    quota: 20 latest items; checked hourly
+    status: verified
+    enabled: true
+    display_mode: headline_only
+    max_excerpt_chars: 0
+    images: false
+    summaries: false
+    attribution: "Korea.net"
+    retention_days: 30
+    evidence:
+      url: https://www.korea.net/Others/Subscribe-to-Koreanet/RSS-Service
+      checked_on: 2026-10-15
+      note: >-
+        Rule A1: the government portal publishes RSS feeds for subscription and has no terms page,
+        only "Copyright © Ministry of Culture, Sports and Tourism" (residual risk R1). robots.txt
+        allows everything except site search. The feed sets a session cookie on a redirect.
+
+  - slug: businesskorea
+    name: BusinessKorea RSS (national, markets, industries, science)
+    kind: news_feed
+    connector: headline_rss
+    feeds:
+      - https://www.businesskorea.co.kr/rss/S1N2.xml
+      - https://www.businesskorea.co.kr/rss/S1N18.xml
+      - https://www.businesskorea.co.kr/rss/S1N17.xml
+      - https://www.businesskorea.co.kr/rss/S1N27.xml
+    publisher: BusinessKorea
+    publisher_country: KR
+    publisher_city_geonames_id: 1835848            # Seoul
+    covers_country: KR
+    story_type: news
+    feed_timezone: Asia/Seoul  # "2026-10-15 16:44:03", Seoul time without a zone
+    auth: none
+    quota: 20 latest items per feed; checked hourly
+    status: verified
+    enabled: true
+    display_mode: headline_only
+    max_excerpt_chars: 0
+    images: false
+    summaries: false
+    attribution: "BusinessKorea"
+    retention_days: 30
+    evidence:
+      url: https://www.businesskorea.co.kr/com/copyright.html
+      checked_on: 2026-10-15
+      note: >-
+        Rule A1: the copyright policy and terms (/com/service.html) bar reproduction, publication
+        and distribution of articles without consent, with no clause on linking, headlines or
+        automated reading (R1). Its RSS page (/rssIndex.html) describes other sites collecting
+        titles and links through RSS. robots.txt disallows only /admin/. The events and
+        press-release feeds are not read.
+
+  - slug: china-digital-times
+    name: China Digital Times RSS
+    kind: news_feed
+    connector: headline_rss
+    feeds:
+      - https://chinadigitaltimes.net/feed/
+    publisher: China Digital Times
+    publisher_country: null   # Berkeley, California
+    covers_country: CN
+    story_type: news
+    skip_categories: ["CDT in the news"]   # posts about CDT itself
+    auth: none
+    quota: About 15 items over several days; checked hourly
+    status: verified
+    enabled: true
+    display_mode: headline_only
+    max_excerpt_chars: 0
+    images: false
+    summaries: false          # the feed carries no description to work from
+    attribution: "China Digital Times"
+    retention_days: 30
+    evidence:
+      url: https://chinadigitaltimes.net/about/sources-and-permissions/
+      checked_on: 2026-10-15
+      note: >-
+        Rule A2: other websites "are welcome to repost excerpts of CDT posts" with credit and a
+        link to the original; full-text republication needs contact. EastWire shows only the
+        headline, credited, linking to CDT. The feed answers automated requests.
+
+  - slug: dialogue-earth
+    name: Dialogue Earth RSS (English)
+    kind: news_feed
+    connector: headline_rss
+    feeds:
+      - https://dialogue.earth/en/feed/
+    publisher: Dialogue Earth
+    publisher_country: null   # London and Beijing
+    # Global coverage: an item is kept only when its headline or dateline places it in a
+    # covered country (mostly China).
+    covers_country: null
+    story_type: feature       # in-depth environmental reporting: the reading section
+    auth: none
+    quota: 10 latest items; checked hourly
+    status: verified
+    enabled: true
+    display_mode: headline_only
+    max_excerpt_chars: 0
+    images: false
+    summaries: false          # CC BY-NC-ND: no derivative text, so no summaries
+    attribution: "Dialogue Earth"
+    retention_days: 30
+    license:
+      name: CC BY-NC-ND 4.0
+      url: https://creativecommons.org/licenses/by-nc-nd/4.0/
+    evidence:
+      url: https://dialogue.earth/en/republishing/
+      checked_on: 2026-10-15
+      note: >-
+        Rule A2: written content is CC BY-NC-ND 4.0; republishing needs attribution and a link
+        back, no commercial use and no changes. A credited headline link is within that. Its
+        request to delay republication by two days applies to republishing full text, which
+        EastWire never does.
+
+  - slug: china-media-project
+    name: China Media Project RSS
+    kind: news_feed
+    connector: headline_rss
+    feeds:
+      - https://chinamediaproject.org/feed/
+    publisher: China Media Project
+    publisher_country: null
+    covers_country: CN
+    story_type: feature       # analysis of Chinese media and politics
+    auth: none
+    quota: 10 latest items; checked hourly
+    status: verified
+    enabled: true
+    display_mode: headline_only
+    max_excerpt_chars: 0
+    images: false
+    summaries: false
+    attribution: "China Media Project"
+    retention_days: 30
+    evidence:
+      url: https://chinamediaproject.org/about/
+      checked_on: 2026-10-15
+      note: >-
+        Rule A1: no terms of use or content license on the site (about page and footer read;
+        /terms and /terms-of-use do not exist) and no robots.txt restrictions on the feed.
+
+  - slug: whats-on-weibo
+    name: What's on Weibo RSS
+    kind: news_feed
+    connector: headline_rss
+    feeds:
+      - https://www.whatsonweibo.com/feed/
+    publisher: What's on Weibo
+    publisher_country: null
+    covers_country: CN
+    story_type: feature       # China's online culture and society: the reading section
+    auth: none
+    quota: 5 latest items; checked hourly
+    status: verified
+    enabled: true
+    display_mode: headline_only
+    max_excerpt_chars: 0
+    images: false
+    summaries: false
+    attribution: "What's on Weibo"
+    retention_days: 30
+    evidence:
+      url: https://www.whatsonweibo.com/terms-conditions/
+      checked_on: 2026-10-15
+      note: >-
+        Rule A1: the terms cover paid subscriptions and refunds only; nothing on linking,
+        display or automated reading. robots.txt disallows nothing. Many articles are for
+        subscribers; the headline links to the publisher's page either way.
 
   - slug: japan-times
     name: The Japan Times

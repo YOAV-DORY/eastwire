@@ -80,7 +80,7 @@ public final class DisplayPolicy {
         }
         // Discovered items are headline links only, whatever the source's own display mode says.
         return new DisplayDecision(true, "ok", 0, false, domain.get().publisher(), source.attribution(),
-                null, null, null, source.label());
+                null, null, null, source.label(), domain.get().publisherLabel());
     }
 
     private DisplayDecision decideDirect(SourceConfig source, DisplayRequest request) {
@@ -98,7 +98,7 @@ public final class DisplayPolicy {
         return new DisplayDecision(true, "ok", Math.max(excerpt, 0), false, publisher,
                 attribution(source.attribution(), request.author()),
                 licensed ? source.license().name() : null, licensed ? source.license().url() : null,
-                source.excerptNote(), source.label());
+                source.excerptNote(), source.label(), source.publisherLabel());
     }
 
     /** Fills "{author}" in a template; drops the "By {author}, " part when there is no byline. */

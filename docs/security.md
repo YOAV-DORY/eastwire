@@ -10,8 +10,8 @@ there is to protect: the reader's privacy, the read-only API, the database and t
 | Header | Value and why |
 |---|---|
 | `Content-Security-Policy` | `script-src 'self' https://embed.bsky.app`: only our bundle, `theme-init.js` and Bluesky's official embed script. No inline scripts; the theme script is a file for this reason. |
-| | `connect-src 'self' <API origin>`: the build writes in the one API host from `VITE_API_BASE_URL`. |
-| | `img-src`: OpenStreetMap tiles and YouTube API thumbnails. `frame-src`: the two official embeds. `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, `frame-ancestors 'none'`. |
+| | `connect-src 'self' <API origin> https://tiles.openfreemap.org`: the build writes in the API host from `VITE_API_BASE_URL` (and the edge snapshot's, if set); OpenFreeMap serves the base map ([map.md](map.md)). `worker-src 'self'`: MapLibre's worker. |
+| | `img-src`: OpenStreetMap tiles (the map's fallback), OpenFreeMap, `blob:` (map images), Wikimedia Commons photos and YouTube API thumbnails. `frame-src`: the two official embeds. `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, `frame-ancestors 'none'`. |
 | | `style-src` allows `'unsafe-inline'`, because Leaflet and the embeds set style attributes. Scripts stay locked. |
 | `Strict-Transport-Security` | One year, subdomains included |
 | `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy: same-origin` | No framing, no cross-window handles |
@@ -54,7 +54,7 @@ CSP violation.
 - **No cookies.** `localStorage` holds only the theme and the shortcut setting.
 - **No analytics or trackers.**
 - **Third-party requests:**
-  - OpenStreetMap tiles when a map is on screen.
+  - OpenFreeMap's base map (or OpenStreetMap's tiles as a fallback) when a map is on screen.
   - YouTube thumbnails on the social page.
   - Bluesky or YouTube only after the reader presses "Load". The YouTube button says it may set cookies.
 - The About page states all of this, plus the YouTube API Services terms and the Google Privacy Policy.

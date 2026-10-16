@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { ArrowUpRight, PanelRightOpen } from 'lucide-react'
+import { ArrowUpRight, Info } from 'lucide-react'
 import { useState, type CSSProperties } from 'react'
 import type { ArticleView } from '../../api/types'
 import type { SlotImage } from '../../lib/imagery'
@@ -122,6 +122,7 @@ export function StoryCard({
           image={image}
           country={country}
           sector={article.sectors[0]?.slug}
+          source={article.publisher}
           seed={article.id}
           ratio={variant === 'row' ? '4 / 3' : variant === 'standard' ? '16 / 9' : '3 / 2'}
           sizes={variant === 'row' ? '120px' : sizes}
@@ -136,8 +137,14 @@ export function StoryCard({
             <span className="visually-hidden"> (read at {article.publisher}, opens in a new tab)</span>
           </a>
         </Heading>
-        {showSummary && article.excerpt && <p className={clsx(styles.summary, 'clamp-2')}>{article.excerpt}</p>}
-        {showSummary && licensed && (
+        {showSummary && article.summary ? (
+          <p className={clsx(styles.summary, 'clamp-2')} title="Summary written automatically by EastWire from the publisher's description">
+            {article.summary}
+          </p>
+        ) : (
+          showSummary && article.excerpt && <p className={clsx(styles.summary, 'clamp-2')}>{article.excerpt}</p>
+        )}
+        {showSummary && licensed && !article.summary && (
           <p className={styles.license}>
             {article.attribution}
             {' · '}
@@ -150,6 +157,7 @@ export function StoryCard({
           <p className={styles.meta}>
             <span className={styles.publisher}>{article.publisher}</span>
             <StoryTime article={article} now={now} />
+            {article.publisherLabel && <span className={styles.ownership}>{article.publisherLabel}</span>}
           </p>
           {variant !== 'compact' && (
             <div className={styles.actions}>
@@ -165,8 +173,8 @@ export function StoryCard({
                 onClick={() => setOpen(true)}
                 aria-label={`Details: ${article.title}`}
               >
-                <PanelRightOpen size={14} strokeWidth={2} aria-hidden="true" />
-                Details
+                <Info size={15} strokeWidth={2} aria-hidden="true" />
+                <span className={styles.detailsLabel}>Details</span>
               </button>
             </div>
           )}

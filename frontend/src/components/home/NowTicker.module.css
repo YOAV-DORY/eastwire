@@ -1,6 +1,6 @@
 .ticker {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
   align-items: center;
   height: 44px;
   margin-top: calc(-1 * var(--space-6));
@@ -41,71 +41,79 @@
 }
 
 .track {
+  display: flex;
+  min-width: 0;
+  height: 100%;
   overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent);
+  padding-left: var(--space-4);
 }
 
-.belt {
+/* One headline at a time; each new one rises in (keyed, so the animation reruns). */
+.item {
   display: flex;
-  width: max-content;
-  animation: run calc(var(--n) * 7s) linear infinite;
-}
-
-.track:hover .belt,
-.track:focus-within .belt,
-.paused .belt {
-  animation-play-state: paused;
-}
-
-@keyframes run {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.list {
-  display: flex;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.list li {
-  display: flex;
+  flex: 1 1 auto;
   align-items: center;
-  white-space: nowrap;
-}
-
-.list li::after {
-  content: "";
-  width: 4px;
-  height: 4px;
-  margin: 0 var(--space-5);
-  background: var(--accent-text);
-  transform: rotate(45deg);
-}
-
-.list a {
-  display: inline-flex;
-  align-items: center;
-  height: 44px;
   gap: var(--space-2);
+  min-width: 0;
+  height: 44px;
   color: var(--on-ink);
   font-weight: var(--weight-semibold);
   text-decoration: none;
+  animation: rise 260ms var(--ease-out);
 }
 
-.list a:hover {
+.item:hover .title {
   text-decoration: underline;
 }
 
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(40%);
+  }
+}
+
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.waiting {
+  width: min(420px, 60%);
+  height: 10px;
+  margin-left: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(100deg, var(--ink-rule) 30%, rgba(255, 255, 255, 0.16) 50%, var(--ink-rule) 70%);
+  background-size: 300% 100%;
+  animation: waiting 1.5s linear infinite;
+}
+
+@keyframes waiting {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
 .when {
+  flex: none;
   color: #ff8a8a;
   font-weight: var(--weight-regular);
   font-variant-numeric: tabular-nums;
 }
 
-.pause {
+.position {
+  padding: 0 var(--space-3);
+  color: var(--on-ink-muted, rgba(255, 255, 255, 0.6));
+  font-size: var(--text-micro);
+  font-variant-numeric: tabular-nums;
+}
+
+.button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -116,28 +124,22 @@
   background: var(--ink);
   color: var(--on-ink);
   cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-standard);
 }
 
-.pause:hover {
+.button:hover {
   background: #1d1e22;
 }
 
-/* Reduced motion: no movement; the row scrolls by hand, the second copy and the button go. */
+.button:active {
+  background: #26272c;
+}
+
+/* Reduced motion: headlines change only when asked (the pause button goes, Next stays). */
 @media (prefers-reduced-motion: reduce) {
-  .belt {
-    animation: none;
-  }
-
-  .belt > :last-child,
-  .pause {
-    display: none;
-  }
-
-  .track {
-    overflow-x: auto;
-  }
-
-  .dot {
+  .item,
+  .dot,
+  .waiting {
     animation: none;
   }
 }
@@ -145,5 +147,21 @@
 @media (max-width: 599px) {
   .label {
     padding: 0 var(--space-3);
+  }
+
+  .labelMore,
+  .position {
+    display: none;
+  }
+
+  .track {
+    padding-left: var(--space-3);
+  }
+}
+
+/* The narrowest phones: the headline gets the room; its time is on the card below. */
+@media (max-width: 399px) {
+  .when {
+    display: none;
   }
 }

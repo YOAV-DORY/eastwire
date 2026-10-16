@@ -1,20 +1,22 @@
 import clsx from 'clsx'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { useCountries, useFront, useMapCities, usePlaces, useStatus } from '../api/queries'
+import { useCountries, useFront, useMapCities, useMix, usePlaces, useStatus } from '../api/queries'
 import { FrontPage } from '../components/front/FrontPage'
 import { SectorIcon } from '../components/graphics/SectorIcon'
 import { CountryStrip } from '../components/home/CountryStrip'
 import { LiveStats, MapCompanion, SocialPreview } from '../components/home/Companion'
 import { NowTicker } from '../components/home/NowTicker'
 import { SectorTiles } from '../components/home/SectorTiles'
-import { StaleBanner } from '../components/status/Feedback'
+import { StaleBanner, UpdatedLabel } from '../components/status/Feedback'
 import { Button } from '../components/ui/Button'
 import { FilterTabs } from '../components/ui/FilterTabs'
+import { Picker } from '../components/ui/Picker'
+import { useRefreshFade } from '../hooks/useRefreshFade'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { DEFAULT_ROLES } from '../lib/map'
+import { prominentIds } from '../lib/frontLayout'
 import { SECTOR_TILE_IMAGES } from '../lib/pageImages'
-import { relativeTime } from '../lib/time'
 import { SECTORS, isSectorId, sectorLabel } from '../sectors'
 import styles from './Home.module.css'
 
@@ -45,6 +47,10 @@ export function Home() {
   const status = useStatus()
   const map = useMapCities({ window: '7d', roles: DEFAULT_ROLES, country, sector })
   const everything = useFront({})
+  const shown = useFront({ country, city, sector })
+  // The saved copy is replaced by live news without a jump: the block fades up once.
+  const frontRef = useRefreshFade<HTMLDivElement>(shown.data)
+  const mix = useMix()
 
   const countryNames = useMemo(
     () => Object.fromEntries((countries.data ?? []).map((c) => [c.iso2, c.name])),
@@ -84,21 +90,27 @@ export function Home() {
             ]}
           />
           {country && (places.data?.length ?? 0) > 0 && (
-            <label className={styles.cityPicker}>
-              <span>City</span>
-              <select value={city ?? ''} onChange={(e) => select({ country, city: e.target.value || undefined, sector })}>
-                <option value="">All of {countryNames[country] ?? country}</option>
-                {places.data?.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Picker label="City" value={city ?? ''} onChange={(v) => select({ country, city: v || undefined, sector })}>
+              <option value="">All of {countryNames[country] ?? country}</option>
+              {places.data?.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </Picker>
           )}
     </>
   )
-  const tickerItems = everything.data?.latest.slice(0, 10) ?? []
+  // The ticker carries the newest stories not already shown in the top of the page, so each story
+  // appears once on Home; the page's lower groups then leave the ticker's stories out.
+  const prominent = prominentIds(shown.data)
+  const tickerItems = [...(everything.data?.latest ?? [])]
+    .filter((a) => !prominent.has(a.id))
+    .sort((x, y) => Date.parse(y.publishedAt ?? y.discoveredAt) - Date.parse(x.publishedAt ?? x.discoveredAt))
+    .slice(0, 8)
+  const tickerIds = new Set(tickerItems.map((a) => a.id))
+  // When the stories on screen were last refreshed from our sources (also true for a snapshot).
+  const updatedAt = status.data?.updatedAt ?? undefined
   const stories24h = (countries.data ?? []).reduce((sum, c) => sum + c.last24h, 0)
 
   return (
@@ -109,6 +121,7 @@ export function Home() {
           <h1 className="visually-hidden">Latest news from China, India, South Korea and Japan</h1>
           <p className={styles.dateline}>
             <span className={styles.date}>{today()}</span>
+            {updatedAt && <UpdatedLabel at={updatedAt} className={styles.updated} />}
             <span className={styles.tagline}>
               Numbers: stories our sources published in the last 24 hours, not how much happened
             </span>
@@ -117,14 +130,12 @@ export function Home() {
 
         <CountryStrip countries={countries.data} selected={country} onSelect={(c) => select({ country: c, sector })} />
         <div className={clsx(styles.filters, styles.wideOnly)}>{sectorChips}</div>
-        {(status.data?.state === 'stale' || status.data?.state === 'outage') && status.data.lastSuccessAt && (
-          <StaleBanner
-            state={status.data.state}
-            detail={`Every source was last checked successfully ${relativeTime(status.data.lastSuccessAt)}.`}
-          />
+        {/* Only when nothing was refreshed for six hours: a reader-level note, details on the Sources page. */}
+        {(status.data?.updateState === 'stale' || status.data?.updateState === 'outage') && status.data.updatedAt && (
+          <StaleBanner state={status.data.updateState} since={status.data.updatedAt} />
         )}
 
-        <div className={styles.front}>
+        <div className={styles.front} ref={frontRef}>
           <FrontPage
             filters={{ country, city, sector }}
             countryNames={countryNames}
@@ -133,10 +144,15 @@ export function Home() {
             onHighlight={setHighlighted}
             highlightedPlace={highlighted}
             reservedImages={SECTOR_TILE_IMAGES}
+            elsewhere={tickerIds}
             rail={
               <>
                 <MapCompanion data={map.data} countryNames={countryNames} country={country} highlightedId={highlighted} />
-                <LiveStats stories={countries.data ? stories24h : undefined} cities={map.data?.cities.length} status={status.data} />
+                <LiveStats
+                  stories={countries.data ? stories24h : undefined}
+                  cities={map.data?.cities.length}
+                  outlets={mix.data?.publishers.length}
+                />
               </>
             }
             after={<SectorTiles />}

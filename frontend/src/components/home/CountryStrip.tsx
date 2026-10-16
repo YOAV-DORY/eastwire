@@ -23,9 +23,8 @@ export function CountryStrip({
     <div className={styles.strip} role="group" aria-label="Filter by country">
       <button type="button" className={clsx(styles.tile, styles.all)} aria-pressed={!selected} onClick={() => onSelect(undefined)}>
         <span className={styles.name}>All four</span>{' '}
-        <span className={styles.count}>
-          <CountUp value={total} />
-        </span>
+        {/* No figure until there is a real one: never a placeholder "0". */}
+        <span className={styles.count}>{countries && <CountUp value={total} />}</span>
       </button>
       {(countries ?? Array.from({ length: 4 }, () => undefined)).map((c, i) =>
         c ? (

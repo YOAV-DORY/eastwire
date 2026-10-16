@@ -1,16 +1,21 @@
 name: Ingest
 
-# The hourly ingestion job (docs/ingestion.md). Minute 17 avoids GitHub's busy top of the hour;
-# GitHub may still delay or drop scheduled runs, and the cursors catch up on the next one.
+# The hourly ingestion job (docs/ingestion.md).
+# Primary trigger: the edge Worker dispatches it once an hour (docs/edge.md), because GitHub's
+# own schedule was observed firing only every three to five hours on 2026-10-14/15.
+# Backup: two scheduled times an hour. A scheduled run skips itself when another run finished
+# successfully in the last 40 minutes, so the backup costs a few seconds, not a database wake.
 # Scheduled workflows only run on the default branch, and GitHub disables them after 60 days
-# without repository activity.
+# without repository activity; the Worker's dispatches do not depend on either.
 on:
   schedule:
     - cron: "17 * * * *"
+    - cron: "47 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: ingest
@@ -22,20 +27,49 @@ jobs:
     # three EASTWIRE_DB_* secrets (docs/database.md).
     if: vars.INGEST_ENABLED == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Skip a scheduled run when one succeeded recently
+        id: recent
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          last=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ingest.yml --status success --limit 1 --json updatedAt --jq '.[0].updatedAt // empty')
+          if [ -n "$last" ] && [ $(( $(date +%s) - $(date -d "$last" +%s) )) -lt 2400 ]; then
+            echo "Last successful run finished at $last; skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.recent.outputs.skip != 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+      - if: steps.recent.outputs.skip != 'true'
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
           java-version: "21"
-      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - if: steps.recent.outputs.skip != 'true'
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      # EastWire's own one-line summaries (docs/summaries.md): a small open model on this runner.
+      # Optional: if it cannot start, the run continues and stories simply get no summary.
+      - name: Restore the summary model
+        if: steps.recent.outputs.skip != 'true'
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/eastwire-summary-model
+          key: summary-model-phi3-mini-q4-a64113399c2f-llama-b11269
+      - name: Start the summary model
+        id: model
+        if: steps.recent.outputs.skip != 'true'
+        continue-on-error: true
+        run: scripts/summary-model.sh "$HOME/eastwire-summary-model"
       - name: Build the ingest job
+        if: steps.recent.outputs.skip != 'true'
         working-directory: backend
         run: ./gradlew :ingest:bootJar --console=plain
       - name: Run one ingestion
+        if: steps.recent.outputs.skip != 'true'
         env:
           EASTWIRE_DB_URL: ${{ secrets.EASTWIRE_DB_URL }}
           EASTWIRE_DB_USER: ${{ secrets.EASTWIRE_DB_USER }}
@@ -43,4 +77,5 @@ jobs:
           EASTWIRE_CONFIG_DIR: ${{ github.workspace }}/config
           # Optional; YouTube stays off in sources.yaml until it is set (docs/social.md).
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          EASTWIRE_SUMMARY_URL: ${{ steps.model.outcome == 'success' && 'http://127.0.0.1:8091' || '' }}
         run: java -jar backend/ingest/build/libs/eastwire-ingest.jar

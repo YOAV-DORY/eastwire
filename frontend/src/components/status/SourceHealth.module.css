@@ -128,3 +128,8 @@
 .db[data-state='warn'] .meter span {
   background: var(--accent-2);
 }
+
+.summary {
+  color: var(--text);
+  font-family: var(--font-secondary);
+}

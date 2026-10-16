@@ -1,4 +1,4 @@
-import { ArrowUpRight, PanelRightOpen } from 'lucide-react'
+import { ArrowUpRight, Info } from 'lucide-react'
 import { useState } from 'react'
 import type { FrontStory } from '../../api/types'
 import type { SlotImage } from '../../lib/imagery'
@@ -44,6 +44,7 @@ export function LeadStory({
         image={image}
         country={mainCountry(a)}
         sector={a.sectors[0]?.slug}
+        source={a.publisher}
         seed={a.id}
         ratio="var(--lead-ratio)"
         sizes="(min-width: 1024px) 800px, 100vw"
@@ -57,8 +58,14 @@ export function LeadStory({
             <span className="visually-hidden"> (read at {a.publisher}, opens in a new tab)</span>
           </a>
         </h2>
-        {a.excerpt && <p className={styles.summary}>{a.excerpt}</p>}
-        {a.excerpt && a.license && (
+        {a.summary ? (
+          <p className={styles.summary} title="Summary written automatically by EastWire from the publisher's description">
+            {a.summary}
+          </p>
+        ) : (
+          a.excerpt && <p className={styles.summary}>{a.excerpt}</p>
+        )}
+        {!a.summary && a.excerpt && a.license && (
           <p className={styles.license}>
             {a.attribution} ·{' '}
             <a href={a.license.url} target="_blank" rel="noopener noreferrer license">
@@ -69,10 +76,12 @@ export function LeadStory({
         <div className={styles.foot}>
           <p className={styles.meta}>
             <strong>{a.publisher}</strong>
+            {a.publisherLabel && <span className={styles.ownership}>{a.publisherLabel}</span>}
             <StoryTime article={a} now={now} />
           </p>
           <span className={styles.read} aria-hidden="true">
-            Read at {a.publisher}
+            <span className={styles.readLong}>Read at {a.publisher}</span>
+            <span className={styles.readShort}>Read the story</span>
             <ArrowUpRight size={16} strokeWidth={2.25} />
           </span>
           <button
@@ -82,8 +91,8 @@ export function LeadStory({
             aria-label={`Details: ${a.title}`}
             onClick={() => setOpen(true)}
           >
-            <PanelRightOpen size={15} strokeWidth={2} aria-hidden="true" />
-            Details
+            <Info size={15} strokeWidth={2} aria-hidden="true" />
+            <span className={styles.detailsLabel}>Details</span>
           </button>
         </div>
         {story.why.length > 0 && (

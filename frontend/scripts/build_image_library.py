@@ -72,6 +72,7 @@ def main():
                 "country": country,
                 "cities": ids,
                 "sectors": e.get("sectors", []),
+                "headlineWords": e.get("headline_words", []),
             }
         )
     body = json.dumps(images, indent=2, ensure_ascii=False)
@@ -96,6 +97,8 @@ def main():
         "  country: string | null\n"
         "  cities: number[]\n"
         "  sectors: string[]\n"
+        "  /** A topic photo is used only when the headline contains one of these. */\n"
+        "  headlineWords: string[]\n"
         "}\n\n"
         f"export const IMAGE_LIBRARY: LibraryImage[] = {body}\n"
     )
